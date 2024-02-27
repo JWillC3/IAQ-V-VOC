@@ -13,8 +13,6 @@ library(ggdark)
 library(viridis)
 library(DT)
 library(plotly)
-library(xlsx)
-library(readxl)
 
 new <- read_csv("./data/VOC samples all.csv")
 goofy <- new %>% 
