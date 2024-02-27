@@ -13,12 +13,10 @@ library(ggdark)
 library(viridis)
 library(DT)
 library(plotly)
-library(xlsx)
-library(readxl)
 
-new <- read_excel(file.choose(), 1)
+new <- read_csv("./data/VOC samples all.csv")
 goofy <- new %>% 
-  filter(site == "40")
+  filter(site == "040")
 
 ggplot(goofy, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
@@ -30,7 +28,7 @@ ggplot(goofy, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 
-sites <- (read_csv(file = "./data/all_voc.csv")) %>%
+sites <- (read_csv(file = "./data/OSHA_voc.csv")) %>%
   filter(analyte %in% c("benzene", "toluene", "ethylbenzene", "m+p-xylene",
          "o-xylene", "styrene", "toluene", "acetaldehyde", "acetone",
          "n-hexane", "C2Cl4", "C2HCl3")) %>% 
