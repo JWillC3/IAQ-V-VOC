@@ -19,7 +19,7 @@ goofy <- new %>%
   filter(site == "040")
 
 ggplot(goofy, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "brown") +
+  geom_bar(stat = "identity", fill = "pink") +
   stat_summary(aes(label = stat(y)), fun.y = "sum", geom = "text",
                col = "white", vjust = 1.5) +
   ggtitle("Site 040 VOC Samples by Canister Location") +
