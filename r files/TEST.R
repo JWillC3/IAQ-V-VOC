@@ -14,15 +14,133 @@ library(viridis)
 library(DT)
 library(plotly)
 
-new <- read_csv("./data/VOC samples all.csv")
-goofy <- new %>% 
+#SITE 040 
+new <- read_csv("./VOC_data/data/voc_samples_all.csv")
+
+site_040 <- new %>% 
   filter(site == "040")
 
-ggplot(goofy, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "pink") +
-  stat_summary(aes(label = stat(y)), fun.y = "sum", geom = "text",
+ggplot(site_040, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
                col = "white", vjust = 1.5) +
   ggtitle("Site 040 VOC Samples by Canister Location") +
+  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+
+#SITE 063 A
+site_063A <- new %>% 
+  filter(name == "High Desert A")
+
+ggplot(site_063A, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 063A VOC Samples by Canister Location") +
+  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+
+site_063B <- new %>% 
+  filter(name == "High Desert B")
+
+ggplot(site_063B, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 063B VOC Samples by Canister Location") +
+  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+
+---SITE 066
+site_066 <- new %>% 
+  filter(site == "066")
+
+ggplot(site_066, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 066 VOC Samples by Canister Location") +
+  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+
+--- SITE 079
+site_079 <- new %>% 
+  filter(site == "079")
+
+ggplot(site_079, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 079 VOC Samples by Canister Location") +
+  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+
+--- SITE 085
+site_085 <- new %>% 
+  filter(site == "085")
+
+ggplot(site_085, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 085 VOC Samples by Canister Location") +
+  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+
+--- SITE 086
+site_086 <- new %>% 
+  filter(site == "086")
+
+ggplot(site_086, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 086 VOC Samples by Canister Location") +
+  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+
+--- SITE 099
+site_099 <- new %>% 
+  filter(site == "099")
+
+ggplot(site_099, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 099 VOC Samples by Canister Location") +
+  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+
+--- SITE 103
+site_103 <- new %>% 
+  filter(site == "103")
+
+ggplot(site_103, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 103 VOC Samples by Canister Location") +
+  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+
+--- SITE 107
+site_107 <- new %>% 
+  filter(site == "107")
+
+ggplot(site_107, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 107 VOC Samples by Canister Location") +
   labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
   theme_bw() +
   theme(axis.text.y = element_blank())
@@ -30,8 +148,8 @@ ggplot(goofy, aes(x = room, y = conc.)) +
 
 sites <- (read_csv(file = "./data/OSHA_voc.csv")) %>%
   filter(analyte %in% c("benzene", "toluene", "ethylbenzene", "m+p-xylene",
-         "o-xylene", "styrene", "toluene", "acetaldehyde", "acetone",
-         "n-hexane", "C2Cl4", "C2HCl3")) %>% 
+                        "o-xylene", "styrene", "toluene", "acetaldehyde", "acetone",
+                        "n-hexane", "C2Cl4", "C2HCl3")) %>% 
   mutate(haz_ratio = conc./OSHA_8hr)
 
 site_040 <- sites %>% 
@@ -50,7 +168,7 @@ kitchens <- sites %>%
   filter(room_type =="kitchen/dining")
 
 p_site_040 <- ggplot(site_040, aes(x = reorder(analyte, haz_ratio),
-                  y = haz_ratio, color = room_name)) +
+                                   y = haz_ratio, color = room_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
@@ -64,7 +182,7 @@ p_site_040 <- ggplot(site_040, aes(x = reorder(analyte, haz_ratio),
 
 #Office haz ratios
 ph_offices <- ggplot(offices, aes(x = reorder(analyte, haz_ratio),
-                    y = haz_ratio, color = site_name)) +
+                                  y = haz_ratio, color = site_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
@@ -92,7 +210,7 @@ pc_offices <- ggplot(offices, aes(x = reorder(analyte, conc.),
 
 #kitchen haz ratios
 ph_kitchens <- ggplot(kitchens, aes(x = reorder(analyte, haz_ratio),
-                y = haz_ratio, color = site_name)) +
+                                    y = haz_ratio, color = site_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
@@ -120,7 +238,7 @@ pc_kitchens <- ggplot(kitchens, aes(x = reorder(analyte, conc.),
 
 #kitchens facet wrap, grouped by city (haz ratio)
 ph_kitchens_fctw <- ggplot(kitchens, aes(x = reorder(analyte, haz_ratio),
-                                       y = haz_ratio, color = site_name)) +
+                                         y = haz_ratio, color = site_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
@@ -192,11 +310,11 @@ pc_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, conc.),
   scale_color_manual(name = "Site ID",
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue"))
-  
+
 
 #outdoor facet wrap, grouped by city (Haz Ratio)
 ph_outdoor_fctw <- ggplot(outdoor, aes(x = reorder(analyte, haz_ratio),
-                                    y = haz_ratio, color = site_name)) +
+                                       y = haz_ratio, color = site_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
