@@ -14,10 +14,13 @@ library(viridis)
 library(DT)
 library(plotly)
 
-#SITE 040 
-new <- read_csv("./VOC_data/data/voc_samples_all.csv")
+# SITE 040 
+path <- "C:/Users/lippmann/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
+#path <- "C:/Users/clagett/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
 
-site_040 <- new %>% 
+sites <- read_csv(paste0(path, "voc_samples_all.csv"))
+
+site_040 <- sites %>% 
   filter(site == "040")
 
 ggplot(site_040, aes(x = room, y = conc.)) +
