@@ -15,8 +15,8 @@ library(DT)
 library(plotly)
 
 # SITE 040 
-path <- "C:/Users/lippmann/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
-#path <- "C:/Users/clagett/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
+#path <- "C:/Users/lippmann/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
+path <- "C:/Users/wclagett/OneDrive - Colostate/Documents/Field Equipment/Summa Canisters/VOC_Data/data/"
 
 sites <- read_csv(paste0(path, "voc_samples_all.csv"))
 
