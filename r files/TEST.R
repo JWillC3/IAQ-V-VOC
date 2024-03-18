@@ -54,7 +54,7 @@ ggplot(site_063B, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
----SITE 066
+#SITE 066
 site_066 <- new %>% 
   filter(site == "066")
 
@@ -67,7 +67,7 @@ ggplot(site_066, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
---- SITE 079
+# SITE 079
 site_079 <- new %>% 
   filter(site == "079")
 
@@ -80,7 +80,7 @@ ggplot(site_079, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
---- SITE 085
+# SITE 085
 site_085 <- new %>% 
   filter(site == "085")
 
@@ -93,7 +93,7 @@ ggplot(site_085, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
---- SITE 086
+# SITE 086
 site_086 <- new %>% 
   filter(site == "086")
 
@@ -106,7 +106,7 @@ ggplot(site_086, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
---- SITE 099
+# SITE 099
 site_099 <- new %>% 
   filter(site == "099")
 
@@ -119,7 +119,7 @@ ggplot(site_099, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
---- SITE 103
+# SITE 103
 site_103 <- new %>% 
   filter(site == "103")
 
@@ -132,7 +132,7 @@ ggplot(site_103, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
---- SITE 107
+# SITE 107
 site_107 <- new %>% 
   filter(site == "107")
 
