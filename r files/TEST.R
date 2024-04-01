@@ -15,15 +15,14 @@ library(DT)
 library(plotly)
 
 # SITE 040 
-#path <- "C:/Users/lippmann/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
-path <- "C:/Users/wclagett/OneDrive - Colostate/Documents/Field Equipment/Summa Canisters/VOC_Data/data/"
+path <- "C:/Users/lippmann/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
+#path <- "C:/Users/clagett/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
 
 sites <- read_csv(paste0(path, "voc_samples_all.csv"))
 
 site_040 <- sites %>% 
   filter(site == "040")
 
-#site 040
 ggplot(site_040, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
   stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
@@ -34,7 +33,7 @@ ggplot(site_040, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 #SITE 063 A
-site_063A <- sites %>% 
+site_063A <- new %>% 
   filter(name == "High Desert A")
 
 ggplot(site_063A, aes(x = room, y = conc.)) +
@@ -46,8 +45,7 @@ ggplot(site_063A, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
-#site 063 B
-site_063B <- sites %>% 
+site_063B <- new %>% 
   filter(name == "High Desert B")
 
 ggplot(site_063B, aes(x = room, y = conc.)) +
@@ -60,7 +58,7 @@ ggplot(site_063B, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 #SITE 066
-site_066 <- sites %>% 
+site_066 <- new %>% 
   filter(site == "066")
 
 ggplot(site_066, aes(x = room, y = conc.)) +
@@ -73,7 +71,7 @@ ggplot(site_066, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 079
-site_079 <- sites %>% 
+site_079 <- new %>% 
   filter(site == "079")
 
 ggplot(site_079, aes(x = room, y = conc.)) +
@@ -86,7 +84,7 @@ ggplot(site_079, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 085
-site_085 <- sites %>% 
+site_085 <- new %>% 
   filter(site == "085")
 
 ggplot(site_085, aes(x = room, y = conc.)) +
@@ -99,7 +97,7 @@ ggplot(site_085, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 086
-site_086 <- sites %>% 
+site_086 <- new %>% 
   filter(site == "086")
 
 ggplot(site_086, aes(x = room, y = conc.)) +
@@ -112,7 +110,7 @@ ggplot(site_086, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 099
-site_099 <- sites %>% 
+site_099 <- new %>% 
   filter(site == "099")
 
 ggplot(site_099, aes(x = room, y = conc.)) +
@@ -125,7 +123,7 @@ ggplot(site_099, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 103
-site_103 <- sites %>% 
+site_103 <- new %>% 
   filter(site == "103")
 
 ggplot(site_103, aes(x = room, y = conc.)) +
@@ -138,7 +136,7 @@ ggplot(site_103, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 107
-site_107 <- sites %>% 
+site_107 <- new %>% 
   filter(site == "107")
 
 ggplot(site_107, aes(x = room, y = conc.)) +
@@ -150,9 +148,46 @@ ggplot(site_107, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
+# SITE 040 ROOM PAIR CORRELATIONS 
+SITE_040 <- new %>%
+  filter(site == "040")
 
-#data filtered by OSHA 8hr PEL
-osha <- (read_csv(file = "./data/OSHA_voc.csv")) %>%
+#bears & frogs 
+df <- data.frame(room = c("Bears", "Frogs"), 
+                 variable_of_interest = c(1, 2))
+
+bears_data <- subset(df, room == "Bears")$variable_of_interest
+frogs_data <- subset(df, room == "Frogs")$variable_of_interest
+
+spearman_corr <- cor(bears_data, frogs_data, method = "spearman")
+
+print(spearman_corr)
+
+#bears & lesson prep
+df <- data.frame(room = c("Bears", "Lesson Prep"), 
+                 variable_of_interest = c(1, 2))
+
+bears_data <- subset(df, room == "Bears")$variable_of_interest
+lessonprep_data <- subset(df, room == "Lesson Prep")$variable_of_interest
+
+spearman_corr <- cor(bears_data, lessonprep_data, method = "spearman")
+
+print(spearman_corr)
+#bears & monkeys
+#bears & outdoor
+#bears & office 
+#frogs & lesson prep
+#frogs & monkeys
+#frogs & office
+#frogs & outdoor
+#lesson prep & monkeys 
+#lesson prep & office 
+#lesson prep & outdoor 
+#monkeys & office
+#monkeys & outdoor
+#office & outdoor 
+
+sites <- (read_csv(file = "./data/OSHA_voc.csv")) %>%
   filter(analyte %in% c("benzene", "toluene", "ethylbenzene", "m+p-xylene",
                         "o-xylene", "styrene", "toluene", "acetaldehyde", "acetone",
                         "n-hexane", "C2Cl4", "C2HCl3")) %>% 
