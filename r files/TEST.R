@@ -148,31 +148,62 @@ ggplot(site_107, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
-# SITE 040 ROOM PAIR CORRELATIONS 
+
+
+
+# QTrak Data
+data_qtrak <- read_rds(paste0(path_data, "/data_qtrak.rds")) %>%
+  filter(datetime >= ymd_hms(datetime_start, tz = "US/Mountain")) %>%
+  filter(datetime < ymd_hms(datetime_end, tz = "US/Mountain")) %>%
+  left_join(inst_log$qtrak, by = "id_inst") %>%
+  select(-level, date_installed, date_uninstalled)
+
+voc <- data_qtrak %>%
+  select(id_room, datetime, room, val, var) %>%
+  mutate(location = gsub("_", " ", str_to_title(room))) %>%
+  filter(grepl('totalvoc low24_ppm', var)) %>%
+  mutate(voc = val*1000)
+
+baseline <- data_qtrak %>%
+  group_by(id_room, room) %>%
+  mutate(min_time = min(datetime)) %>%
+  #filter(datetime <= min_time + minutes(20)) %>%
+  filter(grepl('totalvoc low24_ppm', var)) %>%
+  summarise(baseline = median(val)*1000) %>%
+  ungroup %>%
+  mutate(avg_baseline = mean(baseline)) %>% group_by(id_room) %>%
+  mutate(baseline_fix = avg_baseline - baseline)
+
+# Join the baseline data frame with the voc data frame
+voc <- voc %>%
+  left_join(baseline, by = "id_room")
+
+# Subtract the baseline from the voc values
+voc <- voc %>%
+  mutate(voc_baseline_subtracted = voc + baseline_fix) 
+
+# SITE 040 ROOM PAIR CORRELATIONS
 SITE_040 <- new %>%
   filter(site == "040")
 
 #bears & frogs 
-df <- data.frame(room = c("Bears", "Frogs"), 
-                 variable_of_interest = c(1, 2))
+bears_data <- subset(SITE_040, room == "Bears")
+frogs_data <- subset(SITE_040, room == "Frogs")
 
-bears_data <- subset(df, room == "Bears")$variable_of_interest
-frogs_data <- subset(df, room == "Frogs")$variable_of_interest
+# Select only the columns containing concentration data
+bears_conc <- bears_data[, grepl("^conc\\.", names(bears_data))]
+frogs_conc <- frogs_data[, grepl("^conc\\.", names(frogs_data))]
 
-spearman_corr <- cor(bears_data, frogs_data, method = "spearman")
+# Calculate correlations for each pair of analytes within Bears and Frogs
+bears_cor <- cor(bears_conc, method = "spearman")
+frogs_cor <- cor(frogs_conc, method = "spearman")
 
-print(spearman_corr)
+print("Correlation matrix for Bears:")
+print(bears_cor)
+print("Correlation matrix for Frogs:")
+print(frogs_cor)
 
 #bears & lesson prep
-df <- data.frame(room = c("Bears", "Lesson Prep"), 
-                 variable_of_interest = c(1, 2))
-
-bears_data <- subset(df, room == "Bears")$variable_of_interest
-lessonprep_data <- subset(df, room == "Lesson Prep")$variable_of_interest
-
-spearman_corr <- cor(bears_data, lessonprep_data, method = "spearman")
-
-print(spearman_corr)
 #bears & monkeys
 #bears & outdoor
 #bears & office 
