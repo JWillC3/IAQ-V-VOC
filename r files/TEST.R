@@ -23,6 +23,7 @@ sites <- read_csv(paste0(path, "voc_samples_all.csv"))
 site_040 <- sites %>% 
   filter(site == "040")
 
+#site 040
 ggplot(site_040, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
   stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
@@ -33,7 +34,7 @@ ggplot(site_040, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 #SITE 063 A
-site_063A <- new %>% 
+site_063A <- sites %>% 
   filter(name == "High Desert A")
 
 ggplot(site_063A, aes(x = room, y = conc.)) +
@@ -45,7 +46,8 @@ ggplot(site_063A, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
-site_063B <- new %>% 
+#site 063 B
+site_063B <- sites %>% 
   filter(name == "High Desert B")
 
 ggplot(site_063B, aes(x = room, y = conc.)) +
@@ -58,7 +60,7 @@ ggplot(site_063B, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 #SITE 066
-site_066 <- new %>% 
+site_066 <- sites %>% 
   filter(site == "066")
 
 ggplot(site_066, aes(x = room, y = conc.)) +
@@ -71,7 +73,7 @@ ggplot(site_066, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 079
-site_079 <- new %>% 
+site_079 <- sites %>% 
   filter(site == "079")
 
 ggplot(site_079, aes(x = room, y = conc.)) +
@@ -84,7 +86,7 @@ ggplot(site_079, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 085
-site_085 <- new %>% 
+site_085 <- sites %>% 
   filter(site == "085")
 
 ggplot(site_085, aes(x = room, y = conc.)) +
@@ -97,7 +99,7 @@ ggplot(site_085, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 086
-site_086 <- new %>% 
+site_086 <- sites %>% 
   filter(site == "086")
 
 ggplot(site_086, aes(x = room, y = conc.)) +
@@ -110,7 +112,7 @@ ggplot(site_086, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 099
-site_099 <- new %>% 
+site_099 <- sites %>% 
   filter(site == "099")
 
 ggplot(site_099, aes(x = room, y = conc.)) +
@@ -123,7 +125,7 @@ ggplot(site_099, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 103
-site_103 <- new %>% 
+site_103 <- sites %>% 
   filter(site == "103")
 
 ggplot(site_103, aes(x = room, y = conc.)) +
@@ -136,7 +138,7 @@ ggplot(site_103, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 107
-site_107 <- new %>% 
+site_107 <- sites %>% 
   filter(site == "107")
 
 ggplot(site_107, aes(x = room, y = conc.)) +
@@ -149,7 +151,8 @@ ggplot(site_107, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 
-sites <- (read_csv(file = "./data/OSHA_voc.csv")) %>%
+#data filtered by OSHA 8hr PEL
+osha <- (read_csv(file = "./data/OSHA_voc.csv")) %>%
   filter(analyte %in% c("benzene", "toluene", "ethylbenzene", "m+p-xylene",
                         "o-xylene", "styrene", "toluene", "acetaldehyde", "acetone",
                         "n-hexane", "C2Cl4", "C2HCl3")) %>% 
