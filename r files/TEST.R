@@ -1,5 +1,5 @@
 library(tidyverse)
-library(plyr)
+library(dplyr)
 library(faraway)
 library(cowplot)
 library(reshape2)
@@ -13,6 +13,8 @@ library(ggdark)
 library(viridis)
 library(DT)
 library(plotly)
+library(readxl)
+library(ggplot2)
 
 # SITE 040 
 path <- "C:/Users/lippmann/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
@@ -218,6 +220,124 @@ print(frogs_cor)
 #monkeys & outdoor
 #office & outdoor 
 
+# Function to read and process each site's data
+read_site_data <- function(site_name) {
+  # Read Excel file for the site
+  sites <- read_csv(paste0(path, "voc_samples_all.csv"))
+  
+  # Add site name is a column
+  sites$site <- site_name
+  
+  # Select necessary columns
+  sites <- select(sites, type, analyte, conc.,site)
+  
+  # Return processed data
+  return(sites)
+}
+
+# List of site names
+site_names <- c(
+  "site_040", "site_063A", "site_063B", "site_066", 
+  "site_079", "site_085", "site_086", "site_099", 
+  "site_103", "site_107"
+)
+
+# Read data for each site and combine into a single dataframe
+all_data <- bind_rows(lapply(site_names, read_site_data))
+
+#Plot dimensions
+options(repr.plot.width = 10, repr.plot.height = 6)
+
+# Plot scatter plot
+ggplot(SITE_040, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 040 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_063A, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 063A Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_063B, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 063B Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_066, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 066 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_079, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 079 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_085, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 085 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_086, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 086 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_099, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 099 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_103, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 103 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_107, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 107 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#all data into one plot
+ggplot(all_data, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Scatter Plot") +
+  theme_minimal() +
+  ylim(0,200) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# 
 sites <- (read_csv(file = "./data/OSHA_voc.csv")) %>%
   filter(analyte %in% c("benzene", "toluene", "ethylbenzene", "m+p-xylene",
                         "o-xylene", "styrene", "toluene", "acetaldehyde", "acetone",
