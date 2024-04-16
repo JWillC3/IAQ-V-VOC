@@ -1,5 +1,5 @@
 library(tidyverse)
-library(plyr)
+library(dplyr)
 library(faraway)
 library(cowplot)
 library(reshape2)
@@ -13,17 +13,18 @@ library(ggdark)
 library(viridis)
 library(DT)
 library(plotly)
+library(readxl)
+library(ggplot2)
 
 # SITE 040 
-#path <- "C:/Users/lippmann/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
-path <- "C:/Users/wclagett/OneDrive - Colostate/Documents/Field Equipment/Summa Canisters/VOC_Data/data/"
+path <- "C:/Users/lippmann/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
+#path <- "C:/Users/clagett/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
 
 sites <- read_csv(paste0(path, "voc_samples_all.csv"))
 
 site_040 <- sites %>% 
   filter(site == "040")
 
-#site 040
 ggplot(site_040, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
   stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
@@ -34,7 +35,7 @@ ggplot(site_040, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 #SITE 063 A
-site_063A <- sites %>% 
+site_063A <- new %>% 
   filter(name == "High Desert A")
 
 ggplot(site_063A, aes(x = room, y = conc.)) +
@@ -46,8 +47,7 @@ ggplot(site_063A, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
-#site 063 B
-site_063B <- sites %>% 
+site_063B <- new %>% 
   filter(name == "High Desert B")
 
 ggplot(site_063B, aes(x = room, y = conc.)) +
@@ -60,7 +60,7 @@ ggplot(site_063B, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 #SITE 066
-site_066 <- sites %>% 
+site_066 <- new %>% 
   filter(site == "066")
 
 ggplot(site_066, aes(x = room, y = conc.)) +
@@ -73,7 +73,7 @@ ggplot(site_066, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 079
-site_079 <- sites %>% 
+site_079 <- new %>% 
   filter(site == "079")
 
 ggplot(site_079, aes(x = room, y = conc.)) +
@@ -86,7 +86,7 @@ ggplot(site_079, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 085
-site_085 <- sites %>% 
+site_085 <- new %>% 
   filter(site == "085")
 
 ggplot(site_085, aes(x = room, y = conc.)) +
@@ -99,7 +99,7 @@ ggplot(site_085, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 086
-site_086 <- sites %>% 
+site_086 <- new %>% 
   filter(site == "086")
 
 ggplot(site_086, aes(x = room, y = conc.)) +
@@ -112,7 +112,7 @@ ggplot(site_086, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 099
-site_099 <- sites %>% 
+site_099 <- new %>% 
   filter(site == "099")
 
 ggplot(site_099, aes(x = room, y = conc.)) +
@@ -125,7 +125,7 @@ ggplot(site_099, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 103
-site_103 <- sites %>% 
+site_103 <- new %>% 
   filter(site == "103")
 
 ggplot(site_103, aes(x = room, y = conc.)) +
@@ -138,7 +138,7 @@ ggplot(site_103, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 107
-site_107 <- sites %>% 
+site_107 <- new %>% 
   filter(site == "107")
 
 ggplot(site_107, aes(x = room, y = conc.)) +
@@ -151,8 +151,194 @@ ggplot(site_107, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 
-#data filtered by OSHA 8hr PEL
-osha <- (read_csv(file = "./data/OSHA_voc.csv")) %>%
+
+
+# QTrak Data
+data_qtrak <- read_rds(paste0(path_data, "/data_qtrak.rds")) %>%
+  filter(datetime >= ymd_hms(datetime_start, tz = "US/Mountain")) %>%
+  filter(datetime < ymd_hms(datetime_end, tz = "US/Mountain")) %>%
+  left_join(inst_log$qtrak, by = "id_inst") %>%
+  select(-level, date_installed, date_uninstalled)
+
+voc <- data_qtrak %>%
+  select(id_room, datetime, room, val, var) %>%
+  mutate(location = gsub("_", " ", str_to_title(room))) %>%
+  filter(grepl('totalvoc low24_ppm', var)) %>%
+  mutate(voc = val*1000)
+
+baseline <- data_qtrak %>%
+  group_by(id_room, room) %>%
+  mutate(min_time = min(datetime)) %>%
+  #filter(datetime <= min_time + minutes(20)) %>%
+  filter(grepl('totalvoc low24_ppm', var)) %>%
+  summarise(baseline = median(val)*1000) %>%
+  ungroup %>%
+  mutate(avg_baseline = mean(baseline)) %>% group_by(id_room) %>%
+  mutate(baseline_fix = avg_baseline - baseline)
+
+# Join the baseline data frame with the voc data frame
+voc <- voc %>%
+  left_join(baseline, by = "id_room")
+
+# Subtract the baseline from the voc values
+voc <- voc %>%
+  mutate(voc_baseline_subtracted = voc + baseline_fix) 
+
+# SITE 040 ROOM PAIR CORRELATIONS
+SITE_040 <- new %>%
+  filter(site == "040")
+
+#bears & frogs 
+bears_data <- subset(SITE_040, room == "Bears")
+frogs_data <- subset(SITE_040, room == "Frogs")
+
+# Select only the columns containing concentration data
+bears_conc <- bears_data[, grepl("^conc\\.", names(bears_data))]
+frogs_conc <- frogs_data[, grepl("^conc\\.", names(frogs_data))]
+
+# Calculate correlations for each pair of analytes within Bears and Frogs
+bears_cor <- cor(bears_conc, method = "spearman")
+frogs_cor <- cor(frogs_conc, method = "spearman")
+
+print("Correlation matrix for Bears:")
+print(bears_cor)
+print("Correlation matrix for Frogs:")
+print(frogs_cor)
+
+#bears & lesson prep
+#bears & monkeys
+#bears & outdoor
+#bears & office 
+#frogs & lesson prep
+#frogs & monkeys
+#frogs & office
+#frogs & outdoor
+#lesson prep & monkeys 
+#lesson prep & office 
+#lesson prep & outdoor 
+#monkeys & office
+#monkeys & outdoor
+#office & outdoor 
+
+# Function to read and process each site's data
+read_site_data <- function(site_name) {
+  # Read Excel file for the site
+  sites <- read_csv(paste0(path, "voc_samples_all.csv"))
+  
+  # Add site name is a column
+  sites$site <- site_name
+  
+  # Select necessary columns
+  sites <- select(sites, type, analyte, conc.,site)
+  
+  # Return processed data
+  return(sites)
+}
+
+# List of site names
+site_names <- c(
+  "site_040", "site_063A", "site_063B", "site_066", 
+  "site_079", "site_085", "site_086", "site_099", 
+  "site_103", "site_107"
+)
+
+# Read data for each site and combine into a single dataframe
+all_data <- bind_rows(lapply(site_names, read_site_data))
+
+#Plot dimensions
+options(repr.plot.width = 10, repr.plot.height = 6)
+
+# Plot scatter plot
+ggplot(SITE_040, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 040 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_063A, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 063A Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_063B, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 063B Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_066, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 066 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_079, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 079 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_085, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 085 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_086, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 086 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_099, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 099 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_103, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 103 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_107, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 107 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#all data into one plot
+ggplot(all_data, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Scatter Plot") +
+  theme_minimal() +
+  ylim(0,200) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# 
+sites <- (read_csv(file = "./data/OSHA_voc.csv")) %>%
   filter(analyte %in% c("benzene", "toluene", "ethylbenzene", "m+p-xylene",
                         "o-xylene", "styrene", "toluene", "acetaldehyde", "acetone",
                         "n-hexane", "C2Cl4", "C2HCl3")) %>% 
