@@ -16,6 +16,8 @@ library(plotly)
 library(readxl)
 library(ggplot2)
 
+#update.packages(ask = FALSE, checkBuilt = TRUE)
+
 # SITE 040 
 path <- "C:/Users/lippmann/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
 #path <- "C:/Users/clagett/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
