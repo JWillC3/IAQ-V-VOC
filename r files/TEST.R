@@ -1,53 +1,29 @@
-library(tidyverse)
-library(dplyr)
-library(faraway)
-library(cowplot)
-library(reshape2)
-library(corrplot)
-library(scales)
-library(ggthemes)
-library(gridExtra)
-library(patchwork)
-library(gghighlight)
-library(ggdark)
-library(viridis)
-library(DT)
-library(plotly)
-library(readxl)
-library(ggplot2)
 
-#update.packages(ask = FALSE, checkBuilt = TRUE)
+source("functions.R")
 
-# SITE 040 
-path <- "C:/Users/lippmann/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
-#path <- "C:/Users/clagett/OneDrive - Colostate/Summa Canisters/VOC_Data/data/"
+id_site <- "40"
 
-sites <- read_csv(paste0(path, "voc_samples_all.csv"))
 
 site_040 <- sites %>% 
-  filter(site == "040")
+  filter(site == id_site)
 
-ggplot(site_040, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 040 VOC Samples by Canister Location") +
-  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
-  theme_bw() +
-  theme(axis.text.y = element_blank())
+p_conc_room(site_040, id_site)
+
+p_conc_room(sites %>% filter(site == "63"), "63")
 
 #SITE 063 A
 site_063A <- new %>% 
   filter(name == "High Desert A")
 
-ggplot(site_063A, aes(x = room, y = conc.)) +
+ggplot(sites, aes(x = fct_reorder(room, conc.), y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+  stat_summary(aes(label = stat(round(y,0))), fun = "sum", geom = "text",
                col = "white", vjust = 1.5) +
-  ggtitle("Site 063A VOC Samples by Canister Location") +
+  ggtitle("VOC Samples by Canister Location") +
   labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
   theme_bw() +
-  theme(axis.text.y = element_blank())
+  theme(axis.text.y = element_blank()) +
+  facet_wrap(~site, ncol = 3, scales = "free_x")
 
 site_063B <- new %>% 
   filter(name == "High Desert B")
