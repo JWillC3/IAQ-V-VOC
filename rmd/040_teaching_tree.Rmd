@@ -1,0 +1,1157 @@
+---
+title: "Site 040 - Teaching Tree (Post) VOC Data"
+author: "Will Clagett"
+date: "2023-01-01"
+output: html_document
+---
+```{r packages, include=FALSE}
+library(tidyverse)
+library(plyr)
+library(faraway)
+library(cowplot)
+library(reshape2)
+library(corrplot)
+library(scales)
+library(ggthemes)
+library(gridExtra)
+library(patchwork)
+library(gghighlight)
+library(ggdark)
+library(viridis)
+library(DT)
+library(plotly)
+library(knitr)
+library(magick)
+
+```
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# **VOC Data**
+## **Site 040 - Teaching Tree (Post)**
+## **Oct. 24 - 31, 2023**
+## *Fort Collins, CO*
+```{r, site_photo, out.width="50%"}
+
+include_graphics("../graphics/040.png")
+
+```
+
+
+---
+
+## Data set
+[Site info and summary]:
+
+ - 1 Outdoor on rooftop
+ - 5 Inside facility
+
+| Rooms sampled inside facility |
+|:------|
+| 1. Bears, first floor classroom |
+| 2. Frogs, first floor classroom |
+| 3. Lesson Prep, second floor office |
+| 4. Monkeys, first floor classroom |
+| 5. Office, first floor office |
+
+---
+
+```{r load_data, include=FALSE}
+#load data
+logo <- image_read("../graphics/csu_cee_logo.png")
+
+#FIND AND REPLACE SITE_ID in csv file, double check rows to slice, col. to select
+site_040 <- (read_csv(file = "../data/site_040_summa_data.csv")) %>% 
+  slice(2:7) %>%
+  select(1,7:67)
+
+#pivot data for plots
+p.analytes <- site_040 %>% 
+  pivot_longer(- ID,
+               names_to = "analyte",
+               values_to = "conc.")
+#VOC classes as objects
+alc <- c("isopropanol", "butanol")
+ald <- c("acetaldehyde")
+aro <- c("cyclopentane", "cyclohexane", "methylcyclohexane")
+btx <- c("benzene", "toluene", "ethylbenzene", "m+p-xylene", "o-xylene",
+          "isopropylbenzene", "n-propylbenzene", "3-ethyltoluene",
+          "4-ethyltoluene", "1,3,5-trimethylbenzene", "2-ethyltoluene",
+          "1,2,4-trimethylbenzene", "1,2,3-trimethylbenzene",
+          "1,3-diethylbenzene", "1,4-diethylbenzene")
+chl <- c("C2HCl3", "C2Cl4")
+kt <- c("acetone")
+oth <- c("isoprene", "styrene", "acetonitrile", "methylethylketone",
+           "a-pinene", "b-pinene", "limonene", "camphene", "methane")
+stc <- c("ethane", "propane", "i-butane", "n-butane", "i-pentane",
+                    "n-pentane", "n-hexane", "2,4 dimethylpentane", "n-heptane",
+                    "2,3-dimethylpentane", "2-methylhexane", "3-methylhexane",
+                    "2,2,4-trimethylpentane", "2,3,4-trimethylpentane",
+                    "2-methylheptane", "3-methylheptane", "n-octane", "n-nonane",
+                    "n-decane", "ethene", "propene", "t-2-butene", "1-butene",
+                    "c-2-butene", "t-2-pentene", "1-pentene", "cis-2-pentene",
+                    "ethyne")
+#add voc categories to dfs
+voc <- p.analytes %>% 
+  mutate(category = case_when(p.analytes$analyte %in% alc ~ "Alc.",
+                              p.analytes$analyte %in% ald ~ "Ald.",
+                              p.analytes$analyte %in% stc ~ "Stc.",
+                              p.analytes$analyte %in% aro ~ "Aro.",
+                              p.analytes$analyte %in% btx ~ "Btx.",
+                              p.analytes$analyte %in% chl ~ "Chl.",
+                              p.analytes$analyte %in% kt ~ "Ktn.",
+                              p.analytes$analyte %in% oth ~ "Oth."))
+
+#create outdoor group
+outdoor <- voc %>% 
+  filter(ID =="Outdoor")
+#change conc. to numeric
+voc$conc. <- as.numeric(as.character(voc$conc.))
+
+outdoor$conc. <- as.numeric(as.character(outdoor$conc.))
+#calculate ratios
+voc <- voc %>%
+  group_by(ID, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = round(as.numeric(voc$conc.)/as.numeric(outdoor$conc.), 2))
+
+#highlight methane
+methane <- voc %>% 
+  filter(analyte == "methane")
+
+#UPDATE LOCATIONS FOR THE SITE YOU ARE CURRENTLY WORKING ON Location 1, 2, etc.!
+#default is alphabetical order
+#subgroups,
+#all indoor locations
+indoor <- voc %>% 
+  filter(ID != "Outdoor")
+#bears
+bears <- voc %>% 
+  filter(ID == "Bears")
+#frogs
+frogs <- voc %>% 
+  filter(ID == "Frogs")
+#lesson_prep
+lesson_prep <- voc %>% 
+  filter(ID == "Lesson Prep")
+#monkeys
+monkeys <- voc %>% 
+  filter(ID == "Monkeys")
+#office
+office <- voc %>% 
+  filter(ID == "Office")
+
+#for DT and plotlys
+voc2 <- p.analytes %>% 
+  mutate(category = case_when(p.analytes$analyte %in% alc ~ "Alcohol",
+                              p.analytes$analyte %in% ald ~ "Aldehyde",
+                              p.analytes$analyte %in% stc ~ "Straight Chain",
+                              p.analytes$analyte %in% aro ~ "Aromatic",
+                              p.analytes$analyte %in% btx ~ "Btex",
+                              p.analytes$analyte %in% chl ~ "Chlorinated",
+                              p.analytes$analyte %in% kt ~ "Ketone",
+                              p.analytes$analyte %in% oth ~ "Other"))
+
+voc2 <- voc2 %>%
+  group_by(ID, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = round(as.numeric(voc2$conc.)/as.numeric(outdoor$conc.), 2))
+
+voc2$conc. <- as.numeric(as.character(voc2$conc.))
+
+indoor2 <- voc2 %>% 
+  filter(ID != "Outdoor")
+
+```
+
+
+## Data Table
+```{r data_table}
+datatable(voc2, colnames = c("Location", "Analyte", "Concentration",
+                               "Category", "Outdoor Ratio"),
+          options = list(pageLength = 10), rownames = FALSE)
+
+```
+
+---
+
+## Summary Plots of all VOCs
+
+Plot of all VOC in All Locations
+```{r plot_all, out.width = "140%", warning=FALSE, message=FALSE}
+
+voc_plot <- ggplot(voc, aes(x = reorder(analyte, conc.),
+                            y = conc., color = ID)) +
+  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc.)) +
+  # guides(size = "none") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 5.5, angle = 45, hjust = 1)) +
+  labs(x = "Analytes", y = "Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Site 040 - Teaching Tree (Post)",
+          "Oct. 24 - 31, 2023")
+  
+voc_plot +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+        theme(legend.title = element_text(color = "black", face = "bold", size = 10),
+        legend.text = element_text(color = "#261e1b"),
+        legend.background = element_rect(color = "black"),
+        axis.line = element_line(color = "black"),
+        legend.position = c(0.10,0.73), 
+        panel.grid.minor = element_line(linetype = "dashed"))
+        
+
+#grid::grid.raster(logo, x = 1, y = .010, just = c('right', 'bottom'), width = unit(2, 'inches'))
+
+
+```
+
+
+Plot of all VOC in All Locations using plotly
+```{r plotly_all_VOCs, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
+#plot all VOCs at site
+voc_plot2 <- ggplot(voc2, aes(x = reorder(analyte, conc.),
+                            y = conc., color = ID,
+                            text = paste("Analyte: ", analyte,
+                                         "<br> Conc. :", conc.,
+                                         "<br> Class: ", category))) +
+  geom_point(shape = 18, size = 2, alpha = 0.5) +
+  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
+                labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_bw() + #try using different themes here
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  xlab("Analytes") +
+  ylab("Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment. Oct. 24  - 31, 2023")
+ggplotly(voc_plot2, tooltip = "text")
+
+```
+
+
+Plots by location
+
+Bears
+```{r exam_1_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+#bears
+l1_plot <- bears %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+  geom_point(color = "orchid", shape = 18, size = 5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc.,
+  #                                size = 6)) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  theme(legend.position = "none") +
+  labs(x = "Analytes",
+       y = expression(atop("Concentration",
+                           paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("040 - Teaching Tree (Post): Bears")
+l1_plot +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+```
+
+Frogs
+```{r exam_2_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+
+#frogs
+l2_plot <- frogs %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+  geom_point(color = "chocolate4", shape = 18, size = 5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc.,
+  #                                size = 6)) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  theme(legend.position = "none") +
+  labs(x = "Analytes",
+       y = expression(atop("Concentration",
+                           paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("040 - Teaching Tree (Post): Frogs")
+l2_plot +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+```
+
+Lesson Prep
+```{r lesson_prep_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+
+#lesson_prep
+l3_plot <- lesson_prep %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+  geom_point(color = "goldenrod2", shape = 18, size = 5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc.,
+  #                                size = 6)) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  theme(legend.position = "none") +
+  labs(x = "Analytes",
+       y = expression(atop("Concentration",
+                           paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("040 - Teaching Tree (Post): Lesson Prep")
+l3_plot +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+```
+
+Monkeys
+```{r nurse_statioini_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+
+#monkeys
+l4_plot <- monkeys %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+  geom_point(color = "#50C878", shape = 18, size = 5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc.,
+  #                                size = 6, color ="red")) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  theme(legend.position = "none") +
+  labs(x = "Analytes",
+       y = expression(atop("Concentration",
+                           paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("040 Teaching Tree (Post): Monkeys")
+l4_plot +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+```
+
+Office
+```{r office_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+
+#office
+l5_plot <- office %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+  geom_point(color = "tomato2", shape = 18, size = 5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc.,
+  #                                size = 6)) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  theme(legend.position = "none") +
+  labs(x = "Analytes",
+       y = expression(atop("Concentration",
+                           paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("040 - Teaching Tree (Post): Office")
+l5_plot +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+```
+
+Outdoor
+```{r outdoor_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+
+#outdoor
+od_plot <- outdoor %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+  geom_point(color = "midnightblue", shape = 18, size = 5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc.,
+  #                                size = 6, color ="red")) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  theme(legend.position = "none") +
+  labs(x = "Analytes",
+       y = expression(atop("Concentration",
+                           paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("040 - Teaching Tree (Post): Outdoor (roof top)")
+od_plot +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+```
+
+
+Facet grid by VOC category
+All Locations
+```{r facet_grid_voc_cat, fig.width = 20, fig.height = 12, warning=FALSE, message=FALSE}
+
+voc_fctg <- ggplot(voc, aes(x = reorder(analyte, conc.),
+                            y = conc., color = ID)) +
+  geom_point(data = voc, aes(x = reorder(analyte, conc.), y = conc.),
+             size = 6, shape = 18, alpha = 0.5) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  facet_grid(.~ category, scales = "free", switch = "x", space = "free_x") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1)) +
+  labs(x = "Analytes Grouped by VOC Categories",
+       y = expression(atop("Concentration",
+                           paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("Site-040, Teaching Tree (Post), Summa Cannister Deployment",
+          "Grouped by Analyte Class")
+voc_fctg +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  theme(legend.title = element_text(color = "black", face = "bold", size = 14),
+        legend.text = element_text(color = "#261e1b", size = 12),
+        legend.background = element_rect(color = "black"),
+        legend.key.height= unit(1, 'cm'),
+        legend.key.width= unit(2, 'cm'),
+        panel.grid.minor = element_line(linetype = "dashed"),
+        axis.title = element_text(size = 14),
+        axis.line = element_line(color = "black"),
+        axis.text.y = element_text(size = 13))
+
+
+```
+
+Indoor locations
+```{r acet_grid_indoor, fig.width = 20, fig.height = 12, warning=FALSE, message=FALSE}
+
+indoor_fctg <- ggplot(indoor, aes(x = reorder(analyte, conc.),
+                               y = conc., color = ID)) +
+  geom_point(data = indoor, aes(x = reorder(analyte, conc.), y = conc.),
+             size = 6, shape = 18, alpha = 0.5) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  facet_grid(.~ category, scales = "free", switch = "x", space = "free_x") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1)) +
+  labs(x = "Analytes Grouped by VOC Categories",
+       y = expression(atop("Concentration",
+                           paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("Site 040 - Teaching Tree (Post), Indoor Summa Cannister Deployment",
+          "Grouped by Analyte Class")
+indoor_fctg +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  theme(legend.title = element_text(color = "black", face = "bold", size = 12),
+        legend.text = element_text(color = "#261e1b", size = 10),
+        legend.background = element_rect(color = "black"),
+        legend.key.height= unit(1, 'cm'),
+        legend.key.width= unit(2, 'cm'),
+        panel.grid.minor = element_line(linetype = "dashed"),
+        axis.title = element_text(size = 14),
+        axis.line = element_line(color = "black"),
+        axis.text.y = element_text(size = 13))
+
+
+
+```
+
+## Plots for each analyte category
+```{r analyte_data, include=FALSE}
+#create category objects
+#Alcohol
+alcohol <- voc2 %>%
+  filter(category == "Alcohol")
+#Aldehyde
+aldehyde <- voc2 %>% 
+  filter(category == "Aldehyde")
+#Straight Chain
+straight_chain <- voc2 %>% 
+  filter(category == "Straight Chain")
+#Aromatic
+aromatic <- voc2 %>% 
+  filter(category == "Aromatic")
+#Btex
+btex <- voc2 %>% 
+  filter(category == "Btex")
+#Chlorinated
+chlorinated <- voc2 %>% 
+  filter(category == "Chlorinated")
+#Ketone
+ketone <- voc2 %>% 
+  filter(category == "Ketone")
+#Other
+other <- voc2 %>% 
+  filter(category == "Other")
+
+```
+
+```{r alcohol_plot, warning=FALSE, message=FALSE}
+
+p_alcohol <- ggplot(alcohol, aes(x = reorder(analyte, conc.),
+                                 y = conc., color = ID)) +
+  geom_point(shape = 18, size = 5, alpha = 0.5, show.legend = FALSE) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10)) +
+  labs(x = "", y = "") +
+  ggtitle("Alcohols")
+p_alcohol +
+  scale_color_manual(name = "Room ID",
+                    values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                               "tomato2", "midnightblue")) +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+```
+
+
+```{r aldehyde_plot, warning=FALSE, message=FALSE}
+
+p_aldehyde <- ggplot(aldehyde, aes(x = reorder(analyte, conc.),
+                                 y = conc., color = ID)) +
+  geom_point(shape = 18, size = 5, alpha = 0.5, show.legend = FALSE) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10)) +
+  labs(x = "", y = "") +
+  ggtitle("Aldehydes")
+p_aldehyde +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+```
+
+
+```{r straight_chain_plot, warning=FALSE, message=FALSE}
+
+p_straight_chain <- ggplot(straight_chain, aes(x = reorder(analyte, conc.),
+                                        y = conc., color = ID)) +
+  geom_point(shape = 18, size = 4, alpha = 0.5, show.legend = FALSE) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 9, angle = 45, hjust = 1)) +
+  labs(x = "", y = "") +
+  ggtitle("Straight Chains")
+p_straight_chain +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+
+```
+
+
+```{r aromatic_plot, warning=FALSE, message=FALSE}
+
+p_aromatic <- ggplot(aromatic, aes(x = reorder(analyte, conc.),
+                                   y = conc., color = ID)) +
+  geom_point(shape = 18, size = 5, alpha = 0.5) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "", y = "") +
+  ggtitle("Aromatics")
+p_aromatic +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  theme(legend.title = element_text(color = "black", face = "bold", size = 10),
+        legend.text = element_text(color = "#261e1b"),
+        legend.background = element_rect(color = "black"),
+        legend.key.height= unit(1, 'cm'),
+        legend.key.width= unit(2, 'cm'),
+        panel.grid.minor = element_line(linetype = "dashed"),
+        axis.title = element_text(size = 12),
+        axis.line = element_line(color = "black"),
+        axis.text.y = element_text(size = 13))
+
+
+```
+
+
+```{r btex_plot, warning=FALSE, message=FALSE}
+
+p_btex <- ggplot(btex, aes(x = reorder(analyte, conc.),
+                               y = conc., color = ID)) +
+  geom_point(shape = 18, size = 4, alpha = 0.5, show.legend = FALSE) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 9, angle = 45, hjust = 1)) +
+  labs(x = "", y = "") +
+  ggtitle("Btex")
+p_btex +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+```
+
+
+```{r chlorinated_plot, warning=FALSE, message=FALSE}
+
+p_chlorinated <- ggplot(chlorinated, aes(x = reorder(analyte, conc.),
+                                      y = conc., color = ID)) +
+  geom_point(shape = 18, size = 5, alpha = 0.5, show.legend = FALSE) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10)) +
+  labs(x = "", y = "") +
+  ggtitle("Chlorinated")
+p_chlorinated +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+```
+
+
+```{r ketone_plot, message=FALSE, warning=FALSE}
+
+p_ketone <- ggplot(ketone, aes(x = reorder(analyte, conc.),
+                                 y = conc., color = ID)) +
+  geom_point(shape = 18, size = 5, alpha = 0.5, show.legend = FALSE) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10)) +
+  labs(x = "", y = "") +
+  ggtitle("Ketones")
+p_ketone +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+
+```
+
+
+```{r other_plot, message=FALSE, warning=FALSE}
+
+p_other <- ggplot(other, aes(x = reorder(analyte, conc.),
+                                y = conc., color = ID)) +
+  geom_point(shape = 18, size = 5, alpha = 0.5) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "", y = "") +
+  ggtitle("Other")
+p_other +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  theme(legend.title = element_text(color = "black", face = "bold", size = 10),
+        legend.text = element_text(color = "#261e1b"),
+        legend.background = element_rect(color = "black"),
+        legend.key.height= unit(1, 'cm'),
+        legend.key.width= unit(2, 'cm'),
+        panel.grid.minor = element_line(linetype = "dashed"),
+        axis.title = element_text(size = 12),
+        axis.line = element_line(color = "black"),
+        axis.text.y = element_text(size = 13))
+
+```
+
+Analyte Category Plots 1
+```{r allcat_plot_1, fig.width = 16, fig.height = 9, message=FALSE, warning=FALSE}
+
+grid.arrange(p_alcohol, p_aldehyde, p_straight_chain, p_aromatic,
+             ncol = 2, nrow = 2,
+             top = "Analytes Grouped by Category",
+             left = "Concentraion\n (VOC ppbv or methane ppmv")
+
+
+```
+
+Analyte Category Plots 2
+```{r allcat_plot_2, fig.width = 16, fig.height = 9, message=FALSE, warning=FALSE}
+
+grid.arrange(p_btex, p_chlorinated, p_ketone, p_other, ncol = 2, nrow = 2,
+             top = "Analytes Grouped by Category",
+             left = "Concentraion\n (VOC ppbv or methane ppmv")
+
+```
+
+
+## Plots for the Top 5 Analytes by Location
+```{r top_five_data, include=FALSE}
+#bears
+bears_top <- bears %>% 
+  group_by(analyte) %>% 
+  arrange(desc(conc.))
+bears_top <- top_n(ungroup(bears_top), 5, conc.)
+
+#frogs
+frogs_top <- frogs %>% 
+  group_by(analyte) %>% 
+  arrange(desc(conc.))
+frogs_top <- top_n(ungroup(frogs_top), 5, conc.)
+
+#lesson_prep
+lesson_prep_top <- lesson_prep %>% 
+  group_by(analyte) %>% 
+  arrange(desc(conc.))
+lesson_prep_top <- top_n(ungroup(lesson_prep_top), 5, conc.)
+
+#monkeys
+monkeys_top <- monkeys %>% 
+  group_by(analyte) %>% 
+  arrange(desc(conc.))
+monkeys_top <- top_n(ungroup(monkeys_top), 5, conc.)
+
+#office
+office_top <- office %>% 
+  group_by(analyte) %>% 
+  arrange(desc(conc.))
+office_top <- top_n(ungroup(office_top), 5, conc.)
+
+#outdoor
+outdoor_top <- outdoor %>% 
+  group_by(analyte) %>% 
+  arrange(desc(conc.))
+outdoor_top <- top_n(ungroup(outdoor_top), 5, conc.)
+
+
+```
+
+
+```{r bears_t, warning=FALSE, message=FALSE}
+p_bears_top <- bears_top %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
+           stat = "identity", fill = "orchid") +
+  labs(x = "Bears", y = "") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text = element_text(size = 13),
+        axis.text.x = element_text(size = 13, angle = 45, hjust = 1),
+        panel.grid.minor = element_line(linetype = "dashed")) 
+
+# p_bears_top + theme(
+#   panel.background = element_rect(fill = "lightblue",
+#                                 colour = "lightblue",
+#                                 size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r frogs_t, warning=FALSE, message=FALSE}
+
+p_frogs_top <- frogs_top %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
+           stat = "identity", fill = "chocolate4") +
+  labs(x = "Frogs", y = "") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1),
+        panel.grid.minor = element_line(linetype = "dashed"))  
+
+# p_frogs_top + theme(
+#   panel.background = element_rect(fill = "lightblue",
+#                                 colour = "lightblue",
+#                                 size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r lesson_prep_t, warning=FALSE, message=FALSE}
+
+lesson_prep_top <- lesson_prep %>% 
+  group_by(analyte) %>% 
+  arrange(desc(conc.))
+lesson_prep_top <- top_n(ungroup(lesson_prep_top), 6, conc.)
+
+p_lesson_prep_top <- lesson_prep_top %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
+           stat = "identity", fill = "goldenrod2") +
+  labs(x = "Lesson Prep", y = "") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1),
+        panel.grid.minor = element_line(linetype = "dashed"))  
+
+# p_lesson_prep_top + theme(
+#   panel.background = element_rect(fill = "lightblue",
+#                                 colour = "lightblue",
+#                                 size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r monkeys_t, warning=FALSE, message=FALSE}
+
+p_monkeys_top <- monkeys_top %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
+           stat = "identity", fill = "#50C878") +
+  labs(x = "Monkeys", y = "") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1),
+        panel.grid.minor = element_line(linetype = "dashed"))  
+
+# p_monkeys_top + theme(
+#   panel.background = element_rect(fill = "lightblue",
+#                                 colour = "lightblue",
+#                                 size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r office_t, warning=FALSE, message=FALSE}
+
+p_office_top <- office_top %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
+           stat = "identity", fill = "tomato2") +
+  labs(x = "Office", y = "") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size  =13, angle = 45, hjust = 1),
+        panel.grid.minor = element_line(linetype = "dashed")) 
+
+# p_office_top + theme(
+#   panel.background = element_rect(fill = "lightblue",
+#                                 colour = "lightblue",
+#                                 size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r, outdoor_t, warning=FALSE, message=FALSE}
+
+p_outdoor_top <- outdoor_top %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
+           stat = "identity", fill = "midnightblue") +
+  labs(x = "Outdoor", y = "") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1),
+        panel.grid.minor = element_line(linetype = "dashed")) 
+
+# p_outdoor_top + theme(
+#   panel.background = element_rect(fill = "lightblue",
+#                                 colour = "lightblue",
+#                                 size = 0.5, linetype = "solid"))
+
+```
+
+
+Top 5 plots for each location
+```{r, warning=FALSE, out.width = "140%", message=FALSE}
+
+grid.arrange(p_bears_top, p_frogs_top, p_lesson_prep_top, p_monkeys_top,
+             p_office_top,p_outdoor_top,
+             ncol = 3, nrow = 2,
+             top = "Top 5 Analytes in Each Location", left = "Concentration")
+
+```
+
+
+## Indoor to Outdoor Ratio Plots
+Outdoor Ratio all Locations
+```{r ratio_plot, out.width = "140%", warning=FALSE, message=FALSE}
+
+ratio_plot <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
+                              y = od_ratio, color = ID)) +
+  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
+  # guides(size = "none") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1)) +
+  labs(x = "Analytes", y = "Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Site 040 - Teaching Tree (Post)",
+          "Oct. 24 - 31, 2023")
+
+ratio_plot +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  theme(legend.title = element_text(color = "black", face = "bold"),
+        legend.text = element_text(color = "#261e1b"),
+        legend.background = element_rect(color = "black"),
+        axis.line = element_line(color = "black"),
+        panel.grid.minor = element_line(linetype = "dashed"))
+
+```
+
+
+Outdoor Ratios Facet Grid
+```{r ratio_plot_fact, fig.width = 20, fig.height = 12, warning=FALSE, message=FALSE}
+
+fctg_ratio_plot <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
+                                  y = od_ratio, color = ID)) +
+  geom_point(size = 5, shape = 18, alpha = 0.5) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  facet_grid(.~ category, scales = "free", switch = "x", space = "free_x") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1)) +
+  labs(x = "Analytes Grouped by VOC Categories",
+       y = expression(atop("Outdoor Ratio Concentration",
+                           paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("Site 040 - Teaching Tree (Post), Indoor Summa Cannister Deployment",
+          "Grouped by Analyte Class")
+
+fctg_ratio_plot +
+  scale_color_manual(name = "Room ID",
+                    values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                               "tomato2", "midnightblue")) +
+  theme(legend.title = element_text(color = "black", face = "bold", size = 14),
+        legend.text = element_text(color = "#261e1b", size = 12),
+        legend.background = element_rect(color = "black"),
+        legend.key.height= unit(1, 'cm'),
+        legend.key.width= unit(2, 'cm'),
+        axis.title = element_text(size = 14),
+        panel.grid.minor = element_line(linetype = "dashed"),
+        axis.line = element_line(color = "black"),
+        axis.text.y = element_text(size = 13))
+
+
+```
+
+```{r , fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
+
+ratio_plotly <- ggplot(indoor2, aes(x = reorder(analyte, od_ratio),
+                              y = od_ratio, color = ID,
+                              text = paste("Analyte: ", analyte,
+                                           "<br> Conc. :", od_ratio,
+                                           "<br> Class: ", category))) +
+  geom_point(shape = 18, size = 2, alpha = 0.5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
+  # guides(size = "none") +
+  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
+                labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_bw() + #try using different themes here
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) +
+  xlab("Analytes") +
+  ylab("Indoor to Outdoor\n Concentration Ratios") +
+  ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment")
+ggplotly(ratio_plotly, tooltip = "text")
+
+```
+
+
+## Plots for the Top 5 Outdoor Ratios by Location
+```{r top_five_or__data, include=FALSE}
+#bears od ratio
+bears_top_or <- indoor %>% 
+  filter(ID == "Bears") %>% 
+  group_by(analyte) %>% 
+  arrange(desc(od_ratio))
+bears_top_or <- top_n(ungroup(bears_top_or), 10, od_ratio) 
+
+#frogs od ratio
+frogs_top_or <- indoor %>% 
+  filter(ID == "Frogs") %>% 
+  group_by(analyte) %>% 
+  arrange(desc(od_ratio))
+frogs_top_or <- top_n(ungroup(frogs_top_or), 10, od_ratio)
+
+#lesson_prep od ratio
+lesson_prep_top_or <- indoor %>% 
+  filter(ID == "Lesson Prep") %>% 
+  group_by(analyte) %>% 
+  arrange(desc(od_ratio))
+lesson_prep_top_or <- top_n(ungroup(lesson_prep_top_or), 10, od_ratio)
+
+#monkeys od ratio
+monkeys_top_or <- indoor %>% 
+  filter(ID == "Monkeys") %>% 
+  group_by(analyte) %>% 
+  arrange(desc(od_ratio))
+monkeys_top_or <- top_n(ungroup(monkeys_top_or), 10, od_ratio)
+
+#office od ratio
+office_top_or <- indoor %>% 
+  filter(ID == "Office") %>% 
+  group_by(analyte) %>% 
+  arrange(desc(od_ratio))
+office_top_or <- top_n(ungroup(office_top_or), 10, od_ratio)
+
+
+```
+
+
+```{r bears_or_t, warning=FALSE, message=FALSE}
+
+p_bears_top_or <- bears_top_or %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
+           stat = "identity", fill = "orchid") +
+  labs(x = "Bears", y = "") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
+
+# p_bears_top_or + theme(
+#   panel.background = element_rect(fill = "lightblue",
+#                                 colour = "lightblue",
+#                                 size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r frogs_or_t, warning=FALSE, message=FALSE}
+
+p_frogs_top_or <- frogs_top_or %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
+           stat = "identity", fill = "chocolate4") +
+  labs(x = "Frogs", y = "") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+
+# p_frogs_top_or + theme(
+#   panel.background = element_rect(fill = "lightblue",
+#                                 colour = "lightblue",
+#                                 size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r lesson_prep_or_t, warning=FALSE, message=FALSE}
+
+p_lesson_prep_top_or <- lesson_prep_top_or %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
+           stat = "identity", fill = "goldenrod2") +
+  labs(x = "Lesson Prep", y = "") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+
+# p_lesson_prep_top_or + theme(
+#   panel.background = element_rect(fill = "lightblue",
+#                                 colour = "lightblue",
+#                                 size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r monkeys_or_t, warning=FALSE, message=FALSE}
+
+p_monkeys_top_or <- monkeys_top_or %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
+           stat = "identity", fill = "#50C878") +
+  labs(x = "Monkeys", y = "") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+
+# p_monkeys_top_or + theme(
+#   panel.background = element_rect(fill = "lightblue",
+#                                 colour = "lightblue",
+#                                 size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r office_or_t, warning=FALSE, message=FALSE}
+
+p_office_top_or <- office_top_or %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
+           stat = "identity", fill = "tomato2") +
+  labs(x = "Office", y = "") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
+
+# p_office_top_or + theme(
+#   panel.background = element_rect(fill = "lightblue",
+#                                 colour = "lightblue",
+#                                 size = 0.5, linetype = "solid"))
+
+```
+
+Top 10 ratios plots for each location
+```{r, all_ratio_plots, warning=FALSE, out.width = "125%", message=FALSE}
+
+grid.arrange(p_bears_top_or, p_frogs_top_or, p_lesson_prep_top_or,
+             p_monkeys_top_or, p_office_top_or,
+             ncol = 3, nrow = 2,
+             top = "Top 5 Analyte Ratios in Each Location",
+             left = "Outdoor Ratio")
+
+```
+
+---
+
+## Correlations
+```{r cor_data, include=FALSE, warning=FALSE, message=FALSE}
+
+#correlations
+cor(outdoor$conc., bears$conc., method = "spearman")
+#create a new df for correlation
+voc_cor <- site_040 %>% 
+  slice(-3)
+#convert select rows to numeric
+voc_cor[2:62] <- lapply(voc_cor[2:62], as.numeric)
+#run the correlation
+vcor <- cor(voc_cor[, unlist(lapply(voc_cor, is.numeric))], method = "spearman")
+
+```
+
+
+```{r cor_table, include=FALSE}
+
+datatable(voc_cor) 
+
+```
+
+```{r cor_matrix_upper, out.width = "150%", warning=FALSE, message=FALSE}
+
+#upper w/ diag lables
+corrplot(vcor, method = "color", type = "upper", tl.col = "black",
+         tl.srt = 45, tl.cex = 0.5)
+
+```
+
+
+```{r cor_matrix_lower, out.width = "150%", warning=FALSE, message=FALSE}
+
+#upper w/ diag lables
+corrplot(vcor, method = "color", type = "lower", tl.col = "black",
+         col = viridis(12), tl.srt = 45, tl.cex = 0.5)
+
+```
+
+```{r cor_matrix, out.width = "150%", warning=FALSE, message=FALSE}
+
+#upper w/ diag lables
+corrplot(vcor, method = "color", tl.col = "black", tl.cex = 0.5)
+
+```
+
+
+

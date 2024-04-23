@@ -1,0 +1,409 @@
+---
+title: "Site 085 - La Puente VOC Data"
+author: "Will Clagett"
+date: "2023-09-21"
+output: html_document
+---
+```{r packages, include=FALSE}
+library(readr)
+library(knitr)
+library(dplyr)
+library(plyr)
+library(forcats)
+library(ggplot2)
+library(tidyr)
+library(purrr)
+library(faraway)
+library(cowplot)
+library(reshape2)
+library(corrplot)
+library(tibble)
+library(scales)
+library(ggthemes)
+library(stringr)
+library(gridExtra)
+library(patchwork)
+library(gghighlight)
+library(ggdark)
+library(viridis)
+library(DT)
+library(plotly)
+```
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# **VOC Data**
+## **Site 085 - La Puente**
+## **27 Jul - 03 Aug 2023**
+## *Alamosa, CO*
+```{r, site_photo, out.width="50%"}
+include_graphics("./graphics/085.png")
+```
+
+
+---
+
+## data set
+Site is temporary living facility for unhoused in Alamosa CO. 
+Summa Canisters were deployed in 3 locations at the site:
+
+ - 1 outdoor
+ - 2 inside facility
+
+| Rooms sampled in facility |
+|:------|
+| 1. Dinning Room |
+| 2.  Barrack Room 5 |
+
+---
+
+```{r load_data, include=FALSE}
+#load data
+#FIND AND REPLACE SITE_ID
+site_085 <- (read_csv(file = "./data/site_085_summa_data.csv")) %>% 
+  slice(2:4) %>%
+  select(1,7:67)
+
+#pivot data for plots
+p.analytes <- site_085 %>% 
+  pivot_longer(- ID,
+               names_to = "analyte",
+               values_to = "conc.")
+#VOC classes as objects
+alc <- c("isopropanol", "butanol")
+ald <- c("acetaldehyde")
+aro <- c("cyclopentane", "cyclohexane", "methylcyclohexane")
+btx <- c("benzene", "toluene", "ethylbenzene", "m+p-xylene", "o-xylene",
+          "isopropylbenzene", "n-propylbenzene", "3-ethyltoluene",
+          "4-ethyltoluene", "1,3,5-trimethylbenzene", "2-ethyltoluene",
+          "1,2,4-trimethylbenzene", "1,2,3-trimethylbenzene",
+          "1,3-diethylbenzene", "1,4-diethylbenzene")
+chl <- c("C2HCl3", "C2Cl4")
+kt <- c("acetone")
+oth <- c("isoprene", "styrene", "acetonitrile", "methylethylketone",
+           "a-pinene", "b-pinene", "limonene", "camphene", "methane")
+stc <- c("ethane", "propane", "i-butane", "n-butane", "i-pentane",
+                    "n-pentane", "n-hexane", "2,4 dimethylpentane", "n-heptane",
+                    "2,3-dimethylpentane", "2-methylhexane", "3-methylhexane",
+                    "2,2,4-trimethylpentane", "2,3,4-trimethylpentane",
+                    "2-methylheptane", "3-methylheptane", "n-octane", "n-nonane",
+                    "n-decane", "ethene", "propene", "t-2-butene", "1-butene",
+                    "c-2-butene", "t-2-pentene", "1-pentene", "cis-2-pentene",
+                    "ethyne")
+#add voc categories to dfs
+voc <- p.analytes %>% 
+  mutate(category = case_when(p.analytes$analyte %in% alc ~ "Alc.",
+                              p.analytes$analyte %in% ald ~ "Ald.",
+                              p.analytes$analyte %in% stc ~ "Stc.",
+                              p.analytes$analyte %in% aro ~ "Aro.",
+                              p.analytes$analyte %in% btx ~ "Btx.",
+                              p.analytes$analyte %in% chl ~ "Chl.",
+                              p.analytes$analyte %in% kt ~ "Ktn.",
+                              p.analytes$analyte %in% oth ~ "Oth."))
+
+#create outdoor group
+outdoor <- voc %>% 
+  filter(ID =="outdoor")
+#change conc. to numeric
+voc$conc. <- as.numeric(as.character(voc$conc.))
+outdoor$conc. <- as.numeric(as.character(outdoor$conc.))
+#calculate ratios
+voc <- voc %>%
+  group_by(ID, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = round(as.numeric(voc$conc.)/as.numeric(outdoor$conc.), 2))
+#highlight methane
+methane <- voc %>% 
+  filter(analyte == "methane")
+
+#subgroups,
+#indoor
+indoor <- voc %>% 
+  filter(ID != "outdoor")
+#dinning
+dinning <- voc %>% 
+  filter(ID == "dinning")
+#room_5
+room_5 <- voc %>% 
+  filter(ID == "room_5")
+
+#for DT and plotlys
+voc2 <- p.analytes %>% 
+  mutate(category = case_when(p.analytes$analyte %in% alc ~ "Alcohol",
+                              p.analytes$analyte %in% ald ~ "Aldehyde",
+                              p.analytes$analyte %in% stc ~ "Straight Chain",
+                              p.analytes$analyte %in% aro ~ "Aromatic",
+                              p.analytes$analyte %in% btx ~ "Btex",
+                              p.analytes$analyte %in% chl ~ "Chlorinated",
+                              p.analytes$analyte %in% kt ~ "Ketone",
+                              p.analytes$analyte %in% oth ~ "Other"))
+
+voc2$conc. <- as.numeric(as.character(voc$conc.))
+voc2 <- voc2 %>%
+  group_by(ID, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = round(as.numeric(voc2$conc.)/as.numeric(outdoor$conc.), 2))
+indoor2 <- voc2 %>% 
+  filter(ID != "outdoor")
+
+```
+
+
+## Data Table
+```{r data_table}
+datatable(voc2, colnames = c("Location", "Analyte", "Concentration",
+                               "Category", "Outdoor Ratio"),
+          options = list(pageLength = 10), rownames = FALSE)
+
+```
+
+---
+
+## Summary Plots of all VOCs
+
+Plot of all VOC in All Locations
+```{r plot_all, out.width = "150%", warning=FALSE, message=FALSE}
+
+voc_plot <- ggplot(voc, aes(x = reorder(analyte, conc.),
+                            y = conc., color = ID)) +
+  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc.)) +
+  # guides(size = "none") +
+  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
+                labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_calc() +
+  theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
+  scale_colour_tableau() +
+  xlab("Analytes") +
+  ylab("Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Site 085 Summa Cannister Deployment",
+          "Jul. 27 - Aug. 03, 2023. Alamosa, CO")
+voc_plot
+
+```
+
+
+Plot of all VOC in All Locations using plotly
+```{r plotly_all_VOCs, fig.align = "center", fig.dim=c(15,10), warning=FALSE, message=FALSE}
+#plot all VOCs at site
+voc_plotly <- ggplot(voc2, aes(x = reorder(analyte, conc.),
+                            y = conc., color = ID,
+                            text = paste("Analyte: ", analyte,
+                                         "<br> Conc. :", conc.,
+                                         "<br> Class: ", category))) +
+  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc.)) +
+  # guides(size = "none") +
+  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
+                labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_calc() + #try using different themes here
+  theme(axis.text.x = element_text(size = 9, angle = 45, hjust = 1)) +
+  scale_colour_tableau() +
+  xlab("Analytes") +
+  ylab("Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Site 085: La Puente Summa Cannister Deployment")
+ggplotly(voc_plotly, tooltip = "text")
+
+```
+
+Facet grid by VOC category
+```{r facet_grid_voc_cat, out.width = "175%", warning=FALSE, message=FALSE}
+
+voc_fctg <- ggplot(voc, aes(x = reorder(analyte, conc.),
+                            y = conc., color = ID)) +
+  geom_point(shape = 18, alpha = 0.5) +
+  geom_point(data = methane, aes(x = analyte, y = conc.)) +
+  guides(size = "none") +
+  facet_grid(~ category, scales = "free_x") +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  facet_grid(.~ category, scales = "free", switch = "x", space = "free_x") +
+  theme_bw() +
+  theme(strip.placement = "outside", strip.text = element_text(size  = 8),
+        strip.background = element_blank()) +
+  theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
+  labs(x = "Analytes Grouped in VOC Categories",
+       y = "Concentration\n(VOC ppbv or methane ppmv)") 
+
+voc_fctg +
+  scale_color_manual(values = c("#065143", "#839b5d",
+                                "#df5e21", "#3f88c5", "#aab6cb",
+                                "#bc2e16"),
+                     labels = c("dinning", "room_5", "outdoor")) +
+  theme(legend.title = element_text(color = "black", size = 10),
+        legend.text = element_text(color = "black"))
+```
+
+Facet grid indoor
+```{r acet_grid_indoor, out.width = "190%", warning=FALSE, message=FALSE}
+
+indoor_fctg <- ggplot(indoor, aes(color = ID, x = analyte, y = conc.)) +
+  geom_point(data = indoor, aes(x = reorder(analyte, conc.), y = conc.),
+             size = 3, shape = 18, alpha = 0.5) +
+  facet_grid(.~ category, scales = "free", space = "free") +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
+  labs(x = "Analytes Grouped in VOC Categories",
+       y = "Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Grouped by Analyte Class")
+
+indoor_fctg +
+  scale_color_manual(values = c("#3090C7", "#C04000"),
+                     labels = c("dinning", "room_5")) +
+  theme(legend.title = element_text(color = "black", size = 10),
+        legend.text = element_text(color = "black"))
+
+
+```
+
+## Top 5 Plots by Location
+```{r top_five_data, include=FALSE}
+#dinning
+dinning_top <- dinning %>% 
+  group_by(analyte) %>% 
+  arrange(desc(conc.))
+dinning_top <- top_n(ungroup(dinning_top), 5, conc.) 
+#room_5
+room_5_top <- room_5 %>% 
+  group_by(analyte) %>% 
+  arrange(desc(conc.))
+room_5_top <- top_n(ungroup(room_5_top), 5, conc.)
+#outdoor
+outdoor_top <- outdoor %>% 
+  group_by(analyte) %>% 
+  arrange(desc(conc.))
+outdoor_top <- top_n(ungroup(outdoor_top), 5, conc.)
+
+```
+
+
+```{r dinning_t, warning=FALSE, message=FALSE}
+p_dinning_top <- dinning_top %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
+           stat = "identity", fill = "#065143") +
+  labs(x = "dinning", y = "Concentration") +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x)))+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1))
+
+p_dinning_top + theme(
+  panel.background = element_rect(fill = "lightblue",
+                                colour = "lightblue",
+                                size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r room_5_t, warning=FALSE, message=FALSE}
+
+p_room_5_top <- room_5_top %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
+           stat = "identity", fill = "#A74AC7") +
+  labs(x = "dinning", y = "Concentration") +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x)))+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1))
+
+p_room_5_top + theme(
+  panel.background = element_rect(fill = "lightblue",
+                                colour = "lightblue",
+                                size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r outdoor_t, warning=FALSE, message=FALSE}
+
+p_od_top <- outdoor_top %>% 
+  ggplot() +
+  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
+           stat = "identity", fill = "#F98B88") +
+  labs(x = "dinning", y = "Concentration") +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x)))+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1))
+
+p_od_top + theme(
+  panel.background = element_rect(fill = "lightblue",
+                                colour = "lightblue",
+                                size = 0.5, linetype = "solid"))
+
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+
+grid.arrange(p_dinning_top, p_room_5_top, p_od_top,
+    top = "Top 5 Analytes in Each Location", left = "Outdoor Ratio")
+
+```
+
+
+## Indoor to Outdoor Ratio Plots
+Outdoor Ratio all Locations
+```{r outdoor_ratios}
+# ratio_plot <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
+#                               y = od_ratio, color = ID)) +
+#   geom_point(shape = 18, size = 1, alpha = 0.5) +
+#   # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
+#   # guides(size = "none") +
+#   scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
+#                 labels = trans_format(`log10`, math_format(10^.x))) +
+#   theme_bw() +
+#   theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
+#   xlab("Analytes") +
+#   ylab("Indoor to Outdoor Ratios") +
+#   ggtitle("Site 085 Summa Cannister Deployment",
+#           "Jul. 27 - Aug. 03, 2023. Alamosa, CO")
+# ratio_plot
+```
+
+```{r ratio_plot, out.width = "135%", warning=FALSE, message=FALSE}
+
+ratio_plot <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
+                              y = od_ratio, color = ID,
+                              text = paste("Analyte: ", analyte,
+                                           "<br> Ratio: ", od_ratio,
+                                           "<br> Class: ", category))) +
+  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
+  # guides(size = "none") +
+  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
+                labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1),
+        legend.position = c(0.1,0.78)) +
+  xlab("Analytes") +
+  ylab("Indoor to Outdoor Ratios") +
+  ggtitle("Site 085 Summa Cannister Deployment: Jul. 27 - Aug. 03, 2023. Alamosa, CO")
+ratio_plot + theme(
+  legend.background = element_rect(fill = "#DADBDD"),
+  legend.key = element_rect(fill = NA, color = NA)) 
+
+
+```
+
+
+```{r , fig.dim=c(13,10), warning=FALSE, message=FALSE}
+ratio_plotly <- ggplot(indoor2, aes(x = reorder(analyte, od_ratio),
+                              y = od_ratio, color = ID,
+                              text = paste("Analyte: ", analyte,
+                                           "<br> Ratio: ", od_ratio,
+                                           "<br> Class: ", category))) +
+  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
+  # guides(size = "none") +
+  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
+                labels = trans_format(`log10`, math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1),
+        legend.position = c(0.1,0.78)) +
+  xlab("Analytes") +
+  ylab("Indoor to Outdoor Ratios") +
+  ggtitle("Site 085 Summa Cannister Deployment: Jul. 27 - Aug. 03, 2023. Alamosa, CO")
+ggplotly(ratio_plotly, tooltip = "text")
+```

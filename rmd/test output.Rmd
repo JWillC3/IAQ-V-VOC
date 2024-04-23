@@ -1,0 +1,327 @@
+---
+title: "Site 063 - High Desert Assisted Living"
+author: "Will Clagett"
+date: "2023-06-11"
+output: html_document
+---
+```{r}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# **VOC Data**
+## **Site 063 - High Desert Assisted Living**
+## **DD MM - DD MM YYYY**
+*Clifton, CO*
+```{r, site_photo}
+#include_graphics()
+```
+
+
+---
+
+```{r packages, include=FALSE}
+library(readr)
+library(dplyr)
+library(plyr)
+library(forcats)
+library(ggplot2)
+library(tidyr)
+library(purrr)
+library(faraway)
+library(cowplot)
+library(reshape2)
+library(corrplot)
+library(tibble)
+library(scales)
+library(RColorBrewer)
+library(ggthemes)
+library(stringr)
+library(knitr)
+library(kableExtra)
+```
+
+---
+
+## data set
+
+Summa cannisters were deployed in six locations at the site:
+
+ - 1 outdoor
+ - 3 in building one
+ - 2 in building two
+ 
+| Rooms sampled in building one |
+|:------|
+| 1. kitchen | 
+| 2. admin/nursing office | 
+| 3. resident room | 
+
+| Rooms sampled in building two |
+|:------|
+| 1. kitchen | 
+| 2. admin/nursing office | 
+---
+
+```{r load_data, include=FALSE}
+site_063 <- (read_csv(file = "./data/site_063_summa_data.csv")) %>% 
+  slice(3:8) %>%
+  select(1,5:65)
+
+#convert to long df
+p.analytes <- site_063 %>% 
+  pivot_longer(- ID,
+               names_to = "analyte",
+               values_to = "conc.")
+
+p.outdoor <- site_063 %>% 
+  slice(4) %>%
+  pivot_longer(- ID,
+               names_to = "analyte",
+               values_to = "conc.")
+
+#VOC classes as objects
+alcohol <- c("isopropanol", "butanol")
+aldehyde <- c("acetaldehyde")
+alkane <- c("ethane", "propane", "i-butane", "n-butane", "i-pentane",
+             "n-pentane", "n-hexane", "2,4 dimethylpentane", "n-heptane",
+             "2,3-dimethylpentane", "2-methylhexane", "3-methylhexane",
+             "2,2,4-trimethylpentane", "2,3,4-trimethylpentane", "2-methylheptane",
+             "3-methylheptane", "n-octane", "n-nonane", "n-decane")
+alkene <- c("ethene", "propene", "t-2-butene", "1-butene", "c-2-butene",
+             "t-2-pentene", "1-pentene", "cis-2-pentene")
+alkyne <- c("ethyne")
+aromatic <- c("cyclopentane", "cyclohexane", "methylcyclohexane")
+btex <- c("benzene", "toluene", "ethylbenzene", "m+p-xylene", "o-xylene",
+           "isopropylbenzene", "n-propylbenzene", "3-ethyltoluene",
+           "4-ethyltoluene", "1,3,5-trimethylbenzene", "2-ethyltoluene",
+           "1,2,4-trimethylbenzene", "1,2,3-trimethylbenzene",
+           "1,3-diethylbenzene", "1,4-diethylbenzene")
+chlorinated <- c("C2HCl3", "C2Cl4")
+ketone <- c("acetone")
+other <- c("isoprene", "styrene", "acetonitrile", "methylethylketone",
+            "a-pinene", "b-pinene", "limonene", "camphene", "methane")
+straight_chain <- c("ethane", "propane", "i-butane", "n-butane", "i-pentane",
+              "n-pentane", "n-hexane", "2,4 dimethylpentane", "n-heptane",
+              "2,3-dimethylpentane", "2-methylhexane", "3-methylhexane",
+              "2,2,4-trimethylpentane", "2,3,4-trimethylpentane",
+              "2-methylheptane", "3-methylheptane", "n-octane", "n-nonane",
+              "n-decane", "ethene", "propene", "t-2-butene", "1-butene",
+              "c-2-butene", "t-2-pentene", "1-pentene", "cis-2-pentene",
+              "ethyne")
+#all informal cats
+voc_cat <- p.analytes %>% 
+  mutate(category = case_when(p.analytes$analyte %in% alcohol ~ "alcohol",
+                              p.analytes$analyte %in% aldehyde ~ "aldehyde",
+                              p.analytes$analyte %in% alkane ~ "alkane",
+                              p.analytes$analyte %in% alkene ~ "alkene",
+                              p.analytes$analyte %in% alkyne ~ "alkyne",
+                              p.analytes$analyte %in% aromatic ~ "aromatic",
+                              p.analytes$analyte %in% btex ~ "btex",
+                              p.analytes$analyte %in% chlorinated ~ "chlorinated",
+                              p.analytes$analyte %in% ketone ~ "ketone",
+                              p.analytes$analyte %in% other ~ "other"))
+#convert conc. to numeric
+voc_cat$conc. <- as.numeric(as.character(voc_cat$conc.))
+#creates ratios in original data frame with concentrations from outdoor
+voc_cat <- voc_cat %>%
+  group_by(ID, analyte) %>%
+  mutate(ratio = round(as.numeric(voc_cat$conc.)/as.numeric(p.outdoor$conc.), 2))
+
+```
+
+```{r}
+kable(site_063) %>% 
+  kable_material(c("striped", "hover"))
+
+```
+
+---
+
+## Plots
+```{r, warning=FALSE}
+#facet wrap by location
+voc_cat %>%
+  ggplot(aes(x = analyte, y = conc.)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  facet_wrap(~ID, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#facet wrap by location 2 rows
+voc_cat %>%
+  ggplot(aes(x = analyte, y = conc.)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  facet_wrap(~ID, ncol = 2, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#facet wrap by location 1 row
+voc_cat %>%
+  ggplot(aes(x = analyte, y = conc.)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  facet_wrap(~ID, ncol = 1, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#line facet wrap by location 1 row
+voc_cat %>%
+  ggplot(aes(x = analyte, y = conc., group = ID)) +
+  geom_line(size = 0.75) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  facet_wrap(~ID, ncol = 1, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#facet grid by cat
+voc_cat %>%
+  ggplot(aes(x = analyte, y = conc.)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  facet_grid(. ~ category, scales  = "free") +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
+        panel.spacing = unit(.5, "cm"))
+
+#all analytes by location
+voc_cat %>%
+  ggplot(aes(x = analyte, y = conc., color = ID)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab(expression(atop("Concentration",paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("Site 063 Summa Cannister Deployment",
+          "Oct. 18 - 25, 2022. Grand Junction, CO")
+
+#wrapped by indoor location showing all cats
+voc_cat %>%
+  filter(ID != "outdoor") %>% 
+  ggplot(aes(x = analyte, y = conc., color = ID)) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~category, scales = "free_x") +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.spacing.x = unit(.5, "lines"),
+        panel.spacing.y = unit(1.5, "lines")) +
+  ylab("Concentration (ppbv)") +
+  ggtitle("Site 063 Summa Cannister Deployment",
+          "Oct. 18 - 25, 2022. Grand Junction, CO")
+
+#room_24
+voc_cat %>%
+  filter(ID == "room_24") %>% 
+  ggplot(aes(x = analyte, y = conc.)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab(expression(atop("Concentration",paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("Site 063: Room 24 Summa Cannister Deployment",
+          "Oct. 18 - 25, 2022. Grand Junction, CO")
+
+#room_25
+voc_cat %>%
+  filter(ID == "room_25") %>% 
+  ggplot(aes(x = analyte, y = conc.)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab(expression(atop("Concentration",paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("Site 063: Room 25 Summa Cannister Deployment",
+          "Oct. 18 - 25, 2022. Grand Junction, CO")
+
+#room_24
+voc_cat %>%
+  filter(ID == "room_24") %>% 
+  ggplot(aes(x = analyte, y = conc.)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab(expression(atop("Concentration",paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("Site 063: Room 24 Summa Cannister Deployment",
+          "Oct. 18 - 25, 2022. Grand Junction, CO")
+
+#room_23
+voc_cat %>%
+  filter(ID == "room_23") %>% 
+  ggplot(aes(x = analyte, y = conc.)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab(expression(atop("Concentration",paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("Site 063: Room 23 Summa Cannister Deployment",
+          "Oct. 18 - 25, 2022. Grand Junction, CO")
+
+#room_20
+voc_cat %>%
+  filter(ID == "room_20") %>% 
+  ggplot(aes(x = analyte, y = conc.)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab(expression(atop("Concentration",paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("Site 063: Room 20 Summa Cannister Deployment",
+          "Oct. 18 - 25, 2022. Grand Junction, CO")
+
+#room_09
+voc_cat %>%
+  filter(ID == "room_09") %>% 
+  ggplot(aes(x = analyte, y = conc.)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab(expression(atop("Concentration",paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle("Site 063: Room 09 Summa Cannister Deployment",
+          "Oct. 18 - 25, 2022. Grand Junction, CO")
+
+#indoor to ratio plots
+#ratio point plot
+voc_cat %>%
+  filter(ID != "outdoor") %>%
+  ggplot(aes(x = analyte, y = ratio, color = ID)) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Ratio Concentrations (ppbv)") +
+  ggtitle("Site 063 Indoor to Ouutdoor Summa Cannister Deployment",
+          "Oct. 18 - 25, 2022. Grand Junction, CO")
+
+#col plot
+voc_cat %>%
+  filter(ID != "outdoor") %>%
+  ggplot(aes(x = analyte, y = ratio, color = ID)) +
+  geom_col() +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Ratio Concentrations (ppbv)") +
+  ggtitle("Site 063 Summa Cannister Deployment",
+          "Oct. 18 - 25, 2022. Grand Junction, CO")
+
+#another way to view ratios
+library(waterfalls)
+site.063 <- read.csv("./data/site_063_summa_data.csv")
+room.data <- site.063[3:8, 5:65]
+t.room.data <- data.frame(t(room.data),
+                          stringsAsFactors = FALSE)
+names(t.room.data) <- as.character(site.063[3:8, 1]) 
+
+t.room.data <- t.room.data %>% 
+  rownames_to_column(var = "analyte")
+
+ratios.063 <- t.room.data %>% 
+  mutate(out_24_ratio = round(as.numeric(room_24)/as.numeric(outdoor), 2)) %>% 
+  mutate(out_25_ratio = round(as.numeric(room_25)/as.numeric(outdoor), 2)) %>% 
+  mutate(out_23_ratio = round(as.numeric(room_23)/as.numeric(outdoor), 2)) %>% 
+  mutate(out_20_ratio = round(as.numeric(room_20)/as.numeric(outdoor), 2)) %>% 
+  mutate(out_09_ratio = round(as.numeric(room_09)/as.numeric(outdoor), 2)) %>% 
+  select(1,8:12)
+
+waterfall(ratios.063,
+          rect_width = 0.4,
+          linetype = 2) +
+  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+
+
+
