@@ -1,31 +1,65 @@
+#packages
+library(tidyverse)
+library(faraway)
+library(cowplot)
+library(reshape2)
+library(corrplot)
+library(scales)
+library(ggthemes)
+library(gridExtra)
+library(patchwork)
+library(gghighlight)
+library(ggdark)
+library(viridis)
+library(DT)
+library(plotly)
+library(readxl)
 
-source("functions.R")
+#source("functions.R")
 
-id_site <- "40"
+#id_site <- "040"
 
 
+# site_040 <- sites %>% 
+#   filter(site_id == site_id)
+# 
+# p_conc_room(site_040, site_id)
+# 
+# p_conc_room(sites %>% filter(site_id == "063"), "063")
+
+#load data
+sites <- read_excel("data/voc_samples_all.xlsx")
+
+#Need to check the data 040, outdoor should not be the lowest. This is not the case
+#for any other site!
+#site 040
 site_040 <- sites %>% 
-  filter(site == id_site)
+  filter(site_id == "040")
 
-p_conc_room(site_040, id_site)
-
-p_conc_room(sites %>% filter(site == "63"), "63")
-
-#SITE 063 A
-site_063A <- new %>% 
-  filter(name == "High Desert A")
-
-ggplot(sites, aes(x = fct_reorder(room, conc.), y = conc.)) +
+ggplot(site_040, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(round(y,0))), fun = "sum", geom = "text",
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
                col = "white", vjust = 1.5) +
-  ggtitle("VOC Samples by Canister Location") +
+  ggtitle("Site 040 VOC Samples by Canister Location") +
   labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
   theme_bw() +
-  theme(axis.text.y = element_blank()) +
-  facet_wrap(~site, ncol = 3, scales = "free_x")
+  theme(axis.text.y = element_blank())
 
-site_063B <- new %>% 
+#SITE 063 A
+site_063A <- sites %>% 
+  filter(name == "High Desert A")
+
+ggplot(site_063A, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 063A VOC Samples by Canister Location") +
+  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+
+#SITE 063 B
+site_063B <- sites %>% 
   filter(name == "High Desert B")
 
 ggplot(site_063B, aes(x = room, y = conc.)) +
@@ -38,8 +72,8 @@ ggplot(site_063B, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 #SITE 066
-site_066 <- new %>% 
-  filter(site == "066")
+site_066 <- sites %>% 
+  filter(site_id == "066")
 
 ggplot(site_066, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
@@ -51,8 +85,8 @@ ggplot(site_066, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 079
-site_079 <- new %>% 
-  filter(site == "079")
+site_079 <- sites %>% 
+  filter(site_id == "079")
 
 ggplot(site_079, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
@@ -64,8 +98,8 @@ ggplot(site_079, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 085
-site_085 <- new %>% 
-  filter(site == "085")
+site_085 <- sites %>% 
+  filter(site_id == "085")
 
 ggplot(site_085, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
@@ -77,8 +111,8 @@ ggplot(site_085, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 086
-site_086 <- new %>% 
-  filter(site == "086")
+site_086 <- sites %>% 
+  filter(site_id == "086")
 
 ggplot(site_086, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
@@ -90,8 +124,8 @@ ggplot(site_086, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 099
-site_099 <- new %>% 
-  filter(site == "099")
+site_099 <- sites %>% 
+  filter(site_id == "099")
 
 ggplot(site_099, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
@@ -103,8 +137,8 @@ ggplot(site_099, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 103
-site_103 <- new %>% 
-  filter(site == "103")
+site_103 <- sites %>% 
+  filter(site_id == "103")
 
 ggplot(site_103, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
@@ -116,8 +150,8 @@ ggplot(site_103, aes(x = room, y = conc.)) +
   theme(axis.text.y = element_blank())
 
 # SITE 107
-site_107 <- new %>% 
-  filter(site == "107")
+site_107 <- sites %>% 
+  filter(site_id == "107")
 
 ggplot(site_107, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
@@ -163,7 +197,7 @@ voc <- voc %>%
   mutate(voc_baseline_subtracted = voc + baseline_fix) 
 
 # SITE 040 ROOM PAIR CORRELATIONS
-SITE_040 <- new %>%
+SITE_040 <- sites %>%
   filter(site == "040")
 
 #bears & frogs 
