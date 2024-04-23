@@ -35,7 +35,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ## *[City], CO*
 ```{r, site_photo, out.width="50%"}
 
-include_graphics("../graphics/XXX.jpg")
+include_graphics("../graphics/XXX.png")
 
 ```
 
@@ -838,13 +838,13 @@ p_location6_top <- location6_top %>%
 
 ```
 
-Top 5 plots for each location
+Top 10 plots for each location
 ```{r, warning=FALSE, out.width = "140%", message=FALSE}
 
 grid.arrange(p_location1_top, p_location2_top, p_location3_top, p_location4_top,
              p_location5_top,p_location6_top,
              ncol = 3, nrow = 2,
-             top = "Top 5 Analytes in Each Location", left = "Concentration")
+             top = "Top 10 Analytes in Each Location", left = "Concentration")
 
 ```
 
@@ -937,7 +937,7 @@ ggplotly(ratio_plotly, tooltip = "text")
 
 
 ## Plots for the Top 10 Outdoor Ratios by Location
-```{r top_five_or__data, include=FALSE}
+```{r top_ten_or__data, include=FALSE}
 #LOCATION_1 od ratio
 LOCATION_1_top_or <- indoor %>% 
   filter(ID == "[LOCATION NAME]") %>% 
@@ -1076,13 +1076,13 @@ p_LOCATION_5_top_or <- LOCATION_5_top_or %>%
 
 ```
 
-Top 5 ratios plots for each location
+Top 10 ratios plots for each location
 ```{r, all_ratio_plots, warning=FALSE, out.width = "140%", message=FALSE}
 
 grid.arrange(p_LOCATION_1_top_or, p_LOCATION_2_top_or, p_LOCATION_3_top_or,
              p_LOCATION_4_top_or, p_LOCATION_5_top_or,
              ncol = 3, nrow = 2,
-             top = "Top 5 Analyte Ratios in Each Location",
+             top = "Top 10 Analyte Ratios in Each Location",
              left = "Outdoor Ratio")
 
 ```
