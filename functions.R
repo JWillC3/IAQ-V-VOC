@@ -20,12 +20,12 @@ path <- "data/"
 
 
 # read site data
-sites <- read_csv(paste0(path, "voc_samples_all.csv"))
+sites <- read_excel(paste0(path, "voc_samples_all.xlsx"))
 
 
 # function to plot total voc conc by room
 
-p_conc_room <- function(df, site){
+p_conc_room <- function(df, site_id){
 
 ggplot(df, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
