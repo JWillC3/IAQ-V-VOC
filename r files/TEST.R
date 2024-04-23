@@ -27,20 +27,14 @@ library(readxl)
 # 
 # p_conc_room(sites %>% filter(site_id == "063"), "063")
 
-<<<<<<< HEAD
+
 #load data
 sites <- read_excel("data/voc_samples_all.xlsx")
 
 #Need to check the data 040, outdoor should not be the lowest. This is not the case
 #for any other site!
 #site 040
-=======
-source("functions.R")
 
-id_site <- "40"
-#test run
-2+2
->>>>>>> 98de7b53981ecbf39898716b720a478cc5e03a23
 site_040 <- sites %>% 
   filter(site_id == "040")
 
