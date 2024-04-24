@@ -63,7 +63,7 @@ include_graphics("../graphics/040.png")
 logo <- image_read("../graphics/csu_cee_logo.png")
 
 #FIND AND REPLACE SITE_ID in csv file, double check rows to slice, col. to select
-site_040 <- (read_csv(file = "../data/site_040_summa_data.csv")) %>% 
+site_040 <- (read_csv(file = "../data/site_040.csv")) %>% 
   slice(2:7) %>%
   select(1,7:67)
 
@@ -121,28 +121,6 @@ voc <- voc %>%
 methane <- voc %>% 
   filter(analyte == "methane")
 
-#UPDATE LOCATIONS FOR THE SITE YOU ARE CURRENTLY WORKING ON Location 1, 2, etc.!
-#default is alphabetical order
-#subgroups,
-#all indoor locations
-indoor <- voc %>% 
-  filter(ID != "Outdoor")
-#bears
-bears <- voc %>% 
-  filter(ID == "Bears")
-#frogs
-frogs <- voc %>% 
-  filter(ID == "Frogs")
-#lesson_prep
-lesson_prep <- voc %>% 
-  filter(ID == "Lesson Prep")
-#monkeys
-monkeys <- voc %>% 
-  filter(ID == "Monkeys")
-#office
-office <- voc %>% 
-  filter(ID == "Office")
-
 #for DT and plotlys
 voc2 <- p.analytes %>% 
   mutate(category = case_when(p.analytes$analyte %in% alc ~ "Alcohol",
@@ -154,6 +132,7 @@ voc2 <- p.analytes %>%
                               p.analytes$analyte %in% kt ~ "Ketone",
                               p.analytes$analyte %in% oth ~ "Other"))
 
+#plotlys
 voc2 <- voc2 %>%
   group_by(ID, analyte) %>%
   ungroup() %>% 
@@ -163,6 +142,38 @@ voc2$conc. <- as.numeric(as.character(voc2$conc.))
 
 indoor2 <- voc2 %>% 
   filter(ID != "Outdoor")
+
+#UPDATE LOCATIONS FOR THE SITE YOU ARE CURRENTLY WORKING ON Location 1, 2, etc.!
+#default is alphabetical order
+#subgroups,
+#all indoor locations
+indoor <- voc2 %>% 
+  filter(ID != "Outdoor")
+#bears
+bears <- voc2 %>% 
+  filter(ID == "Bears")
+#frogs
+frogs <- voc2 %>% 
+  filter(ID == "Frogs")
+#lesson_prep
+lesson_prep <- voc2 %>% 
+  filter(ID == "Lesson Prep")
+#monkeys
+monkeys <- voc2 %>% 
+  filter(ID == "Monkeys")
+#office
+office <- voc2 %>% 
+  filter(ID == "Office")
+
+# voc2 <- voc2 %>%
+#   group_by(ID, analyte) %>%
+#   ungroup() %>% 
+#   mutate(od_ratio = round(as.numeric(voc2$conc.)/as.numeric(outdoor$conc.), 2))
+# 
+# voc2$conc. <- as.numeric(as.character(voc2$conc.))
+# 
+# indoor2 <- voc2 %>% 
+#   filter(ID != "Outdoor")
 
 ```
 
@@ -180,40 +191,6 @@ datatable(voc2, colnames = c("Location", "Analyte", "Concentration",
 ## Summary Plots of all VOCs
 
 Plot of all VOC in All Locations
-```{r plot_all, out.width = "140%", warning=FALSE, message=FALSE}
-
-voc_plot <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                            y = conc., color = ID)) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.)) +
-  # guides(size = "none") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 5.5, angle = 45, hjust = 1)) +
-  labs(x = "Analytes", y = "Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Site 040 - Teaching Tree (Post)",
-          "Oct. 24 - 31, 2023")
-  
-voc_plot +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-        theme(legend.title = element_text(color = "black", face = "bold", size = 10),
-        legend.text = element_text(color = "#261e1b"),
-        legend.background = element_rect(color = "black"),
-        axis.line = element_line(color = "black"),
-        legend.position = c(0.10,0.73), 
-        panel.grid.minor = element_line(linetype = "dashed"))
-        
-
-#grid::grid.raster(logo, x = 1, y = .010, just = c('right', 'bottom'), width = unit(2, 'inches'))
-
-
-```
-
-
-Plot of all VOC in All Locations using plotly
 ```{r plotly_all_VOCs, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 #plot all VOCs at site
 voc_plot2 <- ggplot(voc2, aes(x = reorder(analyte, conc.),
@@ -240,103 +217,115 @@ ggplotly(voc_plot2, tooltip = "text")
 Plots by location
 
 Bears
-```{r exam_1_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+```{r exam_1_plot, out.width = "125%", warning=FALSE, message=FALSE}
+
 #bears
 l1_plot <- bears %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "orchid", shape = 18, size = 5) +
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID,
+             text = paste("Analyte: ", analyte,
+                                         "<br> Conc. :", conc.,
+                                         "<br> Class: ", category))) +
+  geom_point(color = "orchid", shape = 18, size = 3) +
   # geom_point(data = methane, aes(x = analyte, y = conc.,
   #                                size = 6)) +
   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
   theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   theme(legend.position = "none") +
   labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("040 - Teaching Tree (Post): Bears")
-l1_plot +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
-
+       y = "Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Bears")
+# l1_plot +
+#   theme(panel.grid.minor = element_line(linetype = "dashed"))
+ggplotly(l1_plot, tooltip = "text")
 
 ```
 
 Frogs
-```{r exam_2_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+```{r exam_2_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
 #frogs
 l2_plot <- frogs %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "chocolate4", shape = 18, size = 5) +
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID,
+             text = paste("Analyte: ", analyte,
+                                         "<br> Conc. :", conc.,
+                                         "<br> Class: ", category))) +
+  geom_point(color = "chocolate4", shape = 18, size = 3) +
   # geom_point(data = methane, aes(x = analyte, y = conc.,
   #                                size = 6)) +
   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
   theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   theme(legend.position = "none") +
   labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("040 - Teaching Tree (Post): Frogs")
-l2_plot +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
-
+       y = "Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Frogs")
+# l2_plot +
+#   theme(panel.grid.minor = element_line(linetype = "dashed"))
+ggplotly(l2_plot, tooltip = "text")
 
 ```
 
 Lesson Prep
-```{r lesson_prep_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+```{r lesson_prep_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
 #lesson_prep
 l3_plot <- lesson_prep %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "goldenrod2", shape = 18, size = 5) +
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID,
+             text = paste("Analyte: ", analyte,
+                                         "<br> Conc. :", conc.,
+                                         "<br> Class: ", category))) +
+  geom_point(color = "goldenrod2", shape = 18, size = 3) +
   # geom_point(data = methane, aes(x = analyte, y = conc.,
   #                                size = 6)) +
   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
   theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   theme(legend.position = "none") +
   labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("040 - Teaching Tree (Post): Lesson Prep")
-l3_plot +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
-
+       y = "Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Lesson Prep")
+# l3_plot +
+#   theme(panel.grid.minor = element_line(linetype = "dashed"))
+ggplotly(l3_plot, tooltip = "text")
 
 ```
 
 Monkeys
-```{r nurse_statioini_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+```{r nurse_statioini_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
 #monkeys
 l4_plot <- monkeys %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "#50C878", shape = 18, size = 5) +
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID,
+             text = paste("Analyte: ", analyte,
+                                         "<br> Conc. :", conc.,
+                                         "<br> Class: ", category))) +
+  geom_point(color = "#50C878", shape = 18, size = 3) +
   # geom_point(data = methane, aes(x = analyte, y = conc.,
   #                                size = 6, color ="red")) +
   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
   theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   theme(legend.position = "none") +
   labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("040 Teaching Tree (Post): Monkeys")
-l4_plot +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
-
+       y = "Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Monkeys")
+# l4_plot +
+#   theme(panel.grid.minor = element_line(linetype = "dashed"))
+ggplotly(l4_plot, tooltip = "text")
 
 ```
 
 Office
-```{r office_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+```{r office_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
 #office
 l5_plot <- office %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "tomato2", shape = 18, size = 5) +
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID,
+             text = paste("Analyte: ", analyte,
+                                         "<br> Conc. :", conc.,
+                                         "<br> Class: ", category))) +
+  geom_point(color = "tomato2", shape = 18, size = 3) +
   # geom_point(data = methane, aes(x = analyte, y = conc.,
   #                                size = 6)) +
   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
@@ -344,22 +333,24 @@ l5_plot <- office %>%
   theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
   theme(legend.position = "none") +
   labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("040 - Teaching Tree (Post): Office")
-l5_plot +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
-
+       y = "Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Office")
+# l5_plot +
+#   theme(panel.grid.minor = element_line(linetype = "dashed"))
+ggplotly(l5_plot, tooltip = "text")
 
 ```
 
 Outdoor
-```{r outdoor_plot, fig.width = 10, fig.height = 5, warning=FALSE, message=FALSE}
+```{r outdoor_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
 #outdoor
 od_plot <- outdoor %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "midnightblue", shape = 18, size = 5) +
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID,
+             text = paste("Analyte: ", analyte,
+                                         "<br> Conc. :", conc.,
+                                         "<br> Class: ", category))) +
+  geom_point(color = "midnightblue", shape = 18, size = 3) +
   # geom_point(data = methane, aes(x = analyte, y = conc.,
   #                                size = 6, color ="red")) +
   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
@@ -367,19 +358,18 @@ od_plot <- outdoor %>%
   theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
   theme(legend.position = "none") +
   labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("040 - Teaching Tree (Post): Outdoor (roof top)")
-od_plot +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
-
+       y = "Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle("Outdoor (roof top)")
+# od_plot +
+#   theme(panel.grid.minor = element_line(linetype = "dashed"))
+ggplotly(od_plot, tooltip = "text")
 
 ```
 
 
 Facet grid by VOC category
 All Locations
-```{r facet_grid_voc_cat, fig.width = 20, fig.height = 12, warning=FALSE, message=FALSE}
+```{r facet_grid_voc_cat, fig.height= 10, fig.width= 20, warning=FALSE, message=FALSE}
 
 voc_fctg <- ggplot(voc, aes(x = reorder(analyte, conc.),
                             y = conc., color = ID)) +
@@ -413,7 +403,7 @@ voc_fctg +
 ```
 
 Indoor locations
-```{r acet_grid_indoor, fig.width = 20, fig.height = 12, warning=FALSE, message=FALSE}
+```{r acet_grid_indoor, out.width = "125%", warning=FALSE, message=FALSE}
 
 indoor_fctg <- ggplot(indoor, aes(x = reorder(analyte, conc.),
                                y = conc., color = ID)) +
@@ -1104,54 +1094,3 @@ grid.arrange(p_bears_top_or, p_frogs_top_or, p_lesson_prep_top_or,
              left = "Outdoor Ratio")
 
 ```
-
----
-
-## Correlations
-```{r cor_data, include=FALSE, warning=FALSE, message=FALSE}
-
-#correlations
-cor(outdoor$conc., bears$conc., method = "spearman")
-#create a new df for correlation
-voc_cor <- site_040 %>% 
-  slice(-3)
-#convert select rows to numeric
-voc_cor[2:62] <- lapply(voc_cor[2:62], as.numeric)
-#run the correlation
-vcor <- cor(voc_cor[, unlist(lapply(voc_cor, is.numeric))], method = "spearman")
-
-```
-
-
-```{r cor_table, include=FALSE}
-
-datatable(voc_cor) 
-
-```
-
-```{r cor_matrix_upper, out.width = "150%", warning=FALSE, message=FALSE}
-
-#upper w/ diag lables
-corrplot(vcor, method = "color", type = "upper", tl.col = "black",
-         tl.srt = 45, tl.cex = 0.5)
-
-```
-
-
-```{r cor_matrix_lower, out.width = "150%", warning=FALSE, message=FALSE}
-
-#upper w/ diag lables
-corrplot(vcor, method = "color", type = "lower", tl.col = "black",
-         col = viridis(12), tl.srt = 45, tl.cex = 0.5)
-
-```
-
-```{r cor_matrix, out.width = "150%", warning=FALSE, message=FALSE}
-
-#upper w/ diag lables
-corrplot(vcor, method = "color", tl.col = "black", tl.cex = 0.5)
-
-```
-
-
-
