@@ -15,24 +15,22 @@ library(DT)
 library(plotly)
 library(readxl)
 
+#will work with Nick to ge this automation working again. Ignore for now
 #source("functions.R")
-
 #id_site <- "040"
-
-
 # site_040 <- sites %>% 
 #   filter(site_id == site_id)
-# 
 # p_conc_room(site_040, site_id)
-# 
 # p_conc_room(sites %>% filter(site_id == "063"), "063")
 
 
 #load data
 sites <- read_excel("data/voc_samples_all.xlsx")
 
-#Need to check the data 040, outdoor should not be the lowest. This is not the case
-#for any other site!
+#Need to check the data 040, outdoor should not be the lowest. 
+#This is not the case for any other site!
+
+
 #site 040
 
 site_040 <- sites %>% 
