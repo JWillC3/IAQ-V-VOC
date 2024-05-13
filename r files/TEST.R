@@ -15,7 +15,7 @@ library(DT)
 library(plotly)
 library(readxl)
 
-#will work with Nick to ge this automation working again. Ignore for now
+#will work with Nick to get this automation working again. Ignore for now
 #source("functions.R")
 #id_site <- "040"
 # site_040 <- sites %>% 
@@ -32,7 +32,6 @@ sites <- read_excel("data/voc_samples_all.xlsx")
 
 
 #site 040
-
 site_040 <- sites %>% 
   filter(site_id == "040")
 
