@@ -24,10 +24,10 @@ site_040 <- sites %>%
   filter(site_id == "040")
 #SITE 063 A
 site_063A <- sites %>% 
-  filter(name == "High Desert A")
+  filter(site_id == "063 A")
 #SITE 063 B
 site_063B <- sites %>% 
-  filter(name == "High Desert B")
+  filter(site_id == "063 B")
 #SITE 066
 site_066 <- sites %>% 
   filter(site_id == "066")
@@ -94,8 +94,8 @@ classrooms <- sites %>%
 #temp living
 temp_living <- sites %>% 
   filter(type == "barrack")
-#apartment
-apartment <- sites %>% 
+#apartments
+apartments <- sites %>% 
   filter(type == "apartment")
 #lobbys
 lobby <- sites %>% 
@@ -109,28 +109,6 @@ recreation <- sites %>%
 #medical
 medical <- sites %>% 
   filter(type == "exam")
-
-#VOC classes as objects
-alc <- c("isopropanol", "butanol")
-ald <- c("acetaldehyde")
-aro <- c("cyclopentane", "cyclohexane", "methylcyclohexane")
-btx <- c("benzene", "toluene", "ethylbenzene", "m+p-xylene", "o-xylene",
-         "isopropylbenzene", "n-propylbenzene", "3-ethyltoluene",
-         "4-ethyltoluene", "1,3,5-trimethylbenzene", "2-ethyltoluene",
-         "1,2,4-trimethylbenzene", "1,2,3-trimethylbenzene",
-         "1,3-diethylbenzene", "1,4-diethylbenzene")
-chl <- c("C2HCl3", "C2Cl4")
-kt <- c("acetone")
-oth <- c("isoprene", "styrene", "acetonitrile", "methylethylketone",
-         "a-pinene", "b-pinene", "limonene", "camphene", "methane")
-stc <- c("ethane", "propane", "i-butane", "n-butane", "i-pentane",
-         "n-pentane", "n-hexane", "2,4 dimethylpentane", "n-heptane",
-         "2,3-dimethylpentane", "2-methylhexane", "3-methylhexane",
-         "2,2,4-trimethylpentane", "2,3,4-trimethylpentane",
-         "2-methylheptane", "3-methylheptane", "n-octane", "n-nonane",
-         "n-decane", "ethene", "propene", "t-2-butene", "1-butene",
-         "c-2-butene", "t-2-pentene", "1-pentene", "cis-2-pentene",
-         "ethyne")
 
 #data table
 sites_table <- sites %>% 
