@@ -25,7 +25,8 @@ library(readxl)
 
 
 #load data
-sites <- read_excel("data/voc_samples_all.xlsx")
+sites <- read_excel("data/voc_samples_all.xlsx") %>% 
+  select(1:17)
 
 #Need to check the data 040, outdoor should not be the lowest. 
 #This is not the case for any other site!
