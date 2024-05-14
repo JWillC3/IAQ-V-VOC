@@ -24,7 +24,7 @@ library(plotly)
 #Location 5: "tomato2", Location 6: "midnightblue"
 #make sure to slice and select the correct rows! Will not be the same for all sites
 #load data
-site_040 <- (read_csv(file = "./data/site_040_summa_data.csv")) %>% 
+site_040 <- (read_csv(file = "data/site_040.csv")) %>% 
   slice(2:7) %>%
   select(1,7:67)
 

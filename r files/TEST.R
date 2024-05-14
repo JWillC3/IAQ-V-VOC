@@ -15,7 +15,7 @@ library(DT)
 library(plotly)
 library(readxl)
 
-#will work with Nick to ge this automation working again. Ignore for now
+#will work with Nick to get this automation working again. Ignore for now
 #source("functions.R")
 #id_site <- "040"
 # site_040 <- sites %>% 
@@ -25,14 +25,14 @@ library(readxl)
 
 
 #load data
-sites <- read_excel("data/voc_samples_all.xlsx")
+sites <- read_excel("data/voc_samples_all.xlsx") %>% 
+  select(1:17)
 
 #Need to check the data 040, outdoor should not be the lowest. 
 #This is not the case for any other site!
 
-
+#Site summaries for VOC conc. sum
 #site 040
-
 site_040 <- sites %>% 
   filter(site_id == "040")
 
@@ -162,8 +162,9 @@ ggplot(site_107, aes(x = room, y = conc.)) +
   theme_bw() +
   theme(axis.text.y = element_blank())
 
+#---
 
-
+#Ask Jade to explain this step
 
 # QTrak Data
 data_qtrak <- read_rds(paste0(path_data, "/data_qtrak.rds")) %>%
@@ -232,25 +233,26 @@ print(frogs_cor)
 #monkeys & outdoor
 #office & outdoor 
 
+#Ask Jade to explain this one
 # Function to read and process each site's data
 read_site_data <- function(site_name) {
   # Read Excel file for the site
   sites <- read_csv(paste0(path, "voc_samples_all.csv"))
-  
+
   # Add site name is a column
   sites$site <- site_name
-  
+
   # Select necessary columns
   sites <- select(sites, type, analyte, conc.,site)
-  
+
   # Return processed data
   return(sites)
 }
 
 # List of site names
 site_names <- c(
-  "site_040", "site_063A", "site_063B", "site_066", 
-  "site_079", "site_085", "site_086", "site_099", 
+  "site_040", "site_063A", "site_063B", "site_066",
+  "site_079", "site_085", "site_086", "site_099",
   "site_103", "site_107"
 )
 
@@ -349,28 +351,27 @@ ggplot(all_data, aes(x = analyte, y = conc., color = type)) +
   ylim(0,200) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-# 
+
+#OSHA regulated vocs 
 sites <- (read_csv(file = "./data/OSHA_voc.csv")) %>%
   filter(analyte %in% c("benzene", "toluene", "ethylbenzene", "m+p-xylene",
                         "o-xylene", "styrene", "toluene", "acetaldehyde", "acetone",
                         "n-hexane", "C2Cl4", "C2HCl3")) %>% 
   mutate(haz_ratio = conc./OSHA_8hr)
 
-site_040 <- sites %>% 
-  filter(site_id == "040") 
-
+#Site 040 rooms
 bears <- site_40 %>% 
   filter(room_name == "Bears")
-
+#"offices" from all sites
 offices <- sites %>% 
-  filter(room_type == "office")
-
+  filter(type == "office")
+#"outdoor" locations from all sites
 outdoor <- sites %>% 
-  filter(room_type == "outdoor")
-
+  filter(room == "Outdoor")
+#"kitchens" from all sites
 kitchens <- sites %>% 
-  filter(room_type =="kitchen/dining")
-
+  filter(type =="kitchen/dining")
+#plot of site 040 for haz ratio from papers
 p_site_040 <- ggplot(site_040, aes(x = reorder(analyte, haz_ratio),
                                    y = haz_ratio, color = room_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
@@ -398,7 +399,7 @@ ph_offices <- ggplot(offices, aes(x = reorder(analyte, haz_ratio),
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue"))
 
-#office concentrations
+#all site offices concentrations
 pc_offices <- ggplot(offices, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
@@ -412,7 +413,7 @@ pc_offices <- ggplot(offices, aes(x = reorder(analyte, conc.),
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue"))
 
-#kitchen haz ratios
+#all site kitchen haz ratios
 ph_kitchens <- ggplot(kitchens, aes(x = reorder(analyte, haz_ratio),
                                     y = haz_ratio, color = site_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
@@ -426,7 +427,7 @@ ph_kitchens <- ggplot(kitchens, aes(x = reorder(analyte, haz_ratio),
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue"))
 
-#kitchen concentrations
+#all sites kitchen concentrations
 pc_kitchens <- ggplot(kitchens, aes(x = reorder(analyte, conc.),
                                     y = conc., color = site_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
@@ -440,7 +441,7 @@ pc_kitchens <- ggplot(kitchens, aes(x = reorder(analyte, conc.),
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue"))
 
-#kitchens facet wrap, grouped by city (haz ratio)
+#all sites kitchens facet wrap, grouped by city (haz ratio)
 ph_kitchens_fctw <- ggplot(kitchens, aes(x = reorder(analyte, haz_ratio),
                                          y = haz_ratio, color = site_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
@@ -456,6 +457,7 @@ ph_kitchens_fctw <- ggplot(kitchens, aes(x = reorder(analyte, haz_ratio),
                                 "tomato2", "midnightblue", "red", "purple",
                                 "cyan", "green"))
 
+#WHAT IS THIS PLOT?
 ph_kitchcat_fctg <- ggplot(kitchens, aes(x = reorder(analyte, haz_ratio),
                                          y = haz_ratio, color = site_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
@@ -471,7 +473,7 @@ ph_kitchcat_fctg <- ggplot(kitchens, aes(x = reorder(analyte, haz_ratio),
                                 "tomato2", "midnightblue", "red", "purple",
                                 "cyan", "green"))
 
-#kitchens facet wrap, grouped by city (concentration)
+#all sites kitchens facet wrap, grouped by city (concentration)
 pc_kitchens_fctw <- ggplot(kitchens, aes(x = reorder(analyte, conc.),
                                          y = conc., color = site_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
@@ -487,7 +489,7 @@ pc_kitchens_fctw <- ggplot(kitchens, aes(x = reorder(analyte, conc.),
                                 "tomato2", "midnightblue", "red", "purple",
                                 "cyan", "green"))
 
-#outdoor haz ratios
+#all sites outdoor haz ratios
 ph_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, haz_ratio),
                                   y = haz_ratio, color = city)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
@@ -501,7 +503,7 @@ ph_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, haz_ratio),
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue"))
 
-#outdoor concentrations
+#all sites outdoor concentrations grouped by CO city
 pc_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, conc.),
                                   y = conc., color = city)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
@@ -514,9 +516,9 @@ pc_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, conc.),
   scale_color_manual(name = "Site ID",
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue"))
+pc_outdoor
 
-
-#outdoor facet wrap, grouped by city (Haz Ratio)
+#all sites outdoor facet wrap, grouped by city (Haz Ratio)
 ph_outdoor_fctw <- ggplot(outdoor, aes(x = reorder(analyte, haz_ratio),
                                        y = haz_ratio, color = site_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
