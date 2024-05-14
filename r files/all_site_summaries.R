@@ -302,10 +302,190 @@ pc_offices <- ggplot(offices, aes(x = reorder(analyte, conc.),
 ggplotly(pc_offices, tooltip = "text")
 
 
+#Jade TWA TVOC Scatter Plots by room type
+
+# Function to read and process each site's data
+#read_site_data <- function(site_name) {
+  # Read Excel file for the site
+ # site_number <- read_csv(paste0(path, "voc_samples_all.xlsx"))
+  
+  # Add site name is a column
+  #sites$site <- site_name
+  
+  # Select necessary columns
+  #site_number <- select(sites, type, analyte, conc.,site)
+  
+  # Return processed data
+ # return(sites)
+#}
+
+# List of site names
+site_names <- c(
+  "site_040", "site_063A", "site_063B", "site_066",
+  "site_079", "site_085", "site_086", "site_099",
+  "site_103", "site_107"
+)
+
+# Read data for each site and combine into a single dataframe
+all_data <- bind_rows(lapply(site_names, read_site_data))
+
+#Plot dimensions
+options(repr.plot.width = 10, repr.plot.height = 6)
+
+# Plot scatter plot
+ggplot(site_040, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  guides(size="none")+
+  labs(x = "Sum VOC", y = "TWA TVOC") +
+  ggtitle("Site 040 Scatter Plot")+
+  theme_minimal() +
+  #facet_wrap(~site_id) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_063A, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 063A Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_063B, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 063B Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_066, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 066 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_079, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 079 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_085, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 085 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_086, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 086 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_099, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 099 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_103, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 103 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(site_107, aes(x = analyte, y = conc., color = type, shape = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 107 Scatter Plot") +
+  theme_minimal() +
+  facet_wrap(~site) +
+  ylim(0,100) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#all data into one plot
+ggplot(all_data, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Scatter Plot") +
+  theme_minimal() +
+  ylim(0,200) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
+#Jade Correlations working 
 
+# QTrak Data
+data_qtrak_040 <- read_rds("data/data_qtrak.rds") %>%
+  filter(var=="totalvoc low24_ppm") %>%
+  filter(datetime >= "2023-10-24 11:11:00")
+  #Data for site 40 
+  #filter(datetime >= ymd_hms(datetime_start, tz = "US/Mountain")) %>%
+  #filter(datetime < ymd_hms(datetime_end, tz = "US/Mountain")) %>%
+  #left_join(inst_log$qtrak, by = "id_inst") %>%
+  #select(-level, date_installed, date_uninstalled)
 
+baseline <- data_qtrak_040 %>%
+  mutate(min_time = min(datetime)) %>%
+  #filter(datetime <= min_time + minutes(20)) %>%
+  filter(grepl('totalvoc low24_ppm', var)) %>%
+  summarise(baseline = median(val)*1000) %>%
+  ungroup %>%
+  mutate(avg_baseline = mean(baseline)) %>% group_by(id_inst) %>%
+  mutate(baseline_fix = avg_baseline - baseline)
+
+# Join the baseline data frame with the voc data frame
+voc <- voc %>%
+  left_join(baseline, by = "id_room")
+
+# Subtract the baseline from the voc values
+voc <- voc %>%
+  mutate(voc_baseline_subtracted = voc + baseline_fix) 
+
+# SITE 040 ROOM PAIR CORRELATIONS
+
+#bears & frogs 
+bears_data <- subset(site_040, room == "Bears")
+frogs_data <- subset(site_040, room == "Frogs")
+
+# Select only the columns containing concentration data
+bears_conc <- bears_data[, grepl("^conc\\.", names(bears_data))]
+frogs_conc <- frogs_data[, grepl("^conc\\.", names(frogs_data))]
+
+# Calculate correlations for each pair of analytes within Bears and Frogs
+bears_cor <- cor(bears_conc, method = "spearman")
+frogs_cor <- cor(frogs_conc, method = "spearman")
+
+print("Correlation matrix for Bears:")
+print(bears_cor)
+print("Correlation matrix for Frogs:")
+print(frogs_cor)
+
+#bears & lesson prep
+#bears & monkeys
+#bears & outdoor
+#bears & office 
+#frogs & lesson prep
+#frogs & monkeys
+#frogs & office
+#frogs & outdoor
+#lesson prep & monkeys 
+#lesson prep & office 
+#lesson prep & outdoor 
+#monkeys & office
+#monkeys & outdoor
+#office & outdoor 
 
 
 
