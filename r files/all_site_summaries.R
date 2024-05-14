@@ -305,19 +305,19 @@ ggplotly(pc_offices, tooltip = "text")
 #Jade TWA TVOC Scatter Plots by room type
 
 # Function to read and process each site's data
-#read_site_data <- function(site_name) {
+read_site_data <- function(site_name) {
   # Read Excel file for the site
- # site_number <- read_csv(paste0(path, "voc_samples_all.xlsx"))
+  sites <- read_csv(paste0(path, "voc_samples_all.csv"))
   
   # Add site name is a column
-  #sites$site <- site_name
+  sites$site <- site_name
   
   # Select necessary columns
-  #site_number <- select(sites, type, analyte, conc.,site)
+  sites <- select(sites, type, analyte, conc.,site)
   
   # Return processed data
- # return(sites)
-#}
+  return(sites)
+}
 
 # List of site names
 site_names <- c(
@@ -327,7 +327,7 @@ site_names <- c(
 )
 
 # Read data for each site and combine into a single dataframe
-all_data <- bind_rows(lapply(site_names, read_site_data))
+all_data <- map_dfr(site_names, read_site_data)
 
 #Plot dimensions
 options(repr.plot.width = 10, repr.plot.height = 6)
@@ -335,90 +335,114 @@ options(repr.plot.width = 10, repr.plot.height = 6)
 # Plot scatter plot
 ggplot(site_040, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 040 Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+
+
+ggplot(site_063A, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
   guides(size="none")+
   labs(x = "Sum VOC", y = "TWA TVOC") +
-  ggtitle("Site 040 Scatter Plot")+
+  ggtitle("Site 063A Scatter Plot")+
   theme_minimal() +
   #facet_wrap(~site_id) +
   ylim(0,100) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(site_063A, aes(x = analyte, y = conc., color = type, shape = type)) +
+ggplot(site_063B, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
-  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 063A Scatter Plot") +
+  guides(size="none")+
+  labs(x = "Sum VOC", y = "TWA TVOC") +
+  ggtitle("Site 063B Scatter Plot")+
   theme_minimal() +
-  facet_wrap(~site) +
+  #facet_wrap(~site_id) +
   ylim(0,100) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(site_063B, aes(x = analyte, y = conc., color = type, shape = type)) +
+ggplot(site_066, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
-  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 063B Scatter Plot") +
+  guides(size="none")+
+  labs(x = "Sum VOC", y = "TWA TVOC") +
+  ggtitle("Site 066 Scatter Plot")+
   theme_minimal() +
-  facet_wrap(~site) +
+  #facet_wrap(~site_id) +
   ylim(0,100) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(site_066, aes(x = analyte, y = conc., color = type, shape = type)) +
+ggplot(site_079, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
-  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 066 Scatter Plot") +
+  guides(size="none")+
+  labs(x = "Sum VOC", y = "TWA TVOC") +
+  ggtitle("Site 079 Scatter Plot")+
   theme_minimal() +
-  facet_wrap(~site) +
+  #facet_wrap(~site_id) +
   ylim(0,100) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(site_079, aes(x = analyte, y = conc., color = type, shape = type)) +
+ggplot(site_085, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
-  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 079 Scatter Plot") +
+  guides(size="none")+
+  labs(x = "Sum VOC", y = "TWA TVOC") +
+  ggtitle("Site 085 Scatter Plot")+
   theme_minimal() +
-  facet_wrap(~site) +
+  #facet_wrap(~site_id) +
   ylim(0,100) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(site_085, aes(x = analyte, y = conc., color = type, shape = type)) +
+ggplot(site_086, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
-  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 085 Scatter Plot") +
+  guides(size="none")+
+  labs(x = "Sum VOC", y = "TWA TVOC") +
+  ggtitle("Site 086 Scatter Plot")+
   theme_minimal() +
-  facet_wrap(~site) +
+  #facet_wrap(~site_id) +
   ylim(0,100) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(site_086, aes(x = analyte, y = conc., color = type, shape = type)) +
+ggplot(site_099, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
-  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 086 Scatter Plot") +
+  guides(size="none")+
+  labs(x = "Sum VOC", y = "TWA TVOC") +
+  ggtitle("Site 099 Scatter Plot")+
   theme_minimal() +
-  facet_wrap(~site) +
+  #facet_wrap(~site_id) +
   ylim(0,100) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(site_099, aes(x = analyte, y = conc., color = type, shape = type)) +
+ggplot(site_103, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
-  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 099 Scatter Plot") +
+  guides(size="none")+
+  labs(x = "Sum VOC", y = "TWA TVOC") +
+  ggtitle("Site 103 Scatter Plot")+
   theme_minimal() +
-  facet_wrap(~site) +
+  #facet_wrap(~site_id) +
   ylim(0,100) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(site_103, aes(x = analyte, y = conc., color = type, shape = type)) +
+ggplot(site_107, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
-  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 103 Scatter Plot") +
+  guides(size="none")+
+  labs(x = "Sum VOC", y = "TWA TVOC") +
+  ggtitle("Site 107 Scatter Plot")+
   theme_minimal() +
-  facet_wrap(~site) +
-  ylim(0,100) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-ggplot(site_107, aes(x = analyte, y = conc., color = type, shape = type)) +
-  geom_point() +
-  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Site 107 Scatter Plot") +
-  theme_minimal() +
-  facet_wrap(~site) +
+  #facet_wrap(~site_id) +
   ylim(0,100) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 #all data into one plot
 ggplot(all_data, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
-  labs(x = "Sum VOC", y = "TWA TVOC", color = "Type of Room", shape = "Analyte", title = "Scatter Plot") +
+  labs(x = "Sum VOC", y = "TWA TVOC", color= "Type of Room") +
+  ggtitle("Scatter Plot of All Sites")
   theme_minimal() +
   ylim(0,200) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
