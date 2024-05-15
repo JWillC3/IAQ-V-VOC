@@ -31,9 +31,10 @@ ggplot(df, aes(x = room, y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
   stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
                col = "white", vjust = 1.5) +
-  ggtitle(paste0("Site ", site,  " VOC Samples by Canister Location")) +
+  ggtitle(paste0("sites", sites,  "VOC Samples by Canister Location")) +
   labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
   theme_bw() +
   theme(axis.text.y = element_blank())
 }
-  
+
+getwd()
