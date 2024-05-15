@@ -43,18 +43,52 @@ knitr::opts_chunk$set(echo = FALSE)
 ---
 
 ## Data set
-[Sites info and summary]:
+From October 2022 to May 2024 we deployed Summa Canisters at 18 of the 50 CDPHE
+Project sites. To date 11 of the 18 sites have been analyzed by ATMOS and are 
+summarized below. Almost all sites had a canister co-located with a QTrak and 
+the outdoor monitors. Some sites had fewer canisters because of equipment
+from the ATMOS lab. Each deployment was analyzed for 62 VOC and we have broken 
+down the analytes into informal categories. We have also broken down the various
+sample locations into room types. Below are plots summarizing all of sites by
+Room type, season, and city/town. 
 
- - [X Outdoor on [location info]
- - [X Inside facility]
 
-| Rooms sampled inside facility |
+| CDPHE sites sampled organized by date |
 |:------|
-| 1. [] |
-| 2. [] |
-| 3. [] |
-| 4. [] |
-| 5. [] |
+| 063 A & B. High Desert Assisted Living, Pagosa Springs |
+| 079. Mango House, Denver |
+| 066. Homeward Bound Shelter, Pagosa Springs |
+| 085. La Puente, Alamosa |
+| 086. BGCSLV, Alamosa |
+| 099. Radiant Healthcare, Rocky Ford |
+| 040. Teaching Tree (post), Fort Collins |
+| 103. Karis Community, Denver |
+| 107. The Center, Denver |
+| 094. Ability Advocates, Pagosa Springs |
+| 108. The Phoenix, Denver |
+| 106. Lawrence St. Shelter, Denver |
+| 109. Amaryllis, Denver |
+| 105. Lawrence St. Center, Denver |
+| 101. Silverkey, Colorado Springs |
+| 104. CCS, Colorado Springs |
+| 089. Cortez Library, Cortez |
+| 002. Routt DC, Steamboat Springs |
+
+| Room type categories |
+|:------|
+| 1. Outdoor |
+| 2. Kitchens/Break rooms |
+| 3. Offices/staff locations |
+| 4. Classrooms |
+| 5. Temp Living (shelters) |
+| 6. Apartments/semi-permanent |
+| 7. Lobbys/waiting rooms |
+| 8. Recreation*/Gyms |
+| 9. Medical/clinic exam rooms |
+| 10. Other 
+
+
+*includes open spaces for social gathering and general activity areas 
 
 ---
 
@@ -180,13 +214,14 @@ Outdoor Locations Plot
 pc_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_id,
                      text = paste("Analyte: ", analyte,
+                                  "<br> Room", room,
                                   "<br> Conc. :", conc.,
                                   "<br> Class: ", category))) +
   geom_point(shape = 18, size = 3, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Outdoor Locations in CO") +
+  ggtitle("Outdoor Locations") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration") +
   scale_color_manual(name = "Site ID",
@@ -206,13 +241,14 @@ Kitchens & Dining Rooms
 pc_kitchens <- ggplot(kitchens, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_id,
                                   text = paste("Analyte: ", analyte,
+                                               "<br> Room", room,
                                                "<br> Conc. :", conc.,
                                                "<br> Class: ", category))) +
   geom_point(shape = 18, size = 3, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Kitchen & Dining Locations in CO") +
+  ggtitle("Kitchen & Dining Locations") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration") +
   scale_color_manual(name = "Site ID",
@@ -232,13 +268,14 @@ Staff Locations
 pc_offices <- ggplot(offices, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_id,
                                   text = paste("Analyte: ", analyte,
+                                               "<br> Room", room,
                                                "<br> Conc. :", conc.,
                                                "<br> Class: ", category))) +
   geom_point(shape = 18, size = 3, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Staff Locations in CO") +
+  ggtitle("Staff Locations") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration") +
   scale_color_manual(name = "Site ID",
@@ -258,13 +295,14 @@ Classrooms
 pc_classrooms <- ggplot(classrooms, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_id,
                                   text = paste("Analyte: ", analyte,
+                                               "<br> Room", room,
                                                "<br> Conc. :", conc.,
                                                "<br> Class: ", category))) +
   geom_point(shape = 18, size = 3, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Classrooms in CO") +
+  ggtitle("Classrooms") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration") +
   scale_color_manual(name = "Site ID",
@@ -285,13 +323,14 @@ Temporary Living & Barracks Locations
 pc_temp_living <- ggplot(temp_living, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_id,
                                   text = paste("Analyte: ", analyte,
+                                               "<br> Room", room,
                                                "<br> Conc. :", conc.,
                                                "<br> Class: ", category))) +
   geom_point(shape = 18, size = 3, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Temp Living Locations in CO") +
+  ggtitle("Temp Living Locations") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration") +
   scale_color_manual(name = "Site ID",
@@ -310,13 +349,14 @@ Apartments & Semi-Permanent Locations
 pc_apartment <- ggplot(apartment, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_id,
                                   text = paste("Analyte: ", analyte,
+                                               "<br> Room", room,
                                                "<br> Conc. :", conc.,
                                                "<br> Class: ", category))) +
   geom_point(shape = 18, size = 3, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Semi-Perminant Living Locations in CO") +
+  ggtitle("Semi-Perminant Living Locations") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration") +
   scale_color_manual(name = "Site ID",
@@ -337,13 +377,14 @@ Lobbys & Building Waiting Areas
 pc_lobby <- ggplot(lobby, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_id,
                                   text = paste("Analyte: ", analyte,
+                                               "<br> Room", room,
                                                "<br> Conc. :", conc.,
                                                "<br> Class: ", category))) +
   geom_point(shape = 18, size = 3, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Lobbys & Waiting Room Locations in CO") +
+  ggtitle("Lobbys & Waiting Rooms") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration") +
   scale_color_manual(name = "Site ID",
@@ -364,13 +405,14 @@ Recreation & Gyms
 pc_recreation <- ggplot(recreation, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_id,
                                   text = paste("Analyte: ", analyte,
+                                               "<br> Room", room,
                                                "<br> Conc. :", conc.,
                                                "<br> Class: ", category))) +
   geom_point(shape = 18, size = 3, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Rec & Gym Locations in CO") +
+  ggtitle("Recreation & Gym Locations") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration") +
   scale_color_manual(name = "Site ID",
@@ -390,13 +432,14 @@ Exam Rooms & Medical Rooms
 pc_medical <- ggplot(medical, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_id,
                                   text = paste("Analyte: ", analyte,
+                                               "<br> Room", room,
                                                "<br> Conc. :", conc.,
                                                "<br> Class: ", category))) +
   geom_point(shape = 18, size = 3, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Exam Rooms & Med Locations in CO") +
+  ggtitle("Exam Rooms & Medical Locations") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration") +
   scale_color_manual(name = "Site ID",
@@ -417,13 +460,14 @@ Others & Miscellaneous Locations
 pc_other <- ggplot(other, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_id,
                                   text = paste("Analyte: ", analyte,
+                                               "<br> Room", room,
                                                "<br> Conc. :", conc.,
                                                "<br> Class: ", category))) +
   geom_point(shape = 18, size = 3, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Miscellaneous Locations in CO") +
+  ggtitle("Miscellaneous Locations") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration") +
   scale_color_manual(name = "Site ID",
@@ -521,19 +565,19 @@ ggplotly(p_aldehyde, tooltip = "text")
 ```
 
 
-```{r straight_chain_plot, warning=FALSE, message=FALSE}
+```{r straight_chain_plot, fig.align = "center", out.width= "100%", warning=FALSE, message=FALSE}
 
 p_straight_chain <- ggplot(straight_chain, aes(x = reorder(analyte, conc.),
                                  y = conc., color = site_id,
                                  text = paste("Analyte: ", analyte,
                                                "<br> Conc. :", conc.))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  geom_point(shape = 18, size = 2, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "", y = "") +
-  ggtitle("Straigh Chains") +
+  ggtitle("Straight Chains") +
   scale_color_manual(name = "Room ID",
                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
                                 "#e28de2", "#934270", "#e72fc2", "#5361c7",
@@ -575,13 +619,13 @@ ggplotly(p_aromatic, tooltip = "text")
 ```
 
 
-```{r btex_plot, warning=FALSE, message=FALSE}
+```{r btex_plot, fig.align = "center", out.width= "100%", warning=FALSE, message=FALSE}
 
 p_btex <- ggplot(btex, aes(x = reorder(analyte, conc.),
                                  y = conc., color = site_id,
                                  text = paste("Analyte: ", analyte,
                                                "<br> Conc. :", conc.))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  geom_point(shape = 18, size = 2, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
@@ -653,13 +697,13 @@ ggplotly(p_ketone, tooltip = "text")
 ```
 
 
-```{r other_plot, message=FALSE, warning=FALSE}
+```{r other_plot, fig.align = "center", out.width= "100%", warning=FALSE, message=FALSE}
 
 p_other <- ggplot(other, aes(x = reorder(analyte, conc.),
                                  y = conc., color = site_id,
                                  text = paste("Analyte: ", analyte,
                                                "<br> Conc. :", conc.))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  geom_point(shape = 18, size = 2, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
