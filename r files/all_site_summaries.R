@@ -110,6 +110,16 @@ recreation <- sites %>%
 medical <- sites %>% 
   filter(type == "exam")
 
+#cities
+#Denver
+denver <- sites %>% 
+  filter(city == "Denver")
+
+#seasons
+#fall
+fall <- sites %>% 
+  filter(season == "fall")
+
 #data table
 sites_table <- sites %>% 
   select(1:3,6,7,16)
@@ -301,7 +311,49 @@ pc_offices <- ggplot(offices, aes(x = reorder(analyte, conc.),
                                 "#d9c937", "#9f04fc"))
 ggplotly(pc_offices, tooltip = "text")
 
+#cities
+p_denver <- ggplot(denver, aes(x = reorder(analyte, conc.),
+                                  y = conc., color = site_id,
+                                  text = paste("Analyte: ", analyte,
+                                               "<br> Room", room,
+                                               "<br> Conc. :", conc.,
+                                               "<br> Class: ", category))) +
+  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  ggtitle("VOC Conectrations: Denver, CO") +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration") +
+  scale_color_manual(name = "Site ID",
+                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
+                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
+                                "#b9cda1", "#096013", "#afe642", "#3aa609",
+                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
+                                "#d9c937", "#9f04fc"))
+ggplotly(p_denver, tooltip = "text")
 
+#by season
+p_fall <- ggplot(fall, aes(x = reorder(analyte, conc.),
+                               y = conc., color = site_id,
+                               text = paste("Analyte: ", analyte,
+                                            "<br> Room", room,
+                                            "<br> Conc. :", conc.,
+                                            "<br> Class: ", category))) +
+  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  ggtitle("VOC Conectrations: Fall Season in CO") +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration") +
+  scale_color_manual(name = "Site ID",
+                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
+                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
+                                "#b9cda1", "#096013", "#afe642", "#3aa609",
+                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
+                                "#d9c937", "#9f04fc"))
+ggplotly(p_fall, tooltip = "text")
 
 
 
