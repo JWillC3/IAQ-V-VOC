@@ -18,99 +18,142 @@
 source("functions.R")
 
 #load data
-sites <- read_excel("data/voc_samples_all.xlsx")
+#sites <- read_excel("data/voc_samples_all.xlsx")
 
 #sites
 #site 040
-site_040 <- sites %>% 
-  filter(site_id == "040")
-#SITE 063 A
-site_063A <- sites %>% 
-  filter(site_id == "063 A")
-#SITE 063 B
-site_063B <- sites %>% 
-  filter(site_id == "063 B")
-#SITE 066
-site_066 <- sites %>% 
-  filter(site_id == "066")
-# SITE 079
-site_079 <- sites %>% 
-  filter(site_id == "079")
-# SITE 085
-site_085 <- sites %>% 
-  filter(site_id == "085")
-# SITE 086
-site_086 <- sites %>% 
-  filter(site_id == "086")
-# SITE 099
-site_099 <- sites %>% 
-  filter(site_id == "099")
-# SITE 103
-site_103 <- sites %>% 
-  filter(site_id == "103")
-# SITE 107
-site_107 <- sites %>% 
-  filter(site_id == "107")
-# site 108
-site_108 <- sites %>% 
-  filter(site_id == "108")
-# site 094
-site_094 <- sites %>% 
-  filter(site_id == "094")
-#site 106
-site_106 <- sites %>% 
-  filter(site_id == "106")
-# site 105
-site_105 <- sites %>% 
-  filter(site_id == "105")
-# site 104
-site_104 <- sites %>% 
-  filter(site_id == "104")
-#site 089
-site_089 <- sites %>% 
-  filter(site_id == "089")
-# site 002
-site_002 <- sites %>% 
-  filter(site_id == "002")
-# site 101
-site_101 <- sites %>% 
-  filter(site_id == "101")
-# site 109
-site_109 <- sites %>% 
-  filter(site_id == "109")
+# site_040 <- sites %>% 
+#   filter(site_id == "040")
+# #SITE 063 A
+# site_063A <- sites %>% 
+#   filter(site_id == "063 A")
+# #SITE 063 B
+# site_063B <- sites %>% 
+#   filter(site_id == "063 B")
+# #SITE 066
+# site_066 <- sites %>% 
+#   filter(site_id == "066")
+# # SITE 079
+# site_079 <- sites %>% 
+#   filter(site_id == "079")
+# # SITE 085
+# site_085 <- sites %>% 
+#   filter(site_id == "085")
+# # SITE 086
+# site_086 <- sites %>% 
+#   filter(site_id == "086")
+# # SITE 099
+# site_099 <- sites %>% 
+#   filter(site_id == "099")
+# # SITE 103
+# site_103 <- sites %>% 
+#   filter(site_id == "103")
+# # SITE 107
+# site_107 <- sites %>% 
+#   filter(site_id == "107")
+# # site 108
+# site_108 <- sites %>% 
+#   filter(site_id == "108")
+# # site 094
+# site_094 <- sites %>% 
+#   filter(site_id == "094")
+# #site 106
+# site_106 <- sites %>% 
+#   filter(site_id == "106")
+# # site 105
+# site_105 <- sites %>% 
+#   filter(site_id == "105")
+# # site 104
+# site_104 <- sites %>% 
+#   filter(site_id == "104")
+# #site 089
+# site_089 <- sites %>% 
+#   filter(site_id == "089")
+# # site 002
+# site_002 <- sites %>% 
+#   filter(site_id == "002")
+# # site 101
+# site_101 <- sites %>% 
+#   filter(site_id == "101")
+# # site 109
+# site_109 <- sites %>% 
+#   filter(site_id == "109")
+# 
+# #locations
+# table(sites$type)
+# #outdoor
+# outdoor <- sites %>% 
+#   filter(type == "Outdoor")
+# #kitchens
+# kitchens <- sites %>% 
+#   filter(type =="kitchen/dining")
+# #staff locations
+# offices <- sites %>% 
+#   filter(type %in% c("office" , "lounge"))
+# #classrooms
+# classrooms <- sites %>% 
+#   filter(type == "classrrom")
+# #temp living
+# temp_living <- sites %>% 
+#   filter(type == "barrack")
+# #apartments
+# apartments <- sites %>% 
+#   filter(type == "apartment")
+# #lobbys
+# lobby <- sites %>% 
+#   filter(type == "lobby")
+# #others
+# other <- sites %>% 
+#   filter(type == "other")
+# #recreation
+# recreation <- sites %>% 
+#   filter(type == "recreation")
+# #medical
+# medical <- sites %>% 
+#   filter(type == "exam")
+#indoor locations
+indoor <- sites %>% 
+  filter(type != "Outdoor")
 
-#locations
-table(sites$type)
-#outdoor
-outdoor <- sites %>% 
-  filter(type == "Outdoor")
-#kitchens
-kitchens <- sites %>% 
-  filter(type =="kitchen/dining")
-#staff locations
-offices <- sites %>% 
-  filter(type %in% c("office" , "lounge"))
-#classrooms
-classrooms <- sites %>% 
-  filter(type == "classrrom")
-#temp living
-temp_living <- sites %>% 
-  filter(type == "barrack")
-#apartments
-apartments <- sites %>% 
-  filter(type == "apartment")
-#lobbys
-lobby <- sites %>% 
-  filter(type == "lobby")
-#others
+#create category objects
+#Alcohol
+alcohol <- sites %>%
+  filter(category == "alcohol")
+#Aldehyde
+aldehyde <- sites %>% 
+  filter(category == "aldehyde")
+#Straight Chain
+straight_chain <- sites %>% 
+  filter(category == "straight chain")
+#Aromatic
+aromatic <- sites %>% 
+  filter(category == "aromatic")
+#Btex
+btex <- sites %>% 
+  filter(category == "btex")
+#chlorinated
+chlorinated <- sites %>% 
+  filter(category == "chlorinated")
+#Ketone
+ketone <- sites %>% 
+  filter(category == "ketone")
+#Other
 other <- sites %>% 
-  filter(type == "other")
-#recreation
-recreation <- sites %>% 
-  filter(type == "recreation")
-#medical
-medical <- sites %>% 
-  filter(type == "exam")
+  filter(category == "other")
+
+#mean conc. for all analytes across ALL indoor locations
+indoor %>% 
+  select(analyte, conc.) %>% 
+  group_by(analyte) %>% 
+  summarise(conc._mean = mean(conc.)) %>% 
+  print(n = 61)
+
+#mean conc. for all analytes across ALL outdoor locations
+outdoor %>% 
+  select(analyte, conc.) %>% 
+  group_by(analyte) %>% 
+  summarise(conc._mean = mean(conc.)) %>% 
+  print(n = 61)
 
 #data table
 sites_table <- sites %>% 
@@ -119,6 +162,24 @@ datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
                               "Concentration", "Category"),
           options = list(pageLenght = 10), rownames = FALSE,
           caption = "All Sites Table, Concentrations: ppb(v) or methane ppb(v)")
+
+#box plot
+bp_indoor <- ggplot(indoor, aes(x = analyte, y = conc., #fill = analyte
+                                )) +
+  geom_boxplot(show.legend = FALSE) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  ggtitle("VOC Conectrations: All Indoor Locations in CO\n (n = 11)") +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration")
+  
+
+bp_indoor 
+# + scale_fill_manual(values = c("#069668", "#003c70", "#b38677", "#4ba40b",
+#                                "#e16d70", "#6599a2", "#ea6b12", "#5b1915",
+#                                "#1f84ec", "#042c17", "#fe2b1c", "#ab7b05"))
+
 
 #site summaries concentartion sums
 #site 040
