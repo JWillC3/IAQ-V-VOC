@@ -14,12 +14,14 @@ library(viridis)
 library(DT)
 library(plotly)
 library(readxl)
+library(knitr)
+library(magick)
 
 # Data path
 path <- "data/"
 
 # read site data
-sites <- read_excel(paste0(path, "voc_samples_all.xlsx"))
+sites <- read_excel(paste0(path, "./voc_samples_all.xlsx"))
 
 #sites
 #site 040

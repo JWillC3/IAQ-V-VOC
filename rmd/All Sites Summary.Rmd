@@ -4,6 +4,7 @@ author: "Dr. Carter, Will Clagett, Jade Lippmann"
 date: "2022 Oct - 2024 May"
 output: html_document
 ---
+
 ```{r packages, include=FALSE}
 library(tidyverse)
 library(plyr)
@@ -20,9 +21,9 @@ library(ggdark)
 library(viridis)
 library(DT)
 library(plotly)
+library(readxl)
 library(knitr)
 library(magick)
-library(readxl)
 
 ```
 
@@ -30,12 +31,13 @@ library(readxl)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+
 # **VOC Data**
 ## **All Sites (n=18)**
 
-```{r, site_photo, out.width="50%"}
+```{r, site_photo, out.width="100%"}
 
-#include_graphics("../graphics/XXX.png")
+include_graphics("../graphics/map.png")
 
 ```
 
@@ -43,23 +45,49 @@ knitr::opts_chunk$set(echo = FALSE)
 ---
 
 ## Data set
-[Sites info and summary]:
+From October 2022 to May 2024 we deployed Summa Canisters at 18 of the 50 CDPHE Project sites. To date 11 of the 18 sites have been analyzed by ATMOS and are summarized below. Almost all sites had a canister co-located with a QTrak and the outdoor monitors. Some sites had fewer canisters because of equipment from the ATMOS lab. Each deployment was analyzed for 62 VOC and we have broken down the analytes into informal categories. We have also broken down the various sample locations into room types. Below are plots summarizing all of sites by Room type, season, and city/town.
 
- - [X Outdoor on [location info]
- - [X Inside facility]
-
-| Rooms sampled inside facility |
+| CDPHE sites sampled organized by date |
 |:------|
-| 1. [] |
-| 2. [] |
-| 3. [] |
-| 4. [] |
-| 5. [] |
+| 063 A & B. High Desert Assisted Living, Pagosa Springs |
+| 079. Mango House, Denver |
+| 066. Homeward Bound Shelter, Pagosa Springs |
+| 085. La Puente, Alamosa |
+| 086. BGCSLV, Alamosa |
+| 099. Radiant Healthcare, Rocky Ford |
+| 040. Teaching Tree (post), Fort Collins |
+| 103. Karis Community, Denver |
+| 107. The Center, Denver |
+| 094. Ability Advocates, Pagosa Springs |
+| 108. The Phoenix, Denver |
+| 106. Lawrence St. Shelter, Denver |
+| 109. Amaryllis, Denver |
+| 105. Lawrence St. Center, Denver |
+| 101. Silverkey, Colorado Springs |
+| 104. CCS, Colorado Springs |
+
+| Room type categories |
+|:------|
+| 1. Outdoor |
+| 2. Kitchens/Break rooms |
+| 3. Offices/staff locations |
+| 4. Classrooms |
+| 5. Temp Living (shelters) |
+| 6. Apartments/semi-permanent |
+| 7. Lobbys/waiting rooms |
+| 8. Recreation*/Gyms |
+| 9. Medical/clinic exam rooms |
+| 10. Other
+
+
+*includes open spaces for social gathering and general activity areas
+
 
 ---
 
 ```{r load_data, include=FALSE}
-#load data
+
+# read site data
 sites <- read_excel("../data/voc_samples_all.xlsx")
 
 #sites
@@ -138,8 +166,8 @@ classrooms <- sites %>%
 #temp living
 temp_living <- sites %>% 
   filter(type == "barrack")
-#apartment
-apartment <- sites %>% 
+#apartments
+apartments <- sites %>% 
   filter(type == "apartment")
 #lobbys
 lobby <- sites %>% 
@@ -153,6 +181,35 @@ recreation <- sites %>%
 #medical
 medical <- sites %>% 
   filter(type == "exam")
+#indoor locations
+indoor <- sites %>% 
+  filter(type != "Outdoor")
+
+#analyte category objects
+#Alcohol
+alcohol <- sites %>%
+  filter(category == "alcohol")
+#Aldehyde
+aldehyde <- sites %>% 
+  filter(category == "aldehyde")
+#Straight Chain
+straight_chain <- sites %>% 
+  filter(category == "straight chain")
+#Aromatic
+aromatic <- sites %>% 
+  filter(category == "aromatic")
+#Btex
+btex <- sites %>% 
+  filter(category == "btex")
+#chlorinated
+chlorinated <- sites %>% 
+  filter(category == "chlorinated")
+#Ketone
+ketone <- sites %>% 
+  filter(category == "ketone")
+#Other
+other <- sites %>% 
+  filter(category == "other")
 
 #data table
 sites_table <- sites %>% 
@@ -174,33 +231,23 @@ datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
 
 ## Summary Plots of all VOC Locations
 
-Outdoor Locations Plot
-```{r outdoor_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
-#outdoor concentrations
-pc_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = site_id,
-                     text = paste("Analyte: ", analyte,
-                                  "<br> Conc. :", conc.,
-                                  "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
+```{r boxplot, dpi= 250, warning=FALSE, message=FALSE}
+
+#box plot for all indoor locations
+bp_indoor <- ggplot(indoor, aes(x = analyte, y = conc., #fill = analyte
+)) +
+  geom_boxplot(show.legend = FALSE) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Outdoor Locations in CO") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  scale_color_manual(name = "Site ID",
-                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc"))
-ggplotly(pc_outdoor, tooltip = "text")
+  ggtitle("VOC Conectrations: All Indoor Locations in CO\n (n = 11)") +
+  theme(axis.text.x = element_text(size = 7, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration")
+bp_indoor 
 
 ```
 
 
-Kitchens & Dining Rooms
 ```{r kitchens_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 #kitchen/dinning locations
 pc_kitchens <- ggplot(kitchens, aes(x = reorder(analyte, conc.),
@@ -225,7 +272,7 @@ ggplotly(pc_kitchens, tooltip = "text")
 
 ```
 
-Staff Locations
+
 ```{r staff_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #staff locations
@@ -251,7 +298,7 @@ ggplotly(pc_offices, tooltip = "text")
 
 ```
 
-Classrooms
+
 ```{r classrooms_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #classroom locations
@@ -278,7 +325,7 @@ ggplotly(pc_classrooms, tooltip = "text")
 
 ```
 
-Temporary Living & Barracks Locations
+
 ```{r templiving_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #temp living locations
@@ -304,10 +351,10 @@ ggplotly(pc_temp_living, tooltip = "text")
 
 ```
 
-Apartments & Semi-Permanent Locations
+
 ```{r apartments_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 #apartment locations
-pc_apartment <- ggplot(apartment, aes(x = reorder(analyte, conc.),
+pc_apartments <- ggplot(apartments, aes(x = reorder(analyte, conc.),
                                   y = conc., color = site_id,
                                   text = paste("Analyte: ", analyte,
                                                "<br> Conc. :", conc.,
@@ -325,12 +372,12 @@ pc_apartment <- ggplot(apartment, aes(x = reorder(analyte, conc.),
                                 "#b9cda1", "#096013", "#afe642", "#3aa609",
                                 "#2af464", "#683d0d", "#efaa79", "#d6061a",
                                 "#d9c937", "#9f04fc"))
-ggplotly(pc_apartment, tooltip = "text")
+ggplotly(pc_apartments, tooltip = "text")
 
 
 ```
 
-Lobbys & Building Waiting Areas
+
 ```{r lobbys_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #lobby locations
@@ -357,7 +404,7 @@ ggplotly(pc_lobby, tooltip = "text")
 
 ```
 
-Recreation & Gyms
+
 ```{r recreation_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #rec locations
@@ -370,7 +417,7 @@ pc_recreation <- ggplot(recreation, aes(x = reorder(analyte, conc.),
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: Rec & Gym Locations in CO") +
+  ggtitle("VOC Conectrations: Rec & Acitivy Locations in CO") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration") +
   scale_color_manual(name = "Site ID",
@@ -383,7 +430,7 @@ ggplotly(pc_recreation, tooltip = "text")
 
 ```
 
-Exam Rooms & Medical Rooms
+
 ```{r exam_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #medical locations
@@ -410,7 +457,7 @@ ggplotly(pc_medical, tooltip = "text")
 ```
 
 
-Others & Miscellaneous Locations
+
 ```{r other_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #other locations
@@ -433,6 +480,168 @@ pc_other <- ggplot(other, aes(x = reorder(analyte, conc.),
                                 "#2af464", "#683d0d", "#efaa79", "#d6061a",
                                 "#d9c937", "#9f04fc"))
 ggplotly(pc_other, tooltip = "text")
+
+```
+
+
+```{r outdoor_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
+#outdoor concentrations
+pc_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, conc.),
+                                  y = conc., color = site_id,
+                     text = paste("Analyte: ", analyte,
+                                  "<br> Conc. :", conc.,
+                                  "<br> Class: ", category))) +
+  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  ggtitle("VOC Conectrations: Outdoor Locations in CO") +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration") +
+  scale_color_manual(name = "Site ID",
+                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
+                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
+                                "#b9cda1", "#096013", "#afe642", "#3aa609",
+                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
+                                "#d9c937", "#9f04fc"))
+ggplotly(pc_outdoor, tooltip = "text")
+
+```
+
+## VOC Sum Plots for Each Site
+```{r voc_sums, include=FALSE}
+#site voc concentration sums
+#site 040
+site_040_sum <- ggplot(site_040, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 040") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+#SITE 063 A
+site_063a_sum <- ggplot(site_063A, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 063A") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+#SITE 063 B
+site_063b_sum <- ggplot(site_063B, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 063B") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+#SITE 066
+site_066_sum <- ggplot(site_066, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 066") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+# SITE 079
+site_079_sum <- ggplot(site_079, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 079") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+# SITE 085
+site_085_sum <- ggplot(site_085, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 085") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+# SITE 086
+site_086_sum <- ggplot(site_086, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 086") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+# SITE 099
+site_099_sum <- ggplot(site_099, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 099") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+# SITE 103
+site_103_sum <- ggplot(site_103, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 103") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+# SITE 107
+site_107_sum <- ggplot(site_107, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 107") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+#sites 108
+site_108_sum <- ggplot(site_108, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 108") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+#site 094
+site_094_sum <- ggplot(site_094, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 094") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
+
+```
+
+
+```{r all_voc_sum_plots, fig.height= 30, fig.width = 15, dpi = 200, warning=FALSE, message=FALSE}
+
+grid.arrange(site_094_sum, site_063a_sum, site_063b_sum, site_066_sum, 
+             site_079_sum, site_085_sum, site_086_sum, site_099_sum,
+             site_103_sum, site_107_sum, site_108_sum, site_094_sum,
+             ncol = 2, nrow = 6,
+             bottom = "Rooms Sampled", left = "Sum of VOC Sampled (ppb(v))")
 
 ```
 
@@ -678,40 +887,5 @@ ggplotly(p_other, tooltip = "text")
 
 ```
 
-## Plots for the Top 10 Analytes by Location
-```{r top_ten_data, include=FALSE}
-
-#040
-s040_top <- site_040 %>% 
-  group_by(conc.) %>% 
-  arrange(desc(conc.))
-s040_top <- top_n(ungroup(s040_top), 10, conc.)
-
-```
-
-
-```{r 040_t, warning=FALSE, message=FALSE}
-
-p_s040_top <- s040_top %>% 
-  ggplot(aes(x = reorder(analyte, conc.), y = conc.,
-           color = room,
-           text = paste("<br> Conc. :", conc.,
-                        "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  labs(x = "", y = "") +
-  ggtitle("Teaching Tree") +
-  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
-                labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text = element_text(size = 13),
-        axis.text.x = element_text(size = 13, angle = 45, hjust = 1),
-        panel.grid.minor = element_line(linetype = "dashed")) +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue"))
-
-ggplotly(p_s040_top, tooltip = "text")
-
-```
 
 ---
