@@ -353,6 +353,7 @@ pc_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, conc.),
 ggplotly(pc_outdoor, tooltip = "text")
 
 
+#Jade's analysis
 # Plot scatter plots of Average TVOC Values Recorded 
 ggplot(site_040, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
@@ -485,6 +486,7 @@ ggplot(site_107, aes(x = analyte, y = conc., color = type)) +
     plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
     plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
   )
+
 # SITE 040 ROOM PAIR CORRELATIONS
 
 # select bears & frogs rooms from site data sheeet 
