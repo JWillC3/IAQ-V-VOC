@@ -15,7 +15,7 @@ library(DT)
 library(plotly)
 library(readxl)
 library(knitr)
-library(magick)
+
 
 # Data path
 path <- "data/"
