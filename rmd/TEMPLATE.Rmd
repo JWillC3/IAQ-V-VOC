@@ -1,5 +1,5 @@
 ---
-title: "Site XXX - [Name] VOC Data"
+title: "CDPHE/CSU IAQ-V Project VOC Data"
 author: "Will Clagett"
 date: "YYYY-mm-dd"
 output: html_document
@@ -215,8 +215,7 @@ ggplotly(voc_plot2, tooltip = "text")
 
 ## Plots by location
 
-The location1 classroom is a first floor classroom for children ages 2-3 with
-an average occupancy of about 12 children and 2 adults
+[location room info] 
 ```{r, location_1_photo, out.width="75%"}
 
 include_graphics("../graphics/XXX_location1.jpg")
@@ -247,8 +246,7 @@ ggplotly(l1_plot, tooltip = "text")
 
 ```
 
-The location2 classroom is a first floor classroom for children ages 3-4 with
-an average occupancy of about 12 children and 2 adults.
+[location room info]
 ```{r, location_2_photo, out.width="75%"}
 
 include_graphics("../graphics/XXX_location2.jpg")
@@ -279,12 +277,10 @@ ggplotly(l2_plot, tooltip = "text")
 
 ```
 
-
-Lesson Prep is a second floor location5, teacher's lounge, and storage area. 
-Occupancy was between 1 and 5 teachers with a max occupancy of 10.
+[location room info]
 ```{r, location_3_photo, out.width="75%"}
 
-include_graphics("../graphics/XXX_lessonprep.jpg")
+include_graphics("../graphics/XXX_location3.jpg")
 
 ```
 
@@ -313,8 +309,7 @@ ggplotly(l3_plot, tooltip = "text")
 ```
 
 
-The location4 classroom is a first floor classroom for children ages 1-2 with
-an average occupancy of about 10 children and 2 adults.
+[location room info]
 ```{r, location_4_photo, out.width="75%"}
 
 include_graphics("../graphics/XXX_location4.jpg")
@@ -346,8 +341,7 @@ ggplotly(l4_plot, tooltip = "text")
 ```
 
 
-The location5 location was a first floor location5 occupied by 3 teachers periodaclly
-throught the work day.
+[location room info]
 ```{r, location_5_photo, out.width="75%"}
 
 include_graphics("../graphics/XXX_location5.jpg")
@@ -379,7 +373,7 @@ ggplotly(l5_plot, tooltip = "text")
 ```
 
 
-Outdoor canister was attached to a rooftop equipment tripod
+[location room info]
 ```{r, outdoor_photo, out.width="75%"}
 
 include_graphics("../graphics/XXX_outdoor.jpg")
@@ -849,7 +843,7 @@ p_outdoor_top <- outdoor_top %>%
 ```
 
 
-```{r, warning=FALSE, out.width = "140%", message=FALSE}
+```{r, top_10_grid, warning=FALSE, out.width = "140%", message=FALSE}
 
 grid.arrange(p_location1_top, p_location2_top, p_location3_top, p_location4_top,
              p_location5_top,p_outdoor_top,
