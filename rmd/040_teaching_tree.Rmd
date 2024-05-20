@@ -5,6 +5,7 @@ date: "2023-01-01"
 output: html_document
 ---
 ```{r packages, include=FALSE}
+
 library(tidyverse)
 library(plyr)
 library(faraway)
@@ -43,7 +44,14 @@ include_graphics("../graphics/040.png")
 ---
 
 ## Data set
-[Site info and summary]:
+Site 040 (Post) Teaching Tree Early Childhood Learning Center primarily
+functions as a day care and day program facility for children ages 6 weeks-five 
+years.This site observation was a follow-up visit to the sites initial observation 
+fall 2022.Summa canisters were not deployed in the initial visit. Canisters were 
+co-located with TSI QTrak devices in all 5 rooms and co-located with POPS on the 
+rooftop for outdoor sampling. QTrak TVOC signal data were used to for [ ] analysis 
+and plots. Teaching Tree is a two story multi-use facility with operating hours
+M - F & AM to 6 PM, located in an urban location on the north side of Fort Collins.
 
  - 1 Outdoor on rooftop
  - 5 Inside facility
@@ -60,8 +68,6 @@ include_graphics("../graphics/040.png")
 
 ```{r load_data, include=FALSE}
 #load data
-logo <- image_read("../graphics/csu_cee_logo.png")
-
 #FIND AND REPLACE SITE_ID in csv file, double check rows to slice, col. to select
 site_040 <- (read_csv(file = "../data/site_040.csv")) %>% 
   slice(2:7) %>%
@@ -180,6 +186,7 @@ office <- voc2 %>%
 
 ## Data Table
 ```{r data_table}
+
 datatable(voc2, colnames = c("Location", "Analyte", "Concentration",
                                "Category", "Outdoor Ratio"),
           options = list(pageLength = 10), rownames = FALSE)
@@ -214,6 +221,13 @@ ggplotly(voc_plot2, tooltip = "text")
 
 
 ## Plots by canister location
+The Bears classroom is a first floor classroom for children ages 2-3 with
+an average occupancy of about 12 children and 2 adults
+```{r, bears_photo, out.width="75%"}
+
+include_graphics("../graphics/040_bears.jpg")
+
+```
 
 ```{r exam_1_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
@@ -239,6 +253,13 @@ ggplotly(l1_plot, tooltip = "text")
 
 ```
 
+The Frogs classroom is a first floor classroom for children ages 3-4 with
+an average occupancy of about 12 children and 2 adults.
+```{r, frogs_photo, out.width="75%"}
+
+include_graphics("../graphics/040_frogs.jpg")
+
+```
 
 ```{r exam_2_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
@@ -265,6 +286,14 @@ ggplotly(l2_plot, tooltip = "text")
 ```
 
 
+Lesson Prep is a second floor office, teacher's lounge, and storage area. 
+Occupancy was between 1 and 5 teachers with a max occupancy of 10.
+```{r, lessonprep_photo, out.width="75%"}
+
+include_graphics("../graphics/040_lessonprep.jpg")
+
+```
+
 ```{r lesson_prep_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
 #lesson_prep
@@ -289,6 +318,14 @@ ggplotly(l3_plot, tooltip = "text")
 
 ```
 
+
+The Monkeys classroom is a first floor classroom for children ages 1-2 with
+an average occupancy of about 10 children and 2 adults.
+```{r, monkeys_photo, out.width="75%"}
+
+include_graphics("../graphics/040_monkeys.jpg")
+
+```
 
 ```{r nurse_statioini_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
@@ -315,6 +352,14 @@ ggplotly(l4_plot, tooltip = "text")
 ```
 
 
+The Office location was a first floor office occupied by 3 teachers periodaclly
+throught the work day.
+```{r, office_photo, out.width="75%"}
+
+include_graphics("../graphics/040_office.jpg")
+
+```
+
 ```{r office_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
 #office
@@ -339,6 +384,13 @@ ggplotly(l5_plot, tooltip = "text")
 
 ```
 
+
+Outdoor canister was attached to a rooftop equipment tripod
+```{r, outdoor_photo, out.width="75%"}
+
+include_graphics("../graphics/040_outdoor.jpg")
+
+```
 
 ```{r outdoor_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
@@ -812,7 +864,8 @@ grid.arrange(p_bears_top, p_frogs_top, p_lesson_prep_top, p_monkeys_top,
 ---
 
 ## Indoor to Outdoor Ratio Plot
-```{r , fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
+
+```{r , ratio_plot, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 ratio_plotly <- ggplot(indoor2, aes(x = reorder(analyte, od_ratio),
                               y = od_ratio, color = ID,
