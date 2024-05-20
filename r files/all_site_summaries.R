@@ -353,11 +353,212 @@ pc_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, conc.),
 ggplotly(pc_outdoor, tooltip = "text")
 
 
+# Plot scatter plots of Average TVOC Values Recorded 
+ggplot(site_040, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 040 Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+ggplot(site_063A, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 063A Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+
+ggplot(site_063B, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 063B Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+ggplot(site_066, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 066 Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+ggplot(site_079, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 079 Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+ggplot(site_085, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 085 Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+ggplot(site_086, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 086 Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+ggplot(site_099, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 099 Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+ggplot(site_103, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 103 Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+ggplot(site_107, aes(x = analyte, y = conc., color = type)) +
+  geom_point() +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 107 Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+# SITE 040 ROOM PAIR CORRELATIONS
+
+# select bears & frogs rooms from site data sheeet 
+bears_data <- subset(site_040, room == "Bears")
+frogs_data <- subset(site_040, room == "Frogs")
+
+# Select only the columns containing concentration data associated with each analyte 
+bears_conc <- select(bears_data, conc., analyte)
+frogs_conc <- select(frogs_data, conc., analyte)
+
+# Select columns containing "conc." and ensure they are numeric
+bears_numeric <- bears_conc %>%
+  select(where(is.numeric))
+frogs_numeric <- frogs_conc %>%
+  select(where(is.numeric))
+
+# Calculate correlations for each pair of analytes within Bears and Frogs
+#Currently not calculating correctly, giving value of 1 for correlation. 
+#Should I instead choose one analyte of interest, and gather correlations between rooms from there? 
+bears_cor <- cor(bears_numeric, method = "spearman")
+frogs_cor <- cor(frogs_numeric, method = "spearman")
+
+print("Correlation matrix for Bears:")
+print(bears_cor)
+print("Correlation matrix for Frogs:")
+print(frogs_cor)
+
+#all possible room pairs from site 040
+#bears & lesson prep
+#bears & monkeys
+#bears & outdoor
+#bears & office 
+#frogs & lesson prep
+#frogs & monkeys
+#frogs & office
+#frogs & outdoor
+#lesson prep & monkeys 
+#lesson prep & office 
+#lesson prep & outdoor 
+#monkeys & office
+#monkeys & outdoor
+#office & outdoor
 
 
+# Attempting to pull in qtrak data
+path_data <- "/data_qtrak.rds"
 
+# QTrak Data
+data_qtrak <- read_rds(paste0(path_data, "/data_qtrak.rds")) %>%
+  filter(datetime >= ymd_hms(datetime_start, tz = "US/Mountain")) %>%
+  filter(datetime < ymd_hms(datetime_end, tz = "US/Mountain")) %>%
+  left_join(inst_log$qtrak, by = "id_inst") %>%
+  select(-level, date_installed, date_uninstalled)
 
+voc <- data_qtrak %>%
+  select(id_room, datetime, room, val, var) %>%
+  mutate(location = gsub("_", " ", str_to_title(room))) %>%
+  filter(grepl('totalvoc low24_ppm', var)) %>%
+  mutate(voc = val*1000)
 
+baseline <- data_qtrak %>%
+  group_by(id_room, room) %>%
+  mutate(min_time = min(datetime)) %>%
+  #filter(datetime <= min_time + minutes(20)) %>%
+  filter(grepl('totalvoc low24_ppm', var)) %>%
+  summarise(baseline = median(val)*1000) %>%
+  ungroup %>%
+  mutate(avg_baseline = mean(baseline)) %>% group_by(id_room) %>%
+  mutate(baseline_fix = avg_baseline - baseline)
 
+# Join the baseline data frame with the voc data frame
+voc <- voc %>%
+  left_join(baseline, by = "id_room")
 
-
+# Subtract the baseline from the voc values
+voc <- voc %>%
+  mutate(voc_baseline_subtracted = voc + baseline_fix)
