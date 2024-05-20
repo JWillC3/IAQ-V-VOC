@@ -255,6 +255,7 @@ ggplotly(l1_plot, tooltip = "text")
 
 The Frogs classroom is a first floor classroom for children ages 3-4 with
 an average occupancy of about 12 children and 2 adults.
+
 ```{r, frogs_photo, out.width="75%"}
 
 include_graphics("../graphics/040_frogs.jpg")
