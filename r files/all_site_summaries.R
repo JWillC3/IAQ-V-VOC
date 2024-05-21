@@ -152,7 +152,8 @@ grid.arrange(site_094_sum, site_063a_sum, site_063b_sum, site_066_sum,
 
 
 #box plot for all indoor locations
-bp_indoor <- ggplot(indoor, aes(x = analyte, y = conc., #fill = analyte
+bp_indoor <- ggplot(indoor, aes(x = reorder(analyte, conc.), 
+                                y = conc., #fill = analyte
 )) +
   geom_boxplot(show.legend = FALSE) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
@@ -162,6 +163,17 @@ bp_indoor <- ggplot(indoor, aes(x = analyte, y = conc., #fill = analyte
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration")
 bp_indoor 
+
+#site_040 boxplot
+donald <- site_040 %>% 
+  ggplot(aes(x = reorder(analyte, conc.), y = conc.)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration")
+donald
 
 #apartments
 pc_apartments <- ggplot(apartments, aes(x = reorder(analyte, conc.),
@@ -353,6 +365,7 @@ pc_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, conc.),
 ggplotly(pc_outdoor, tooltip = "text")
 
 
+#Jade's analysis
 # Plot scatter plots of Average TVOC Values Recorded 
 ggplot(site_040, aes(x = analyte, y = conc., color = type)) +
   geom_point() +
@@ -485,6 +498,7 @@ ggplot(site_107, aes(x = analyte, y = conc., color = type)) +
     plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
     plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
   )
+
 # SITE 040 ROOM PAIR CORRELATIONS
 
 # select bears & frogs rooms from site data sheeet 

@@ -234,7 +234,8 @@ datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
 ```{r boxplot, dpi= 250, warning=FALSE, message=FALSE}
 
 #box plot for all indoor locations
-bp_indoor <- ggplot(indoor, aes(x = analyte, y = conc., #fill = analyte
+bp_indoor <- ggplot(indoor, aes(x = reorder(analyte, conc., FUN = median),
+                              y = conc., #fill = analyte
 )) +
   geom_boxplot(show.legend = FALSE) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
@@ -887,5 +888,76 @@ ggplotly(p_other, tooltip = "text")
 
 ```
 
+---
+
+## TWA for each analyte by room type
+
+```{r twa_040, fig.width= 12, fig.height= 7, message=FALSE, warning=FALSE}
+
+twa_040 <- ggplot(site_040, aes(x = analyte, y = conc., color = type)) +
+  geom_point(size = 3, alpha = 0.5) +
+  guides(size = "none") +
+  labs(x = "Analyte", y = "Average TVOC Value Recorded") +
+  ggtitle("Site 040 Scatter Plot") +
+  theme_minimal() +
+  ylim(0, 100) +
+  theme(
+    axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5),  # Center the title horizontally
+    plot.subtitle = element_text(face = "italic"),  # Italicize subtitle (if needed)
+    plot.caption = element_text(color = "gray20", size = 8)  # Customize caption
+  )
+
+twa_040
+
+```
 
 ---
+
+## ROOM PAIR CORRELATIONS
+
+```{r rp_correlations, echo=TRUE}
+
+# select bears & frogs rooms from site data sheeet 
+bears_data <- subset(site_040, room == "Bears")
+frogs_data <- subset(site_040, room == "Frogs")
+
+# Select only the columns containing concentration data associated with each analyte 
+bears_conc <- select(bears_data, conc., analyte)
+frogs_conc <- select(frogs_data, conc., analyte)
+
+# Select columns containing "conc." and ensure they are numeric
+bears_numeric <- bears_conc %>%
+  select(where(is.numeric))
+frogs_numeric <- frogs_conc %>%
+  select(where(is.numeric))
+
+# Calculate correlations for each pair of analytes within Bears and Frogs
+#Currently not calculating correctly, giving value of 1 for correlation. 
+#Should I instead choose one analyte of interest, and gather correlations between rooms from there? 
+bears_cor <- cor(bears_numeric, method = "spearman")
+frogs_cor <- cor(frogs_numeric, method = "spearman")
+
+print("Correlation matrix for Bears:")
+print(bears_cor)
+print("Correlation matrix for Frogs:")
+print(frogs_cor)
+
+#all possible room pairs from site 040
+#bears & lesson prep
+#bears & monkeys
+#bears & outdoor
+#bears & office 
+#frogs & lesson prep
+#frogs & monkeys
+#frogs & office
+#frogs & outdoor
+#lesson prep & monkeys 
+#lesson prep & office 
+#lesson prep & outdoor 
+#monkeys & office
+#monkeys & outdoor
+#office & outdoor
+
+```
+
