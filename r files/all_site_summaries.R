@@ -152,7 +152,8 @@ grid.arrange(site_094_sum, site_063a_sum, site_063b_sum, site_066_sum,
 
 
 #box plot for all indoor locations
-bp_indoor <- ggplot(indoor, aes(x = analyte, y = conc., #fill = analyte
+bp_indoor <- ggplot(indoor, aes(x = reorder(analyte, conc.), 
+                                y = conc., #fill = analyte
 )) +
   geom_boxplot(show.legend = FALSE) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
@@ -162,6 +163,17 @@ bp_indoor <- ggplot(indoor, aes(x = analyte, y = conc., #fill = analyte
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration")
 bp_indoor 
+
+#site_040 boxplot
+donald <- site_040 %>% 
+  ggplot(aes(x = reorder(analyte, conc.), y = conc.)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration")
+donald
 
 #apartments
 pc_apartments <- ggplot(apartments, aes(x = reorder(analyte, conc.),
