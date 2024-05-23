@@ -576,3 +576,149 @@ voc <- voc %>%
 # Subtract the baseline from the voc values
 voc <- voc %>%
   mutate(voc_baseline_subtracted = voc + baseline_fix)
+
+
+#Ben's help
+# Define the file path for the Excel file
+file_path <- "./data/summa_date_time.xlsx"
+base_path <- "T:/Projects/iaqv/data_rds"  # Base path for data files
+
+# Read the Excel file into a dataframe
+data <- read_excel(file_path)
+
+# Convert to dataframe (although read_excel already returns a tibble, which is a type of dataframe)
+df <- as.data.frame(data)
+
+# Extract unique site_ids
+site_ids <- unique(df$site_id)
+
+# Function to read the data for each site_id
+read_site_data <- function(site_id, base_path) {
+  # Construct the paths for each file
+  qtrak_path <- file.path(base_path, site_id, "data_qtrak.rds")
+  instlog_path <- file.path(base_path, site_id, "data_instlog.rds")
+  site_data_path <- file.path(base_path, site_id, "data_site.rds")
+  
+  # Initialize a list to store data for this site
+  site_data <- list()
+  
+  # Read the data_qtrak.rds file if it exists
+  if (file.exists(qtrak_path)) {
+    site_data$data_qtrak <- readRDS(qtrak_path)
+  } else {
+    site_data$data_qtrak <- NULL
+  }
+  
+  # Read the data_instlog.rds file if it exists
+  if (file.exists(instlog_path)) {
+    site_data$data_instlog <- readRDS(instlog_path)
+  } else {
+    site_data$data_instlog <- NULL
+  }
+  
+  
+  
+  return(site_data)
+}
+
+# Loop through each site_id and read the data
+site_data_list <- lapply(site_ids, read_site_data, base_path = base_path)
+
+
+
+# Assign names to the list elements based on site_id
+names(site_data_list) <- site_ids
+
+# Display the site_data_list to verify contents
+print(site_data_list)
+
+# Initialize an empty vector to store unique 'var' values
+unique_vars <- c()
+
+# Loop through each site_id and extract unique 'var' values
+for (site_id in names(site_data_list)) {
+  site_data <- site_data_list[[site_id]]
+  
+  # Check if data_qtrak is not NULL
+  if (!is.null(site_data$data_qtrak)) {
+    # Extract unique 'var' values and combine them with the existing ones
+    unique_vars <- unique(c(unique_vars, site_data$data_qtrak$var))
+  }
+}
+
+# Display the unique 'var' values
+print(unique_vars)
+
+# List of VOC-related variables with ppm or equivalent units
+voc_ppm_vars <- c(
+  "voclow1_ppm", "voclow12_ppm", "totalvoc low24_ppm",
+  "voclow4_ppb", "voclow12_ppb"
+)
+
+# Function to filter data_qtrak by VOC-related variables with ppm or equivalent units
+filter_voc_ppm <- function(data_qtrak) {
+  # Check if data_qtrak is not NULL
+  if (!is.null(data_qtrak)) {
+    # Filter the data_qtrak dataframe
+    filtered_data <- data_qtrak %>%
+      filter(var %in% voc_ppm_vars)
+    return(filtered_data)
+  } else {
+    return(NULL)
+  }
+}
+
+# Assuming site_data_list is already populated
+# Loop through each site_id and filter data_qtrak
+filtered_site_data <- lapply(site_data_list, function(site_data) {
+  site_data$data_qtrak <- filter_voc_ppm(site_data$data_qtrak)
+  return(site_data)
+})
+
+# Function to extract and transform data from each site
+# Function to extract and transform data from each site
+extract_data <- function(site_data, site_id) {
+  excluded_sites <- c("107", "089")  # List of site_ids to exclude
+  if (!(site_id %in% excluded_sites)) {  # Ignore site_ids in the list
+    if (!is.null(site_data$data_qtrak) && nrow(site_data$data_qtrak) > 0) {
+      data <- site_data$data_qtrak
+      if ("room" %in% colnames(data)) {
+        data <- data %>%
+          mutate(site_id = site_id) %>%  # Include site_id
+          select(datetime, site_id, id_inst, var, val, room)
+      } else {
+        data <- data %>%
+          mutate(site_id = site_id) %>%  # Include site_id
+          select(datetime, site_id, id_inst, var, val) %>%
+          mutate(room = NA)
+      }
+      return(data)
+    }
+  }
+  return(NULL)
+}
+
+# Use map2 to iterate over names and elements of the list and apply the function
+all_data <- map2_df(filtered_site_data, names(filtered_site_data), extract_data)
+
+# Convert dates and times to POSIXct
+df <- df %>%
+  mutate(
+    start_datetime = as.POSIXct(paste(start_date, format(start_time, "%H:%M:%S")), format="%Y-%m-%d %H:%M:%S"),
+    end_datetime = as.POSIXct(paste(end_date, format(end_time, "%H:%M:%S")), format="%Y-%m-%d %H:%M:%S")
+  )
+
+# Convert datetime columns to POSIXct if they are not already
+all_data$datetime <- as.POSIXct(all_data$datetime, format = "%Y-%m-%d %H:%M:%S")
+df$start_datetime <- as.POSIXct(df$start_datetime, format = "%Y-%m-%d %H:%M:%S")
+df$end_datetime <- as.POSIXct(df$end_datetime, format = "%Y-%m-%d %H:%M:%S")
+
+# Perform the join and filter based on datetime range
+filtered_data <- all_data %>%
+  left_join(df, by = c("site_id" = "site_id", "room" = "room")) %>%
+  filter(datetime >= start_datetime & datetime <= end_datetime)
+
+# Convert filtered_site_data$`079`$data_qtrak to a dataframe and get the first 5 rows for each id_inst
+check <- filtered_data %>%
+  group_by(site_id, room) %>%
+  slice_head(n = 1)
