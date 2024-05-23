@@ -651,9 +651,9 @@ print(unique_vars)
 
 # List of VOC-related variables with ppm or equivalent units
 voc_ppm_vars <- c(
-  "voclow1_ppm", "voclow12_ppm", "totalvoc low24_ppm",
-  "voclow4_ppb", "voclow12_ppb"
+  "voclow1_ppm", "voclow12_ppm", "totalvoc low24_ppm"
 )
+
 
 # Function to filter data_qtrak by VOC-related variables with ppm or equivalent units
 filter_voc_ppm <- function(data_qtrak) {
@@ -742,3 +742,11 @@ filtered_data <- all_data %>%
 check <- filtered_data %>%
   group_by(site_id, room) %>%
   slice_head(n = 1)
+
+#for correlation fingers crossed
+# Select the required columns and calculate the average val
+result <- filtered_data %>%
+  select(datetime, site_id, id_inst, room, val) %>%
+  group_by(site_id, id_inst, room) %>%
+  summarise(sum_val = sum(val, na.rm = TRUE))
+
