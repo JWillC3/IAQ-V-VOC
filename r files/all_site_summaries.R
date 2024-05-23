@@ -677,21 +677,15 @@ filtered_site_data <- lapply(site_data_list, function(site_data) {
 
 # Function to extract and transform data from each site
 # Function to extract and transform data from each site
+# Function to extract and transform data from each site
 extract_data <- function(site_data, site_id) {
   excluded_sites <- c("107", "089")  # List of site_ids to exclude
   if (!(site_id %in% excluded_sites)) {  # Ignore site_ids in the list
     if (!is.null(site_data$data_qtrak) && nrow(site_data$data_qtrak) > 0) {
       data <- site_data$data_qtrak
-      if ("room" %in% colnames(data)) {
-        data <- data %>%
-          mutate(site_id = site_id) %>%  # Include site_id
-          select(datetime, site_id, id_inst, var, val, room)
-      } else {
-        data <- data %>%
-          mutate(site_id = site_id) %>%  # Include site_id
-          select(datetime, site_id, id_inst, var, val) %>%
-          mutate(room = NA)
-      }
+      data <- data %>%
+        mutate(site_id = site_id) %>%  # Include site_id
+        select(datetime, site_id, id_inst, var, val)
       return(data)
     }
   }
@@ -701,6 +695,32 @@ extract_data <- function(site_data, site_id) {
 # Use map2 to iterate over names and elements of the list and apply the function
 all_data <- map2_df(filtered_site_data, names(filtered_site_data), extract_data)
 
+# Function to extract id_inst and room from data_instlog$qtrak
+extract_qtrak_data <- function(site_data, site_id) {
+  if (!is.null(site_data$data_instlog$qtrak) && nrow(site_data$data_instlog$qtrak) > 0) {
+    data <- site_data$data_instlog$qtrak
+    data <- data %>%
+      mutate(site_id = site_id)
+    
+    # Check if 'room' column exists, if not, create it with NA
+    if (!"room" %in% colnames(data)) {
+      data <- data %>% mutate(room = NA)
+    }
+    
+    data <- data %>%
+      select(site_id, id_inst, room) %>%
+      filter(grepl("^[0-9]+$", id_inst))  # Keep only numeric id_inst
+    
+    return(data)
+  }
+  return(NULL)
+}
+
+# Use map2_df to iterate over names and elements of the list and apply the function
+qtrak_data <- map2_df(site_data_list, names(site_data_list), extract_qtrak_data)
+
+all_data <- all_data %>%
+  left_join(qtrak_data, by = c("site_id" = "site_id", "id_inst" = "id_inst"))
 # Convert dates and times to POSIXct
 df <- df %>%
   mutate(
