@@ -207,8 +207,14 @@ voc_plot2 <- ggplot(voc2, aes(x = reorder(analyte, conc.),
   xlab("Analytes") +
   ylab("Concentration\n(VOC ppbv or methane ppmv)") +
   ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment, Oct. 24 - 31, 2023")
+
 ggplotly(voc_plot2, tooltip = "text")
 
+#p_plotly <- p_plotly %>% layout(
+#  yaxis = list(
+#    tickformat = "e"
+#  )
+#)
 
 #combo__plot (not working ATM)
 # add after 'group = ID' if want the line thicker" , linewidth = 1, alpha = 0.5
