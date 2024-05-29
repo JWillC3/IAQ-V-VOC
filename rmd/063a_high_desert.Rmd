@@ -1,7 +1,7 @@
 ---
 title: "CDPHE/CSU IAQ-V Project VOC Data"
 author: "Will Clagett"
-date: "2023-01-01"
+date: "2024-05-20"
 output: html_document
 ---
 ```{r packages, include=FALSE}
@@ -31,12 +31,12 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 # **Summa Canister Deployment**
-## **Site 040 - Teaching Tree (Post)**
-## **Oct. 24 - 31, 2023**
-## *Fort Collins, CO*
-```{r, site_photo, out.width="100%"}
+## **Site 063 A - High Desert Assisted Living Facility**
+## **Oct. 18 - 25, 2022**
+## *Grand Junction, CO*
+```{r, site_photo, out.width="50%"}
 
-include_graphics("../graphics/040.png")
+include_graphics("../graphics/063.jpg")
 
 ```
 
@@ -44,37 +44,34 @@ include_graphics("../graphics/040.png")
 ---
 
 ## Data set
-Site 040 (Post) Teaching Tree Early Childhood Learning Center primarily
-functions as a day care and day program facility for children ages 6 weeks-five 
-years.This site observation was a follow-up visit to the sites initial observation 
-fall 2022.Summa canisters were not deployed in the initial visit. Canisters were 
-co-located with TSI QTrak devices in all 5 rooms and co-located with POPS on the 
-rooftop for outdoor sampling. QTrak TVOC signal data were used to for [ ] analysis 
-and plots. Teaching Tree is a two story multi-use facility with operating hours
-M - F & AM to 6 PM, located in an urban location on the north side of Fort Collins.
+063 A High Desert Assisted living is a semi-permanent housing facilty for adults
+who require minor medical and therapeutic care. The facility consisted of 2 
+buildings, A and B. This report is for the "A" building. Building A house 10
+residents and included a kitchen/dining room and admin room where residents
+went for prescribed medications. Both of the High Desert Assisted Living facility
+building are single story buildings and there is a yard space between the two.
+This facility is a semi-rural location.
 
- - 1 Outdoor on rooftop
- - 5 Inside facility
+ - 1 Outdoor on the ground level, in yard
+ - 3 Inside the facility
 
 | Rooms sampled inside facility |
 |:------|
-| 1. Bears, first floor classroom |
-| 2. Frogs, first floor classroom |
-| 3. Lesson Prep, second floor office |
-| 4. Monkeys, first floor classroom |
-| 5. Office, first floor office |
+| 1. Admin |
+| 2. Kitchen & Dining |
+| 3. Room 09 |
 
 ---
 
 ```{r load_data, include=FALSE}
 #load data
 #FIND AND REPLACE SITE_ID in csv file, double check rows to slice, col. to select
-site_040 <- (read_csv(file = "../data/site_040.csv")) %>% 
-  slice(2:7) %>%
-  select(1,7:67)
+site_063_a <- (read_csv(file = "../data/site_063_a.csv")) %>% 
+  slice(3:6) %>%
+  select(1,5:65)
 
 #pivot data for plots
-p.analytes <- site_040 %>% 
+p.analytes <- site_063_a %>% 
   pivot_longer(- ID,
                names_to = "analyte",
                values_to = "conc.")
@@ -155,21 +152,21 @@ indoor2 <- voc2 %>%
 #all indoor locations
 indoor <- voc2 %>% 
   filter(ID != "Outdoor")
-#bears
-bears <- voc2 %>% 
-  filter(ID == "Bears")
-#frogs
-frogs <- voc2 %>% 
-  filter(ID == "Frogs")
-#lesson_prep
-lesson_prep <- voc2 %>% 
-  filter(ID == "Lesson Prep")
-#monkeys
-monkeys <- voc2 %>% 
-  filter(ID == "Monkeys")
-#office
-office <- voc2 %>% 
-  filter(ID == "Office")
+#admin
+admin <- voc2 %>% 
+  filter(ID == "Admin")
+#kitchen
+kitchen <- voc2 %>% 
+  filter(ID == "Dining/Kitchen")
+#outdoor
+outdoor <- voc2 %>% 
+  filter(ID == "Outdoor")
+#room_09
+room_09 <- voc2 %>% 
+  filter(ID == "Room 09")
+# #location5
+# location5 <- voc2 %>% 
+#   filter(ID == "Location5")
 
 # voc2 <- voc2 %>%
 #   group_by(ID, analyte) %>%
@@ -195,7 +192,7 @@ datatable(voc2, colnames = c("Location", "Analyte", "Concentration",
 
 ---
 
-## Summary Plot of all VOCs
+## Summary Plots of all VOCs
 
 ```{r plotly_all_VOCs, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 #plot all VOCs at site
@@ -220,19 +217,21 @@ ggplotly(voc_plot2, tooltip = "text")
 ```
 
 
-## Plots by canister location
-The Bears classroom is a first floor classroom for children ages 2-3 with
-an average occupancy of about 12 children and 2 adults
-```{r, bears_photo, out.width="75%"}
+## Plots by location
 
-include_graphics("../graphics/040_bears.jpg")
+Admin room is staffed 24/7 by at least one nursing staff and had an average
+occupancy of about 3 people.
+
+```{r, admin_photo, out.width="75%"}
+
+include_graphics("../graphics/063a_admin.jpg")
 
 ```
 
-```{r exam_1_plot, out.width = "125%", warning=FALSE, message=FALSE}
+```{r admin_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
-#bears
-l1_plot <- bears %>%
+#admin
+l1_plot <- admin %>%
   ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID,
              text = paste("Analyte: ", analyte,
                                          "<br> Conc. :", conc.,
@@ -246,26 +245,29 @@ l1_plot <- bears %>%
   theme(legend.position = "none") +
   labs(x = "Analytes",
        y = "Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Bears")
+  ggtitle("Admin")
 # l1_plot +
 #   theme(panel.grid.minor = element_line(linetype = "dashed"))
 ggplotly(l1_plot, tooltip = "text")
 
 ```
 
-The Frogs classroom is a first floor classroom for children ages 3-4 with
-an average occupancy of about 12 children and 2 adults.
+Kitchen/Dining room was an open concept room where meals were prepared and eaten.
+Three meals per day are served 7 days a week. This room also serves as a general
+activity and lounge space where residents would watch TV. There was at least one
+staff member preparing meals throughout the day and about 1 - 2 residents watching
+TV throughout the day. During meal times occupancy would average 10-12 people.
 
-```{r, frogs_photo, out.width="75%"}
+```{r, kitchen_photo, out.width="75%"}
 
-include_graphics("../graphics/040_frogs.jpg")
+include_graphics("../graphics/063a_kitchen.jpg")
 
 ```
 
-```{r exam_2_plot, out.width = "125%", warning=FALSE, message=FALSE}
+```{r kitchen_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
-#frogs
-l2_plot <- frogs %>%
+#kitchen
+l2_plot <- kitchen %>%
   ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID,
              text = paste("Analyte: ", analyte,
                                          "<br> Conc. :", conc.,
@@ -279,7 +281,7 @@ l2_plot <- frogs %>%
   theme(legend.position = "none") +
   labs(x = "Analytes",
        y = "Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Frogs")
+  ggtitle("Kitchen/Dining")
 # l2_plot +
 #   theme(panel.grid.minor = element_line(linetype = "dashed"))
 ggplotly(l2_plot, tooltip = "text")
@@ -287,51 +289,19 @@ ggplotly(l2_plot, tooltip = "text")
 ```
 
 
-Lesson Prep is a second floor office, teacher's lounge, and storage area. 
-Occupancy was between 1 and 5 teachers with a max occupancy of 10.
-```{r, lessonprep_photo, out.width="75%"}
+Room 09 is a resident apartment. All apartments were single occupancy. The resident
+of Room 09 spent a majority of their time in the room usually only leaving for
+meals. 
+```{r, room_09_photo, out.width="75%"}
 
-include_graphics("../graphics/040_lessonprep.jpg")
-
-```
-
-```{r lesson_prep_plot, out.width = "125%", warning=FALSE, message=FALSE}
-
-#lesson_prep
-l3_plot <- lesson_prep %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID,
-             text = paste("Analyte: ", analyte,
-                                         "<br> Conc. :", conc.,
-                                         "<br> Class: ", category))) +
-  geom_point(color = "goldenrod2", shape = 18, size = 3) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6)) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = "Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Lesson Prep")
-# l3_plot +
-#   theme(panel.grid.minor = element_line(linetype = "dashed"))
-ggplotly(l3_plot, tooltip = "text")
+# include_graphics("../graphics/063a_room_09.jpg")
 
 ```
 
+```{r room_09_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
-The Monkeys classroom is a first floor classroom for children ages 1-2 with
-an average occupancy of about 10 children and 2 adults.
-```{r, monkeys_photo, out.width="75%"}
-
-include_graphics("../graphics/040_monkeys.jpg")
-
-```
-
-```{r nurse_statioini_plot, out.width = "125%", warning=FALSE, message=FALSE}
-
-#monkeys
-l4_plot <- monkeys %>%
+#room_09
+l4_plot <- room_09 %>%
   ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID,
              text = paste("Analyte: ", analyte,
                                          "<br> Conc. :", conc.,
@@ -345,7 +315,7 @@ l4_plot <- monkeys %>%
   theme(legend.position = "none") +
   labs(x = "Analytes",
        y = "Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Monkeys")
+  ggtitle("Room 09")
 # l4_plot +
 #   theme(panel.grid.minor = element_line(linetype = "dashed"))
 ggplotly(l4_plot, tooltip = "text")
@@ -353,43 +323,12 @@ ggplotly(l4_plot, tooltip = "text")
 ```
 
 
-The Office location was a first floor office occupied by 3 teachers periodaclly
-throught the work day.
-```{r, office_photo, out.width="75%"}
+The outdoor sampling location was on an equipment tripod on the gorund level in
+the yard between the two buildings.
 
-include_graphics("../graphics/040_office.jpg")
-
-```
-
-```{r office_plot, out.width = "125%", warning=FALSE, message=FALSE}
-
-#office
-l5_plot <- office %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID,
-             text = paste("Analyte: ", analyte,
-                                         "<br> Conc. :", conc.,
-                                         "<br> Class: ", category))) +
-  geom_point(color = "tomato2", shape = 18, size = 3) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6)) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = "Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Office")
-# l5_plot +
-#   theme(panel.grid.minor = element_line(linetype = "dashed"))
-ggplotly(l5_plot, tooltip = "text")
-
-```
-
-
-Outdoor canister was attached to a rooftop equipment tripod
 ```{r, outdoor_photo, out.width="75%"}
 
-include_graphics("../graphics/040_outdoor.jpg")
+include_graphics("../graphics/063_outdoor.jpg")
 
 ```
 
@@ -410,7 +349,7 @@ od_plot <- outdoor %>%
   theme(legend.position = "none") +
   labs(x = "Analytes",
        y = "Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Outdoor (roof top)")
+  ggtitle("Outdoor (ground)")
 # od_plot +
 #   theme(panel.grid.minor = element_line(linetype = "dashed"))
 ggplotly(od_plot, tooltip = "text")
@@ -419,8 +358,9 @@ ggplotly(od_plot, tooltip = "text")
 
 ---
 
-## Plots for analyte categories
+## Plots for each analyte category
 ```{r analyte_data, include=FALSE}
+
 #create category objects
 #Alcohol
 alcohol <- voc2 %>%
@@ -448,6 +388,7 @@ other <- voc2 %>%
   filter(category == "Other")
 
 ```
+
 
 ```{r alcohol_plot, fig.align = "center", warning=FALSE, message=FALSE}
 
@@ -681,61 +622,52 @@ p_other +
 ---
 
 ## Plots for the Top 10 Analytes by Location
+*Outdoor plot showing top 6 analytes sampled
 
 ```{r top_ten_data, include=FALSE}
-#bears
-bears_top <- bears %>% 
+
+#admin
+admin_top <- admin %>% 
   group_by(analyte) %>% 
   arrange(desc(conc.))
-bears_top <- top_n(ungroup(bears_top), 10, conc.)
+admin_top <- top_n(ungroup(admin_top), 10, conc.)
 
-#frogs
-frogs_top <- frogs %>% 
+#kitchen
+kitchen_top <- kitchen %>% 
   group_by(analyte) %>% 
   arrange(desc(conc.))
-frogs_top <- top_n(ungroup(frogs_top), 10, conc.)
+kitchen_top <- top_n(ungroup(kitchen_top), 10, conc.)
 
-#lesson_prep
-lesson_prep_top <- lesson_prep %>% 
+#room_09
+room_09_top <- room_09 %>% 
   group_by(analyte) %>% 
   arrange(desc(conc.))
-lesson_prep_top <- top_n(ungroup(lesson_prep_top), 10, conc.)
+room_09_top <- top_n(ungroup(room_09_top), 10, conc.)
 
-#monkeys
-monkeys_top <- monkeys %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-monkeys_top <- top_n(ungroup(monkeys_top), 10, conc.)
-
-#office
-office_top <- office %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-office_top <- top_n(ungroup(office_top), 10, conc.)
-
-#outdoor
+#Outdoor
 outdoor_top <- outdoor %>% 
   group_by(analyte) %>% 
   arrange(desc(conc.))
-outdoor_top <- top_n(ungroup(outdoor_top), 10, conc.)
+outdoor_top <- top_n(ungroup(outdoor_top), 6, conc.)
 
 
 ```
 
 
-```{r bears_t, warning=FALSE, message=FALSE}
-p_bears_top <- bears_top %>% 
+
+```{r admin_t, warning=FALSE, message=FALSE}
+p_admin_top <- admin_top %>% 
   ggplot() +
   geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
            stat = "identity", fill = "orchid") +
-  labs(x = "Bears", y = "") +
+  labs(x = "Admin", y = "") +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
         panel.grid.minor = element_line(linetype = "dashed")) 
 
-# p_bears_top + theme(
+# p_admin_top + theme(
 #   panel.background = element_rect(fill = "lightblue",
 #                                 colour = "lightblue",
 #                                 size = 0.5, linetype = "solid"))
@@ -743,20 +675,20 @@ p_bears_top <- bears_top %>%
 ```
 
 
-```{r frogs_t, warning=FALSE, message=FALSE}
+```{r kitchen_t, warning=FALSE, message=FALSE}
 
-p_frogs_top <- frogs_top %>% 
+p_kitchen_top <- kitchen_top %>% 
   ggplot() +
   geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
            stat = "identity", fill = "chocolate4") +
-  labs(x = "Frogs", y = "") +
+  labs(x = "Kitchen/Dining", y = "") +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
         panel.grid.minor = element_line(linetype = "dashed"))  
 
-# p_frogs_top + theme(
+# p_kitchen_top + theme(
 #   panel.background = element_rect(fill = "lightblue",
 #                                 colour = "lightblue",
 #                                 size = 0.5, linetype = "solid"))
@@ -764,67 +696,20 @@ p_frogs_top <- frogs_top %>%
 ```
 
 
-```{r lesson_prep_t, warning=FALSE, message=FALSE}
+```{r room_09_t, warning=FALSE, message=FALSE}
 
-lesson_prep_top <- lesson_prep %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-lesson_prep_top <- top_n(ungroup(lesson_prep_top), 6, conc.)
-
-p_lesson_prep_top <- lesson_prep_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "goldenrod2") +
-  labs(x = "Lesson Prep", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
-        panel.grid.minor = element_line(linetype = "dashed"))  
-
-# p_lesson_prep_top + theme(
-#   panel.background = element_rect(fill = "lightblue",
-#                                 colour = "lightblue",
-#                                 size = 0.5, linetype = "solid"))
-
-```
-
-
-```{r monkeys_t, warning=FALSE, message=FALSE}
-
-p_monkeys_top <- monkeys_top %>% 
+p_room_09_top <- room_09_top %>% 
   ggplot() +
   geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
            stat = "identity", fill = "#50C878") +
-  labs(x = "Monkeys", y = "") +
+  labs(x = "Room 09", y = "") +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
         panel.grid.minor = element_line(linetype = "dashed"))  
 
-# p_monkeys_top + theme(
-#   panel.background = element_rect(fill = "lightblue",
-#                                 colour = "lightblue",
-#                                 size = 0.5, linetype = "solid"))
-
-```
-
-
-```{r office_t, warning=FALSE, message=FALSE}
-
-p_office_top <- office_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "tomato2") +
-  labs(x = "Office", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
-        panel.grid.minor = element_line(linetype = "dashed")) 
-
-# p_office_top + theme(
+# p_room_09_top + theme(
 #   panel.background = element_rect(fill = "lightblue",
 #                                 colour = "lightblue",
 #                                 size = 0.5, linetype = "solid"))
@@ -853,10 +738,9 @@ p_outdoor_top <- outdoor_top %>%
 ```
 
 
-```{r, warning=FALSE, out.width = "140%", message=FALSE}
+```{r, top_10_grid, warning=FALSE, out.width = "140%", message=FALSE}
 
-grid.arrange(p_bears_top, p_frogs_top, p_lesson_prep_top, p_monkeys_top,
-             p_office_top,p_outdoor_top,
+grid.arrange(p_admin_top, p_kitchen_top, p_room_09_top, p_outdoor_top,
              ncol = 3, nrow = 2,
              top = "", left = "Concentration")
 
@@ -864,7 +748,7 @@ grid.arrange(p_bears_top, p_frogs_top, p_lesson_prep_top, p_monkeys_top,
 
 ---
 
-## Indoor to Outdoor Ratio Plot
+## Indoor to Outdoor Ratio Plots
 
 ```{r , ratio_plot, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
@@ -891,61 +775,46 @@ ggplotly(ratio_plotly, tooltip = "text")
 ```
 
 
-## Top 10 Outdoor Ratios by Location
+## Plots for the Top 10 Outdoor Ratios by Location
 
 ```{r top_ten_or__data, include=FALSE}
-#bears od ratio
-bears_top_or <- indoor %>% 
-  filter(ID == "Bears") %>% 
+#admin od ratio
+admin_top_or <- indoor %>% 
+  filter(ID == "Admin") %>% 
   group_by(analyte) %>% 
   arrange(desc(od_ratio))
-bears_top_or <- top_n(ungroup(bears_top_or), 10, od_ratio) 
+admin_top_or <- top_n(ungroup(admin_top_or), 10, od_ratio) 
 
-#frogs od ratio
-frogs_top_or <- indoor %>% 
-  filter(ID == "Frogs") %>% 
+#kitchen od ratio
+kitchen_top_or <- indoor %>% 
+  filter(ID == "Dining/Kitchen") %>% 
   group_by(analyte) %>% 
   arrange(desc(od_ratio))
-frogs_top_or <- top_n(ungroup(frogs_top_or), 10, od_ratio)
+kitchen_top_or <- top_n(ungroup(kitchen_top_or), 10, od_ratio)
 
-#lesson_prep od ratio
-lesson_prep_top_or <- indoor %>% 
-  filter(ID == "Lesson Prep") %>% 
+#room_09 od ratio
+room_09_top_or <- indoor %>% 
+  filter(ID == "Room 09") %>% 
   group_by(analyte) %>% 
   arrange(desc(od_ratio))
-lesson_prep_top_or <- top_n(ungroup(lesson_prep_top_or), 10, od_ratio)
-
-#monkeys od ratio
-monkeys_top_or <- indoor %>% 
-  filter(ID == "Monkeys") %>% 
-  group_by(analyte) %>% 
-  arrange(desc(od_ratio))
-monkeys_top_or <- top_n(ungroup(monkeys_top_or), 10, od_ratio)
-
-#office od ratio
-office_top_or <- indoor %>% 
-  filter(ID == "Office") %>% 
-  group_by(analyte) %>% 
-  arrange(desc(od_ratio))
-office_top_or <- top_n(ungroup(office_top_or), 10, od_ratio)
-
+room_09_top_or <- top_n(ungroup(room_09_top_or), 10, od_ratio)
 
 ```
 
 
-```{r bears_or_t, warning=FALSE, message=FALSE}
+```{r admin_or_t, warning=FALSE, message=FALSE}
 
-p_bears_top_or <- bears_top_or %>% 
+p_admin_top_or <- admin_top_or %>% 
   ggplot() +
   geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
            stat = "identity", fill = "orchid") +
-  labs(x = "Bears", y = "") +
+  labs(x = "admin", y = "") +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) 
 
-# p_bears_top_or + theme(
+# p_admin_top_or + theme(
 #   panel.background = element_rect(fill = "lightblue",
 #                                 colour = "lightblue",
 #                                 size = 0.5, linetype = "solid"))
@@ -953,19 +822,19 @@ p_bears_top_or <- bears_top_or %>%
 ```
 
 
-```{r frogs_or_t, warning=FALSE, message=FALSE}
+```{r kitchen_or_t, warning=FALSE, message=FALSE}
 
-p_frogs_top_or <- frogs_top_or %>% 
+p_kitchen_top_or <- kitchen_top_or %>% 
   ggplot() +
   geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
            stat = "identity", fill = "chocolate4") +
-  labs(x = "Frogs", y = "") +
+  labs(x = "Kitchen/Dining", y = "") +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1))
 
-# p_frogs_top_or + theme(
+# p_kitchen_top_or + theme(
 #   panel.background = element_rect(fill = "lightblue",
 #                                 colour = "lightblue",
 #                                 size = 0.5, linetype = "solid"))
@@ -973,59 +842,19 @@ p_frogs_top_or <- frogs_top_or %>%
 ```
 
 
-```{r lesson_prep_or_t, warning=FALSE, message=FALSE}
+```{r room_09_or_t, warning=FALSE, message=FALSE}
 
-p_lesson_prep_top_or <- lesson_prep_top_or %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
-           stat = "identity", fill = "goldenrod2") +
-  labs(x = "Lesson Prep", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1))
-
-# p_lesson_prep_top_or + theme(
-#   panel.background = element_rect(fill = "lightblue",
-#                                 colour = "lightblue",
-#                                 size = 0.5, linetype = "solid"))
-
-```
-
-
-```{r monkeys_or_t, warning=FALSE, message=FALSE}
-
-p_monkeys_top_or <- monkeys_top_or %>% 
+p_room_09_top_or <- room_09_top_or %>% 
   ggplot() +
   geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
            stat = "identity", fill = "#50C878") +
-  labs(x = "Monkeys", y = "") +
+  labs(x = "Room 09", y = "") +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1))
 
-# p_monkeys_top_or + theme(
-#   panel.background = element_rect(fill = "lightblue",
-#                                 colour = "lightblue",
-#                                 size = 0.5, linetype = "solid"))
-
-```
-
-
-```{r office_or_t, warning=FALSE, message=FALSE}
-
-p_office_top_or <- office_top_or %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
-           stat = "identity", fill = "tomato2") +
-  labs(x = "Office", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) 
-
-# p_office_top_or + theme(
+# p_room_09_top_or + theme(
 #   panel.background = element_rect(fill = "lightblue",
 #                                 colour = "lightblue",
 #                                 size = 0.5, linetype = "solid"))
@@ -1035,10 +864,17 @@ p_office_top_or <- office_top_or %>%
 
 ```{r, all_ratio_plots, warning=FALSE, out.width = "140%", message=FALSE}
 
-grid.arrange(p_bears_top_or, p_frogs_top_or, p_lesson_prep_top_or,
-             p_monkeys_top_or, p_office_top_or,
+grid.arrange(p_admin_top_or, p_kitchen_top_or, p_room_09_top_or,
              ncol = 3, nrow = 2,
              top = "",
              left = "Outdoor Ratio")
 
 ```
+
+---
+
+## Correlations
+ Coming Soon
+
+
+
