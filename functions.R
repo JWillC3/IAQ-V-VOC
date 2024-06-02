@@ -146,15 +146,38 @@ other <- sites %>%
 
 
 # # function to plot total voc conc by room
-# p_conc_room <- function(df, site_id){
-# 
-# ggplot(df, aes(x = room, y = conc.)) +
-#   geom_bar(stat = "identity", fill = "midnightblue") +
-#   stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-#                col = "white", vjust = 1.5) +
-#   ggtitle(paste0("Site ", site,  " VOC Samples by Canister Location")) +
-#   labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))")+
-#   theme_bw() +
-#   theme(axis.text.y = element_blank())
-# }
+p_conc_room <- function(df, site_id){
+
+ggplot(df, aes(x = room, y = conc.)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle(paste0("Site: ", site_id,  " VOC Samples by Canister Location")) +
+  labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))") +
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+}
+
+#location type plots
+p_locations <- function(df, type){
   
+  ggplot(df, aes(x = reorder(analyte, conc.),
+                         y = conc., color = site_id,
+                         text = paste("Analyte: ", analyte,
+                                      "<br> Conc. :", conc.,
+                                      "<br> Class: ", category))) +
+    geom_point(shape = 18, size = 5, alpha = 0.5) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    ggtitle(paste0("VOC Concentrations in ", type, " Locations in CO")) +
+    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+    labs(x = "Ananlyte", y = "Concentration") +
+    scale_color_manual(name = "Site ID",
+                       values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
+                                  "#e28de2", "#934270", "#e72fc2", "#5361c7",
+                                  "#b9cda1", "#096013", "#afe642", "#3aa609",
+                                  "#2af464", "#683d0d", "#efaa79", "#d6061a",
+                                  "#d9c937", "#9f04fc"))
+  
+}
