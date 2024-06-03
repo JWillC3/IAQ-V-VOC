@@ -36,10 +36,10 @@ p_conc_room(site_063A, site_id = "063A")
 
 
 #SITE 066
-
+p_conc_room(site_066, site_id = "066")
 
 # SITE 079
-
+p_conc_room(site_079, site_id = "079")
 
 # SITE 085
 
