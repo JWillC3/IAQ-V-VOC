@@ -1,0 +1,75 @@
+---
+title: "Read VOC Canister Data"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: paper
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.path = 'figures/',
+  warning = FALSE,
+  message = FALSE,
+  echo = FALSE,
+  fig.width = 6, fig.height = 3,
+  cache = FALSE)
+```
+
+```{r}
+source("../functions.R")
+```
+
+```{r}
+fldr <- if_else(.Platform$OS.type == "unix",
+                "/Volumes/iaqv/",
+                "T:/Projects/iaqv/")
+```
+
+```{r}
+files_voc <- list.files(paste0(fldr, "data/canister/"), pattern = ".csv$", full.names = TRUE, recursive = "TRUE")
+```
+
+```{r}
+logs_voc <- tibble(id_site = c("040", "063", "066", "079", "085", "086", "094",
+                               "099", "103", "107", "108"),
+                   id_sheet = c("1o8YkndN5TkwzOk2--dVmP3frEHOakLdMUrrvDB0W-DE",
+                                "1epWhdCVkhUVVLSsC1bfP17OrGgRlqyIrh5WWcwFIYtM",
+                                "1_MS6QAfXZlGRBiCGubXKgNI9vEtR1tTcw6gPfw9NObA",
+                                "1qIx_hinRb__owvlhFxZBN9sUSdfoUNhSb6Q0Vz2KIhY",
+                                "1i-PHsSD_DoRlOp44OVMlvZZayq9EMb1dMWLD--p9pwo",
+                                "1ldSA5KtDp1pUBNVF2KUr2QMYzwccv1GVPo1idH9IfqI",
+                                "1NHUvy3h-o8_6rbAKDNo94OCl5Lq6BfqDCM8Wo0F_ZLg",
+                                "1fvWuuiV8C17nAEqZzn4wgq4NkhM9_LXyM4aL-ta8drc",
+                                "1wEjC91BMCNuYcRpY1RuDEh1UNknz2OjwW0glTt2v5ig",
+                                "1oWQ4KLEu234oncUy8CX0M_W3pMTVu5s5kTFWHRoGMJ0",
+                                "1u41ObkKF5BgxhzRrpa9grezP1ZVokvVDlzmSKrMA2ZM")) %>%
+  mutate(meta = map(id_sheet, read_site_data, "canister")) %>%
+  unnest_longer("meta", keep_empty = TRUE) %>% unnest(meta) %>%
+  mutate(id_canister = str_sub(id_canister, str_length(id_canister) - 1,
+                                            str_length(id_canister)))
+```
+
+```{r}
+read_canister <- function(file){
+  read_csv(file, col_types = "c") %>%
+  slice(2:n()) %>%
+  rename_all(tolower) %>%
+  mutate(id_site =  str_split(file, "/")[[1]][6]) %>%
+  rename("id_canister" = "canister designation") %>%
+  select(id_site, id_canister, 7:ncol(.)) %>%
+  pivot_longer(-c("id_site", "id_canister"), names_to = "var", values_to = "val") %>%
+  mutate(val = as.numeric(val),
+         id_canister = str_sub(id_canister, str_length(id_canister) - 1,
+                                            str_length(id_canister)))
+}
+```
+
+```{r}
+data_voc <- map(files_voc, read_canister) %>%
+  bind_rows() %>%
+  left_join(logs_voc, by = c("id_site", "id_canister"))
+```
+
+
+---
