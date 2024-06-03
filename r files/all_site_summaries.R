@@ -387,6 +387,7 @@ site_data_list <- lapply(site_ids, read_site_data, base_path = base_path)
 
 
 # Assign names to the list elements based on site_id
+#this step takes a moment to load
 names(site_data_list) <- site_ids
 
 # Display the site_data_list to verify contents
@@ -509,4 +510,5 @@ result <- filtered_data %>%
   select(datetime, site_id, id_inst, room, val) %>%
   group_by(site_id, id_inst, room) %>%
   summarise(sum_val = sum(val, na.rm = TRUE))
+print(unique(filtered_data$room))
 
