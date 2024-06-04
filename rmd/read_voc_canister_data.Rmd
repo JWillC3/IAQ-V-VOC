@@ -109,6 +109,7 @@ tvoc <- data_voc %>%
 
 
 ```{r site_040 plot}
+#need to change id_room to room names for plots
 site_040 <- tvoc %>% 
   filter(id_site == "040")
 
