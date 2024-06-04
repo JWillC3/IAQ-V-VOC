@@ -7,6 +7,29 @@ output:
     theme: paper
 ---
 
+```{r [ackages, include = FALSE]}
+
+library(tidyverse)
+library(plyr)
+library(faraway)
+library(cowplot)
+library(reshape2)
+library(corrplot)
+library(scales)
+library(ggthemes)
+library(gridExtra)
+library(patchwork)
+library(gghighlight)
+library(ggdark)
+library(viridis)
+library(DT)
+library(plotly)
+library(knitr)
+library(magick)
+
+```
+
+
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.path = 'figures/',
   warning = FALSE,
@@ -82,6 +105,22 @@ data_voc <- map(files_voc, read_canister) %>%
 tvoc <- data_voc %>% 
   group_by(id_site, building, id_room, id_canister) %>% 
   summarise(tvoc = sum(val,na.rm = TRUE), .groups = "drop")
+```
+
+
+```{r site_040 plot}
+site_040 <- tvoc %>% 
+  filter(id_site == "040")
+
+ggplot(site_040, aes(x = id_room, y = tvoc)) +
+  geom_bar(stat = "identity", fill = "midnightblue") +
+  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
+               col = "white", vjust = 1.5) +
+  ggtitle("Site 040") +
+  labs(x = "", y = "")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+
 ```
 
 ---
