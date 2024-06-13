@@ -148,7 +148,8 @@ other <- sites %>%
 # # function to plot total voc conc by room
 p_conc_room <- function(df, site_id){
 
-ggplot(df, aes(x = room, y = conc.)) +
+ggplot(df, aes(x = reorder(room, conc.),
+               y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
   stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
                col = "white", vjust = 1.5) +
