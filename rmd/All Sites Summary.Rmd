@@ -5,25 +5,27 @@ date: "2022 Oct - 2024 May"
 output: html_document
 ---
 
-```{r packages, include=FALSE}
-library(tidyverse)
-library(plyr)
-library(faraway)
-library(cowplot)
-library(reshape2)
-library(corrplot)
-library(scales)
-library(ggthemes)
-library(gridExtra)
-library(patchwork)
-library(gghighlight)
-library(ggdark)
-library(viridis)
-library(DT)
-library(plotly)
-library(readxl)
-library(knitr)
-library(magick)
+```{r load_packages_data, include=FALSE}
+
+source("../functions.R")
+# library(tidyverse)
+# library(plyr)
+# library(faraway)
+# library(cowplot)
+# library(reshape2)
+# library(corrplot)
+# library(scales)
+# library(ggthemes)
+# library(gridExtra)
+# library(patchwork)
+# library(gghighlight)
+# library(ggdark)
+# library(viridis)
+# library(DT)
+# library(plotly)
+# library(readxl)
+# library(knitr)
+# library(magick)
 
 ```
 
