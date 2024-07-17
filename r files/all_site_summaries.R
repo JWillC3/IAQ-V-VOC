@@ -1,4 +1,4 @@
-source("functions.R")
+source("source_data.R")
 #load data
 #sites <- read_excel("data/voc_samples_all.xlsx")
 
