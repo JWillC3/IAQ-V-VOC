@@ -18,10 +18,10 @@ library(knitr)
 
 
 # Data path
-path <- "data/"
+path <- "./data/"
 
 # read site data
-sites <- read_excel(paste0(path, "./voc_samples_all.xlsx"))
+sites <- read_excel(paste0(path, "site_info.xlsx"))
 
 #sites
 #site 040
