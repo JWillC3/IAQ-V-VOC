@@ -198,7 +198,7 @@ p_category <- function(df, category){
     theme_bw() +
     theme(axis.text.x = element_text(size = 10)) +
     labs(x = "", y = "") +
-    ggtitle(paste0("VOC Concentrations for", category)) +
+    ggtitle(paste0("VOC Concentrations for ", category)) +
     theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
     labs(x = "Ananlyte", y = "Concentration ppb(v)") +
     scale_color_manual(name = "Room ID",
