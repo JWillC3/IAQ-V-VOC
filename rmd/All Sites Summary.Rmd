@@ -430,7 +430,13 @@ sites %>%
 # sites with Outdoor canister
 
 donald <- sites %>% 
-  filter(! site_id %in% c("104", "109")) 
+  filter(! site_id %in% c("104", "109")) %>% 
+  group_by(site_id, room_name, analyte) %>% 
+  ungroup() %>% 
+  mutate(od_ratio = donald$conc. / outdoor$conc.)
+
+donald <-  donald %>% 
+  mutate(od_ratio = round(od_ratio, 2))
 
 ```
 
