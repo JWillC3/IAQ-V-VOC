@@ -1,6 +1,6 @@
 ---
 title: "Summa Canister Sites Summary, VOC Data"
-author: "Dr. Carter, Will Clagett, Jade Lippmann"
+author: "Dr. Ellison Carter, Will Clagett, Jade Lippmann"
 date: "2022 Oct - 2024 May"
 output: html_document
 ---
@@ -48,7 +48,7 @@ From October 2022 to May 2024 we deployed Summa Canisters at 18 of the 50 CDPHE 
 | 109. Amaryllis, Denver |
 | 105. Lawrence St. Center, Denver |
 | 101. Silverkey, Colorado Springs |
-| 104. CCS, Colorado Springs |
+| 104. Child Community Services, Colorado Springs |
 | 089. Cortez Public Library, Cortez |
 | 002. Routt Co. Detention Center, Steamboat Springs |
 
@@ -63,7 +63,7 @@ From October 2022 to May 2024 we deployed Summa Canisters at 18 of the 50 CDPHE 
 | 7. Lobbys/waiting rooms |
 | 8. Recreation*/Gyms |
 | 9. Medical/clinic exam rooms |
-| 10. Other**
+| 10. Corridors**
 
 
 *includes open spaces for social gathering and general activity areas
@@ -88,7 +88,7 @@ datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
 
 ---
 
-## Summary Plots of all VOC Locations
+## Box Plot of VOC Concentrations for Indoor Locations
 
 ```{r boxplot, dpi= 250, warning=FALSE, message=FALSE}
 
@@ -106,7 +106,7 @@ bp_indoor <- ggplot(indoor, aes(x = reorder(analyte, conc., FUN = median),
 bp_indoor 
 
 ```
-
+## Summary Plots of all Location Types
 
 ```{r kitchens_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 #kitchen/dinning locations
@@ -192,8 +192,8 @@ ggplotly(p_medical, tooltip = "text")
 
 ```{r other_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
-#other locations
-p_other <- p_locations(other, "Corridor")
+#corridor locations
+p_other <- p_locations(corridors, "Corridor")
   
 ggplotly(p_other, tooltip = "text")
 
@@ -207,6 +207,7 @@ p_outdoor <- p_locations(outdoor, "Outdoor")
 ggplotly(p_outdoor, tooltip = "text")
 
 ```
+Sites 109 and 104 did not have an outdoor canister measurement.
 
 ## VOC Sum Plots for Each Site
 ```{r voc_sums, include=FALSE}
@@ -346,7 +347,7 @@ ggplotly(p_chlorinated, tooltip = "text")
 
 ```{r ketone_plot, message=FALSE, warning=FALSE}
 
-p_ketone <- p_category(keytone, "Keytones")
+p_ketone <- p_category(ketone, "Ketones")
 
 ggplotly(p_ketone, tooltip = "text")
 
@@ -392,8 +393,8 @@ twa_040
 ```{r rp_correlations, echo=TRUE}
 
 # select bears & frogs rooms from site data sheeet 
-bears_data <- subset(site_040, room == "Bears")
-frogs_data <- subset(site_040, room == "Frogs")
+bears_data <- subset(site_040, room_name == "Bears")
+frogs_data <- subset(site_040, room_name == "Frogs")
 
 # Select only the columns containing concentration data associated with each analyte 
 bears_conc <- select(bears_data, conc., analyte)
