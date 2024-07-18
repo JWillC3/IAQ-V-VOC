@@ -422,6 +422,17 @@ sites %>%
 
 ```
 
+---
+## Indoor / Outdoor Ratios
+
+```{r}
+
+# sites with Outdoor canister
+
+donald <- sites %>% 
+  filter(! site_id %in% c("104", "109")) 
+
+```
 
 
 
