@@ -11,52 +11,6 @@ source("source_data.R")
 #make sure to slice and select the correct rows! Will not be the same for all sites
 #load data
 
-#pivot data for plots
-p.analytes <- site_040 %>% 
-  pivot_longer(- ID,
-               names_to = "analyte",
-               values_to = "conc.")
-
-#VOC classes as objects
-alc <- c("isopropanol", "butanol")
-ald <- c("acetaldehyde")
-aro <- c("cyclopentane", "cyclohexane", "methylcyclohexane")
-btx <- c("benzene", "toluene", "ethylbenzene", "m+p-xylene", "o-xylene",
-          "isopropylbenzene", "n-propylbenzene", "3-ethyltoluene",
-          "4-ethyltoluene", "1,3,5-trimethylbenzene", "2-ethyltoluene",
-          "1,2,4-trimethylbenzene", "1,2,3-trimethylbenzene",
-          "1,3-diethylbenzene", "1,4-diethylbenzene")
-chl <- c("C2HCl3", "C2Cl4")
-kt <- c("acetone")
-oth <- c("isoprene", "styrene", "acetonitrile", "methylethylketone",
-           "a-pinene", "b-pinene", "limonene", "camphene", "methane")
-stc <- c("ethane", "propane", "i-butane", "n-butane", "i-pentane",
-                    "n-pentane", "n-hexane", "2,4 dimethylpentane", "n-heptane",
-                    "2,3-dimethylpentane", "2-methylhexane", "3-methylhexane",
-                    "2,2,4-trimethylpentane", "2,3,4-trimethylpentane",
-                    "2-methylheptane", "3-methylheptane", "n-octane", "n-nonane",
-                    "n-decane", "ethene", "propene", "t-2-butene", "1-butene",
-                    "c-2-butene", "t-2-pentene", "1-pentene", "cis-2-pentene",
-                    "ethyne")
-#new 'voc' object becomes the new df for plots
-#add voc categories to df
-voc <- p.analytes %>% 
-  mutate(category = case_when(p.analytes$analyte %in% alc ~ "Alc.",
-                              p.analytes$analyte %in% ald ~ "Ald.",
-                              p.analytes$analyte %in% stc ~ "Stc.",
-                              p.analytes$analyte %in% aro ~ "Aro.",
-                              p.analytes$analyte %in% btx ~ "Btx.",
-                              p.analytes$analyte %in% chl ~ "Chl.",
-                              p.analytes$analyte %in% kt ~ "Ktn.",
-                              p.analytes$analyte %in% oth ~ "Oth."))
-
-
-#create outdoor group
-outdoor_040 <- site_040 %>% 
-  filter(room_name =="Outdoor")
-#create indoor group
-indoor_040 <- site_040 %>% 
-  filter(room_name != "Outdoor")
 
 #calculate ratios
 indoor_040 <- indoor_040 %>%
@@ -66,10 +20,7 @@ indoor_040 <- indoor_040 %>%
 
 #UPDATE LOCATIONS FOR THE SITE YOU ARE CURRENTLY WORKING ON Location 1, 2, etc.!
 #location order should be alphabetical
-#subgroups,
-#indoor
-indoor_040 <- site_040 %>% 
-  filter(room_name != "Outdoor")
+
 #bears
 bears <- site_040 %>% 
   filter(room_name == "Bears")
@@ -78,7 +29,7 @@ frogs <- site_040 %>%
   filter(room_name == "Frogs")
 #lesson prep
 lesson_prep <- site_040 %>% 
-  filter(rrom_name == "Lesson Prep")
+  filter(room_name == "Lesson Prep")
 #monkeys
 monkeys <- site_040 %>% 
   filter(room_name == "Monkeys")
@@ -87,28 +38,18 @@ office <- site_040 %>%
   filter(room_name == "Office")
 
 #data table
-#for data table
-voc2 <- p.analytes %>% 
-  mutate(category = case_when(p.analytes$analyte %in% alc ~ "Alcohol",
-                              p.analytes$analyte %in% ald ~ "Aldehyde",
-                              p.analytes$analyte %in% stc ~ "Straight Chain",
-                              p.analytes$analyte %in% aro ~ "Aromatic",
-                              p.analytes$analyte %in% btx ~ "Btex",
-                              p.analytes$analyte %in% chl ~ "Chlorinated",
-                              p.analytes$analyte %in% kt ~ "Ketone",
-                              p.analytes$analyte %in% oth ~ "Other"))
-voc2 <- voc2 %>%
-  group_by(ID, analyte) %>%
-  ungroup() %>% 
-  mutate(od_ratio = round(as.numeric(voc$conc.)/as.numeric(outdoor$conc.), 2))
 
-datatable(voc2, colnames = c("Location", "Analyte", "Concentration",
-                             "Category", "Outdoor Ratio"),
-          options = list(pageLength = 10), rownames = FALSE)
+site_040_table <- sites %>% 
+  select(4,7,9,18)
 
-voc2$conc. <- as.numeric(as.character(voc2$conc.))
+datatable(site_040_table, colnames = c("Location", "Analyte", "Concentration",
+                                    "Category"),
+          options = list(pageLenght = 10), rownames = FALSE,
+          caption = "Site 040 Table, Concentrations: ppb(v) or methane ppb(v)")
+
 
 #boxplot for all analytes
+
 bp_040 <- site_040 %>% 
   ggplot(aes(x = reorder(analyte, conc.), y = conc.)) +
   geom_boxplot() +
@@ -120,21 +61,10 @@ bp_040 <- site_040 %>%
   ggtitle("Boxplot for All Ananlytes")
 bp_040
 
-#boxplot of indoor / outdoor ratios for all analytes
-in_or_bp_040 <- indoor_040 %>% 
-  ggplot(aes(x = reorder(analyte, od_ratio), y = od_ratio)) +
-  geom_boxplot() +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  ggtitle("Boxplot for All Indoor to Outoodr Conc. for all Ananlytes")
-in_or_bp_040
- 
+
 #plot all VOCs at site
-voc_plot <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                            y = conc., color = ID)) +
+p_040 <- ggplot(site_040, aes(x = reorder(analyte, conc.),
+                            y = conc., color = room_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
   # geom_point(data = methane, aes(x = analyte, y = conc.)) +
   # guides(size = "none") +
@@ -146,7 +76,7 @@ voc_plot <- ggplot(voc, aes(x = reorder(analyte, conc.),
        title = "Site 040 - Teaching Tree (Post), Summa Cannister Deployment\nOct. 24 - Oct. 31, 2023. Fort Collins, CO",
        caption = "6 canisters deployed throughout site\n5 indoor: 4 first floor, 1 second floor\n1 outdoor, roof top")
   
-voc_plot +
+p_040 +
   scale_color_manual(name = "Room ID",
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue")) +
@@ -164,8 +94,8 @@ voc_plot +
 
 #plotly output but y axis not formatted correctly and don't know how to fix
 #WHEN ADDING THIS TO RMD MAKE SURE TO CHANGE THE DF TO INLCUDE LONG CAT NAMES
-voc_plot2 <- ggplot(voc2, aes(x = reorder(analyte, conc.),
-                              y = conc., color = ID,
+p_040_2 <- ggplot(site_040, aes(x = reorder(analyte, conc.),
+                              y = conc., color = room_name,
                               text = paste("Analyte: ", analyte,
                                            "<br> Conc. :", conc.,
                                            "<br> Class: ", category))) +
@@ -181,52 +111,17 @@ voc_plot2 <- ggplot(voc2, aes(x = reorder(analyte, conc.),
   ylab("Concentration\n(VOC ppbv or methane ppmv)") +
   ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment, Oct. 24 - 31, 2023")
 
-ggplotly(voc_plot2, tooltip = "text")
+ggplotly(p_040_2, tooltip = "text")
 
-#p_plotly <- p_plotly %>% layout(
-#  yaxis = list(
-#    tickformat = "e"
-#  )
-#)
-
-#combo__plot (not working ATM)
-# add after 'group = ID' if want the line thicker" , linewidth = 1, alpha = 0.5
-# voc_combo_col <- ggplot(indoor, aes(fill = ID, x = analyte, y = conc.)) +
-#   geom_col(position = position_dodge(1.5)) +
-#   geom_line(data = outdoor, aes(x = analyte, y =  conc.,
-#                                 group = ID)) +
-#   #guides(linewidth = "none", alpha = "none") +
-#   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-# voc_combo_col
-#combo point plot
-
-# voc_combo_point <- ggplot(indoor, aes(color = ID, x = analyte, y = conc.)) +
-#   geom_point(data = indoor, aes(x = analyte, y = conc.),
-#              shape = 18, alpha = 0.5) +
-#   geom_line(data = outdoor, aes(x = analyte, y =  conc.,
-#                                 group = ID, alpha = 0.5)) +
-#   guides(alpha = "none") +
-#   xlab("Analytes") +
-#   ylab(expression(atop("Concentration",paste("(VOC ppbv or methane ppmv)")))) +
-#   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-#   theme_bw() +
-#   theme(axis.text.x = element_text(size = 3, angle = 45, hjust = 1)) +
-#   ggtitle("Site 040 Summa Cannister Deployment",
-#           "Oct. 24 - Oct. 31, 2023. City, CO")
-# voc_combo_point
 
 #facet wrap by location
-loc_fctw <- ggplot(voc, aes(x = reorder(analyte, conc.),
+p_040_fctw <- ggplot(site_040, aes(x = reorder(analyte, conc.),
                             y = conc.)) +
   geom_point(color = "#50C878", size = 3, shape = 18, alpha = 0.5) +
-  geom_point(data = methane, aes(x = analyte, y = conc.,
-                                 color ="red", size = 5)) +
-  guides(size = "none", color = "none") +
   xlab("Analytes") +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
-  facet_wrap(~ID, scales = "free_y") +
+  facet_wrap(~room_name, scales = "free_y") +
   theme_bw() +
   theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
   labs(x = "Analytes",
@@ -234,19 +129,19 @@ loc_fctw <- ggplot(voc, aes(x = reorder(analyte, conc.),
                            paste("(VOC ppbv or methane ppmv)")))) +
   ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment",
             "Grouped by Cannister location")
-loc_fctw
+p_040_fctw
 
 #leave this out for now
 #Two plots together not joined
-voc_plot +
-  loc_fctw +
+p_040 +
+  p_040_fctw +
   plot_layout(nrow = 2, heights = c(1, 2))
 
 
 #facet grid all analytes grouped by class
-voc_fctg <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                            y = conc., color = ID)) +
-  geom_point(data = voc, aes(x = reorder(analyte, conc.), y = conc.),
+p_040_fctg <- ggplot(site_040, aes(x = reorder(analyte, conc.),
+                            y = conc., color = room_name)) +
+  geom_point(data = site_040, aes(x = reorder(analyte, conc.), y = conc.),
              size = 4, shape = 18, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
@@ -258,7 +153,7 @@ voc_fctg <- ggplot(voc, aes(x = reorder(analyte, conc.),
                            paste("(VOC ppbv or methane ppmv)")))) +
   ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment",
           "Grouped by Analyte Class")
-voc_fctg +
+p_040_fctg +
   scale_color_manual(name = "Room ID",
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue")) +
@@ -271,9 +166,9 @@ voc_fctg +
         axis.text.y = element_text(size = 13))
 
 #indoor facet grid by analyte class
-indoor_fctg <- ggplot(indoor, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = ID)) +
-  geom_point(data = indoor, aes(x = reorder(analyte, conc.), y = conc.),
+p_040i_fctg <- ggplot(indoor_040, aes(x = reorder(analyte, conc.),
+                                  y = conc., color = room_name)) +
+  geom_point(data = indoor_040, aes(x = reorder(analyte, conc.), y = conc.),
              size = 5, shape = 18, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
@@ -285,7 +180,7 @@ indoor_fctg <- ggplot(indoor, aes(x = reorder(analyte, conc.),
                            paste("(VOC ppbv or methane ppmv)")))) +
   ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment",
           "Grouped by Analyte Class")
-indoor_fctg +
+p_040i_fctg +
   scale_color_manual(name = "Room ID",
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue")) +
@@ -299,11 +194,9 @@ indoor_fctg +
 
 #plots for each room
 #outdoor
-od_plot <- outdoor %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+p_040od <- outdoor_040 %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
   geom_point(color = "midnightblue", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6, color ="red")) +
   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
@@ -312,14 +205,12 @@ od_plot <- outdoor %>%
        y = expression(atop("Concentration",
                            paste("(VOC ppbv or methane ppmv)")))) +
   ggtitle("Site 040 - Teaching Tree (Post), Outdoor (Rooftop)")
-od_plot
+p_040od
 
 #bears
-l1_plot <- bears %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+p_bears <- bears %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
   geom_point(color = "orchid", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6)) +
   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
@@ -329,14 +220,12 @@ l1_plot <- bears %>%
                            paste("(VOC ppbv or methane ppmv)")))) +
   ggtitle("Site 040 - Teaching Tree (Post), Bears",
           "first floor classroom")
-l1_plot
+p_bears
 
 #frogs
-l2_plot <- frogs %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+p_frogs <- frogs %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
   geom_point(color = "chocolate4", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6)) +
   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
@@ -346,11 +235,11 @@ l2_plot <- frogs %>%
                            paste("(VOC ppbv or methane ppmv)")))) +
   ggtitle("Site 040 - Teaching Tree (Post), Frogs",
           "first floor classroom")
-l2_plot
+p_frogs
 
 #lesson_prep
-l3_plot <- lesson_prep %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+p_lesson_prep <- lesson_prep %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
   geom_point(color = "goldenrod2", shape = 18, size = 5) +
   # geom_point(data = methane, aes(x = analyte, y = conc.,
   #                                size = 6)) +
@@ -363,11 +252,11 @@ l3_plot <- lesson_prep %>%
                            paste("(VOC ppbv or methane ppmv)")))) +
   ggtitle("Site 040 - Teaching Tree (Post), Lesson Prep",
           "second floor office")
-l3_plot
+p_lesson_prep
 
 #monkeys
-l4_plot <- monkeys %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+p_monkeys <- monkeys %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
   geom_point(color = "#50C878", shape = 18, size = 5) +
   # geom_point(data = methane, aes(x = analyte, y = conc.,
   #                                size = 6, color ="red")) +
@@ -380,14 +269,12 @@ l4_plot <- monkeys %>%
                            paste("(VOC ppbv or methane ppmv)")))) +
   ggtitle("Site 040 - Teaching Tree (Post), Monkeys",
           "first floor classroom")
-l4_plot
+p_monkeys
 
 #office
-l5_plot <- office %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
+p_office <- office %>%
+  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
   geom_point(color = "tomato2", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6)) +
   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
@@ -397,15 +284,27 @@ l5_plot <- office %>%
                            paste("(VOC ppbv or methane ppmv)")))) +
   ggtitle("040 - Site Teaching Tree (Post), Office",
           "first floor office")
-l5_plot
+p_office
 
 #indoor, outdoor ratio 
+
+#boxplot of indoor / outdoor ratios for all analytes
+p_040_bp <- indoor_040 %>% 
+  ggplot(aes(x = reorder(analyte, od_ratio), y = od_ratio)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration") +
+  ggtitle("Boxplot for All Indoor to Outoodr Conc. for all Ananlytes")
+
+p_040_bp
+
 #without facet
-ratio_plot <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
-                              y = od_ratio, color = ID)) +
+p_040_ratio <- ggplot(indoor_040, aes(x = reorder(analyte, od_ratio),
+                              y = od_ratio, color = room_name)) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
-  # guides(size = "none") +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
@@ -414,7 +313,7 @@ ratio_plot <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
   ylab("Indoor to Outdoor Ratios\n Concentration Ratios") +
   ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment",
           "Oct. 24 - Oct. 31, 2023. Fort Collins, CO")
-ratio_plot +
+p_040_ratio +
   scale_color_manual(name = "Room ID",
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue")) +
@@ -430,14 +329,12 @@ ratio_plot +
       #plot.background = element_rect("#DADBDD"))
 
 #plotly ratio
-ratio_plotly <- ggplot(indoor2, aes(x = reorder(analyte, od_ratio),
-                              y = od_ratio, color = ID,
+p_040_r <- ggplot(indoor_040, aes(x = reorder(analyte, od_ratio),
+                              y = od_ratio, color = room_name,
                               text = paste("Analyte: ", analyte,
                                            "<br> Conc. :", od_ratio,
                                            "<br> Class: ", category))) +
   geom_point(shape = 18, size = 4, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
-  # guides(size = "none") +
   scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
                 labels = trans_format(`log10`, math_format(10^.x))) +
   theme_bw() + #try using different themes here
@@ -448,11 +345,13 @@ ratio_plotly <- ggplot(indoor2, aes(x = reorder(analyte, od_ratio),
   xlab("Analytes") +
   ylab("Indoor to Outdoor Ratios\n Concentration Ratios") +
   ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment: Oct. 24 - Oct. 31, 2023. Fort Collins, CO")
-ggplotly(ratio_plotly, tooltip = "text")
+
+ggplotly(p_040_r, tooltip = "text")
 
 #ratio plot with facet grid
-fctg_ratio_plot <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
-                                      y = od_ratio, color = ID)) +
+
+p_040_fctg_r <- ggplot(indoor_040, aes(x = reorder(analyte, od_ratio),
+                                      y = od_ratio, color = room_name)) +
   geom_point(size = 5, shape = 18, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
@@ -464,7 +363,8 @@ fctg_ratio_plot <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
                            paste("(VOC ppbv or methane ppmv)")))) +
   ggtitle("Site 040 - Teaching Tree (Post), Indoor Summa Cannister Deployment",
           "Grouped by Analyte Class")
-fctg_ratio_plot
+
+p_040_fctg_r
 
 #create object of the top 5 analytes by outdoor ratio then plot
 #bears od ratio
