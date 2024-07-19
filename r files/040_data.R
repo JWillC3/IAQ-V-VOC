@@ -1,19 +1,5 @@
 #packages
-library(tidyverse)
-library(plyr)
-library(faraway)
-library(cowplot)
-library(reshape2)
-library(corrplot)
-library(scales)
-library(ggthemes)
-library(gridExtra)
-library(patchwork)
-library(gghighlight)
-library(ggdark)
-library(viridis)
-library(DT)
-library(plotly)
+source("source_data.R")
 
 #replace the site number and name first
 #change the dates for plots "Oct. 24 - Oct. 31, 2023."
@@ -24,9 +10,6 @@ library(plotly)
 #Location 5: "tomato2", Location 6: "midnightblue"
 #make sure to slice and select the correct rows! Will not be the same for all sites
 #load data
-site_040 <- (read_csv(file = "data/site_040.csv")) %>% 
-  slice(2:7) %>%
-  select(1,7:67)
 
 #pivot data for plots
 p.analytes <- site_040 %>% 
@@ -69,43 +52,39 @@ voc <- p.analytes %>%
 
 
 #create outdoor group
-outdoor <- voc %>% 
-  filter(ID =="Outdoor")
-#change conc. to numeric
-voc$conc. <- as.numeric(as.character(voc$conc.))
-
-outdoor$conc. <- as.numeric(as.character(outdoor$conc.))
+outdoor_040 <- site_040 %>% 
+  filter(room_name =="Outdoor")
+#create indoor group
+indoor_040 <- site_040 %>% 
+  filter(room_name != "Outdoor")
 
 #calculate ratios
-voc <- voc %>%
-  group_by(ID, analyte) %>%
+indoor_040 <- indoor_040 %>%
+  group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = round(as.numeric(voc$conc.)/as.numeric(outdoor$conc.), 2))
-#highlight methane
-methane <- voc %>% 
-  filter(analyte == "methane")
+  mutate(od_ratio = (indoor_040$conc./outdoor_040$conc.))
 
 #UPDATE LOCATIONS FOR THE SITE YOU ARE CURRENTLY WORKING ON Location 1, 2, etc.!
 #location order should be alphabetical
 #subgroups,
 #indoor
-indoor <- voc %>% 
-  filter(ID != "Outdoor")
+indoor_040 <- site_040 %>% 
+  filter(room_name != "Outdoor")
 #bears
-bears <- voc %>% 
-  filter(ID == "Bears")
+bears <- site_040 %>% 
+  filter(room_name == "Bears")
 #frogs
-frogs <- voc %>% 
-  filter(ID == "Frogs")
+frogs <- site_040 %>% 
+  filter(room_name == "Frogs")
 #lesson prep
-lesson_prep <- voc %>% 
-  filter(ID == "Lesson Prep")
+lesson_prep <- site_040 %>% 
+  filter(rrom_name == "Lesson Prep")
 #monkeys
-monkeys <- voc %>% 
-  filter(ID == "Monkeys")
+monkeys <- site_040 %>% 
+  filter(room_name == "Monkeys")
 #office
-office <- voc %>% 
-  filter(ID == "Office")
+office <- site_040 %>% 
+  filter(room_name == "Office")
 
 #data table
 #for data table
@@ -129,35 +108,29 @@ datatable(voc2, colnames = c("Location", "Analyte", "Concentration",
 
 voc2$conc. <- as.numeric(as.character(voc2$conc.))
 
-#for ratio plots
-indoor2 <- voc2 %>% 
-  filter(ID != "Outdoor")
+#boxplot for all analytes
+bp_040 <- site_040 %>% 
+  ggplot(aes(x = reorder(analyte, conc.), y = conc.)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration") +
+  ggtitle("Boxplot for All Ananlytes")
+bp_040
 
-#create category objects
-#Alcohol
-alcohol <- voc2 %>%
-  filter(category == "Alcohol")
-#Aldehyde
-aldehyde <- voc2 %>% 
-  filter(category == "Aldehyde")
-#Straight Chain
-straight_chain <- voc2 %>% 
-  filter(category == "Straight Chain")
-#Aromatic
-aromatic <- voc2 %>% 
-  filter(category == "Aromatic")
-#Btex
-btex <- voc2 %>% 
-  filter(category == "Btex")
-#Chlorinated
-chlorinated <- voc2 %>% 
-  filter(category == "Chlorinated")
-#Ketone
-ketone <- voc2 %>% 
-  filter(category == "Ketone")
-#Other
-other <- voc2 %>% 
-  filter(category == "Other")
+#boxplot of indoor / outdoor ratios for all analytes
+in_or_bp_040 <- indoor_040 %>% 
+  ggplot(aes(x = reorder(analyte, od_ratio), y = od_ratio)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration") +
+  ggtitle("Boxplot for All Indoor to Outoodr Conc. for all Ananlytes")
+in_or_bp_040
  
 #plot all VOCs at site
 voc_plot <- ggplot(voc, aes(x = reorder(analyte, conc.),
