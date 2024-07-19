@@ -1,6 +1,4 @@
 source("source_data.R")
-#load data
-#sites <- read_excel("data/voc_samples_all.xlsx")
 
 #mean conc. for all analytes across ALL indoor locations
 indoor %>% 
@@ -18,7 +16,7 @@ outdoor %>%
 
 #data table
 sites_table <- sites %>% 
-  select(1:3,6,7,16)
+  select(1,2,4,7,9,18)
 datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
                               "Concentration", "Category"),
           options = list(pageLenght = 10), rownames = FALSE,
@@ -78,13 +76,13 @@ bp_indoor <- ggplot(indoor, aes(x = reorder(analyte, conc.),
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: All Indoor Locations in CO\n (n = 11)") +
+  ggtitle("VOC Conectrations: All Indoor Locations in CO\n (n = 18)") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration")
 bp_indoor 
 
 #site_040 boxplot
-donald <- site_040 %>% 
+bp_040 <- site_040 %>% 
   ggplot(aes(x = reorder(analyte, conc.), y = conc.)) +
   geom_boxplot() +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
@@ -92,12 +90,9 @@ donald <- site_040 %>%
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "Concentration")
-donald
+bp_040
 
 #apartments
-apartments_plot <- p_locations(apartments, type = "apartments")
-
-ggplotly(ap_plot, tooltip = "text")
 
 
 #temp living locations
@@ -122,9 +117,20 @@ ggplotly(ap_plot, tooltip = "text")
 
 
 #outdoor concentrations
+#-----------
+
+
+#-----------
+#attempting ratios
 
 
 
+
+
+#-----------
+
+
+#-----------
 #Jade's analysis
 # Plot scatter plots of Average TVOC Values Recorded 
 ggplot(site_040, aes(x = analyte, y = conc., color = type)) +
@@ -336,8 +342,10 @@ voc <- voc %>%
 # Subtract the baseline from the voc values
 voc <- voc %>%
   mutate(voc_baseline_subtracted = voc + baseline_fix)
+#-----------
 
 
+#-----------
 #Ben's help
 # Define the file path for the Excel file
 file_path <- "./data/summa_date_time.xlsx"
@@ -509,4 +517,4 @@ result <- filtered_data %>%
   select(datetime, site_id, id_inst, room, val) %>%
   group_by(site_id, id_inst, room) %>%
   summarise(sum_val = sum(val, na.rm = TRUE))
-
+#-----------
