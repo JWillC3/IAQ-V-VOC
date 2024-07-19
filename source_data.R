@@ -29,6 +29,9 @@ sites <- read_excel("C:/Users/wclagett/Documents/IAQ-V-VOC/data/site_info.xlsx")
 #site 040
 site_040 <- sites %>% 
   filter(site_id == "040")
+#indoor 040
+
+
 #SITE 063 A
 site_063A <- sites %>% 
   filter(name == "High Desert A")
@@ -147,7 +150,16 @@ other <- sites %>%
   filter(category == "other")
 
 
-# # function to plot total voc conc by room
+# function to calculate ratios for each site
+
+# indoor_ratio <- function() {
+#   group_by(room_name, analyte) %>%
+#   ungroup() %>% 
+#   mutate(od_ratio = (indoor_040$conc./outdoor_040$conc.))
+# 
+# }
+
+# function to plot total voc conc by room
 p_conc_room <- function(df, site_id){
 
 ggplot(df, aes(x = reorder(room_name, conc.),
