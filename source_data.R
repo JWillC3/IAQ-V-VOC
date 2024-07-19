@@ -18,74 +18,198 @@ library(readxl)
 library(knitr)
 library(magick)
 
-# Data path
-#path <- "data/"
+#-----------
 
 # read site data
 sites <- read_excel("C:/Users/wclagett/Documents/IAQ-V-VOC/data/site_info.xlsx") %>% 
   select(1:19)
 
+#load limit of detection
+lod <- read_excel("C:/Users/wclagett/Documents/IAQ-V-VOC/data/summa_lod.xlsx") %>% 
+  select(2:4)
+
+#-----------
+
 #sites
 #site 040
 site_040 <- sites %>% 
   filter(site_id == "040")
-#indoor 040
-
+#indoor group
+indoor_040 <- site_040 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_040 <- site_040 %>% 
+  filter(room_name =="Outdoor")
 
 #SITE 063 A
 site_063A <- sites %>% 
   filter(name == "High Desert A")
+#indoor group
+indoor_063A <- site_063A %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_063A <- site_063A %>% 
+  filter(room_name =="Outdoor")
+
 #SITE 063 B
 site_063B <- sites %>% 
   filter(name == "High Desert B")
+#indoor group
+indoor_063B <- site_063B %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_063B <- site_063B %>% 
+  filter(room_name =="Outdoor")
+
 #SITE 066
 site_066 <- sites %>% 
   filter(site_id == "066")
+#indoor group
+indoor_066 <- site_066 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_066 <- site_066 %>% 
+  filter(room_name =="Outdoor")
+
 # SITE 079
 site_079 <- sites %>% 
   filter(site_id == "079")
+#indoor group
+indoor_079 <- site_079 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_079 <- site_079 %>% 
+  filter(room_name =="Outdoor")
+
 # SITE 085
 site_085 <- sites %>% 
   filter(site_id == "085")
+#indoor group
+indoor_085 <- site_085 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_085 <- site_085 %>% 
+  filter(room_name =="Outdoor")
+
 # SITE 086
 site_086 <- sites %>% 
   filter(site_id == "086")
+#indoor group
+indoor_086 <- site_086 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_086 <- site_086 %>% 
+  filter(room_name =="Outdoor")
+
 # SITE 099
 site_099 <- sites %>% 
   filter(site_id == "099")
+#indoor group
+indoor_099 <- site_099 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_099 <- site_099 %>% 
+  filter(room_name =="Outdoor")
+
 # SITE 103
 site_103 <- sites %>% 
   filter(site_id == "103")
+#indoor group
+indoor_103 <- site_103 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_103 <- site_103 %>% 
+  filter(room_name =="Outdoor")
+
 # SITE 107
 site_107 <- sites %>% 
   filter(site_id == "107")
+#indoor group
+indoor_107 <- site_107 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_107 <- site_107 %>% 
+  filter(room_name =="Outdoor")
+
 # site 108
 site_108 <- sites %>% 
   filter(site_id == "108")
+#indoor group
+indoor_108 <- site_108 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_108 <- site_108 %>% 
+  filter(room_name =="Outdoor")
+
 # site 094
 site_094 <- sites %>% 
   filter(site_id == "094")
+#indoor group
+indoor_094 <- site_094 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_094 <- site_094 %>% 
+  filter(room_name =="Outdoor")
+
 #site 106
 site_106 <- sites %>% 
   filter(site_id == "106")
+#indoor group
+indoor_106 <- site_106 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_106 <- site_106 %>% 
+  filter(room_name =="Outdoor")
+
 # site 105
 site_105 <- sites %>% 
   filter(site_id == "105")
+#indoor group
+indoor_105 <- site_105 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_105 <- site_105 %>% 
+  filter(room_name =="Outdoor")
+
 # site 104
 site_104 <- sites %>% 
   filter(site_id == "104")
+
 #site 089
 site_089 <- sites %>% 
   filter(site_id == "089")
+#indoor group
+indoor_089 <- site_089 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_089 <- site_089 %>% 
+  filter(room_name =="Outdoor")
+
 # site 002
 site_002 <- sites %>% 
   filter(site_id == "002")
+#indoor group
+indoor_002 <- site_002 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_002 <- site_002 %>% 
+  filter(room_name =="Outdoor")
+
 # site 101
 site_101 <- sites %>% 
   filter(site_id == "101")
+#indoor group
+indoor_101 <- site_101 %>% 
+  filter(room_name != "Outdoor")
+#outdoor group
+outdoor_101 <- site_101 %>% 
+  filter(room_name =="Outdoor")
+
 # site 109
 site_109 <- sites %>% 
   filter(site_id == "109")
+
+#-----------
 
 #locations
 table(sites$type)
@@ -123,7 +247,9 @@ medical <- sites %>%
 indoor <- sites %>% 
   filter(type != "Outdoor")
 
-#analyte category objects
+#-----------
+
+#analyte categories
 #Alcohol
 alcohol <- sites %>%
   filter(category == "alcohol")
@@ -149,17 +275,14 @@ ketone <- sites %>%
 other <- sites %>% 
   filter(category == "other")
 
+#-----------
 
-# function to calculate ratios for each site
+#functions
 
-# indoor_ratio <- function() {
-#   group_by(room_name, analyte) %>%
-#   ungroup() %>% 
-#   mutate(od_ratio = (indoor_040$conc./outdoor_040$conc.))
-# 
-# }
+#calculate ratios for each site
 
-# function to plot total voc conc by room
+#to plot total voc conc by room
+
 p_conc_room <- function(df, site_id){
 
 ggplot(df, aes(x = reorder(room_name, conc.),
@@ -174,6 +297,7 @@ ggplot(df, aes(x = reorder(room_name, conc.),
 }
 
 #location type plots
+
 p_locations <- function(df, type){
   
   ggplot(df, aes(x = reorder(analyte, conc.),
@@ -198,6 +322,7 @@ p_locations <- function(df, type){
 }
 
 #analyte category plots
+
 p_category <- function(df, category){
   
   ggplot(df, aes(x = reorder(analyte, conc.),
