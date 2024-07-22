@@ -1,3 +1,4 @@
+#-----------
 # Libraries
 library(tidyverse)
 library(plyr)
@@ -17,9 +18,10 @@ library(plotly)
 library(readxl)
 library(knitr)
 library(magick)
+library(corrr)
+
 
 #-----------
-
 # read site data
 sites <- read_excel("C:/Users/wclagett/Documents/IAQ-V-VOC/data/site_info.xlsx") %>% 
   select(1:19)
@@ -28,8 +30,8 @@ sites <- read_excel("C:/Users/wclagett/Documents/IAQ-V-VOC/data/site_info.xlsx")
 lod <- read_excel("C:/Users/wclagett/Documents/IAQ-V-VOC/data/summa_lod.xlsx") %>% 
   select(2:4)
 
-#-----------
 
+#-----------
 #sites
 #site 040
 site_040 <- sites %>% 
@@ -209,8 +211,9 @@ outdoor_101 <- site_101 %>%
 site_109 <- sites %>% 
   filter(site_id == "109")
 
-#-----------
 
+
+#-----------
 #locations
 table(sites$type)
 #outdoor
@@ -247,8 +250,9 @@ medical <- sites %>%
 indoor <- sites %>% 
   filter(type != "Outdoor")
 
-#-----------
 
+
+#-----------
 #analyte categories
 #Alcohol
 alcohol <- sites %>%
@@ -275,14 +279,173 @@ ketone <- sites %>%
 other <- sites %>% 
   filter(category == "other")
 
-#-----------
 
+
+#-----------
 #functions
 
-#calculate ratios for each site
+#data table object
+data_table <- function(sites, site_id){
+  filtered_table <- sites %>%
+    filter(site_id == !!site_id) %>% 
+    select(4, 7, 9, 18)
+  
+  return(filtered_table)
+  
+}
+
+#data table
+site_dt <- function(data, site_id) {
+  datatable(data, colnames = c("Location", "Analyte", "Concentration", "Category"),
+            options = list(pageLength = 10), rownames = FALSE,
+            caption = paste("Site"
+                            , site_id, "Table, Concentrations: ppb(v) or methane ppb(v)"))
+}
+
+#Get top n analytes
+top_n_analytes <- function(data, n = 61) {
+  top_analytes <- data %>% 
+    group_by(analyte) %>% 
+    arrange(desc(conc.)) %>% 
+    ungroup() %>% 
+    top_n(n, conc.)
+  
+  return(top_analytes)
+  
+}
+
+#Get top 10 ratios
+top_n_or <- function(data, room_name, n = 61) {
+  top_n_or <- data %>% 
+  filter(room_name == room_name) %>% 
+  group_by(analyte) %>% 
+  arrange(desc(od_ratio)) %>% 
+    ungroup() %>% 
+    top_n_or(n, od_ratio)
+  
+  return(top_n_or)
+
+}
+
+
+#from chat gpt for the above
+get_top_analytes <- function(data, room_name, n = 5) {
+  top_analytes <- data %>% 
+    filter(room_name == room_name) %>% 
+    group_by(analyte) %>% 
+    arrange(desc(od_ratio)) %>% 
+    ungroup() %>% 
+    top_n(n, od_ratio)
+  
+  return(top_analytes)
+}
+
+#-----------
+#plot functions
+
+#box plot 
+box_plot <- function(df){
+   
+  ggplot(df, aes(x = reorder(analyte, conc.), y = conc.)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration") +
+  ggtitle("Boxplot for All Ananlytes")
+  
+}
+
+
+#all analytes plots by room id
+p_site <- function(df, site_id){
+  
+  ggplot(df, aes(x = reorder(analyte, conc.),
+                              y = conc., color = room_name,
+                 text = paste("Analyte: ", analyte,
+                              "<br> Conc. :", conc.,
+                              "<br> Class: ", category))) +
+  geom_point(shape = 18, size = 5, alpha = 0.5) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Analytes", y = "Concentration\n(VOC ppbv or methane ppmv)") +
+  ggtitle(paste0("Site: ", site_id, " Summa Canister Deployment")) +
+  scale_color_manual(name = "Room ID",
+                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                "tomato2", "midnightblue")) 
+  
+}
+
+
+#top 10 analytes plot for site
+top_plot <- function(df, site_id, fill){
+  
+  ggplot(df, aes(x = reorder(analyte, conc.), y = conc.)) +
+    geom_bar(stat = "identity", fill = fill) +
+    labs(x = "Analyte", y = "Concentration (ppb)") +
+    ggtitle(paste0("Site: ", site_id, " Top 10 Analytes")) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+  
+}
+
+
+#top 10 analytes plot for loactions
+loc_top_plot <- function(df, fill, location){
+  
+  ggplot(df, aes(x = reorder(analyte, conc.), y = conc.)) +
+    geom_bar(stat = "identity", fill = fill) +
+    labs(x = "", y = "") +
+    ggtitle(location) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+  
+}
+
+#ratios box plot
+r_box_plot <- function(df){
+  
+  ggplot(df, aes(x = reorder(analyte, conc.), y = conc.)) +
+    geom_boxplot() +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+    labs(x = "Ananlyte", y = "Concentration") +
+    ggtitle("Boxplot for All Indoor Ananlytes")
+  
+}
+
+#ratio plot for all locations
+r_p_site <- function(df, site_id){
+  
+  ggplot(df, aes(x = reorder(analyte, od_ratio),
+                 y = od_ratio, color = room_name,
+                 text = paste("Analyte: ", analyte,
+                              "<br> Conc. :", conc.,
+                              "<br> Class: ", category))) +
+    geom_point(shape = 18, size = 5, alpha = 0.5) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+    labs(x = "Analytes", y = "Concentration\n(VOC ppbv or methane ppmv)") +
+    ggtitle(paste0("Site: ", site_id, " Indoor to Outdoor Ratios")) +
+    scale_color_manual(name = "Room ID",
+                       values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                  "tomato2", "midnightblue")) 
+  
+}
+
 
 #to plot total voc conc by room
-
 p_conc_room <- function(df, site_id){
 
 ggplot(df, aes(x = reorder(room_name, conc.),
@@ -297,7 +460,6 @@ ggplot(df, aes(x = reorder(room_name, conc.),
 }
 
 #location type plots
-
 p_locations <- function(df, type){
   
   ggplot(df, aes(x = reorder(analyte, conc.),
@@ -322,7 +484,6 @@ p_locations <- function(df, type){
 }
 
 #analyte category plots
-
 p_category <- function(df, category){
   
   ggplot(df, aes(x = reorder(analyte, conc.),
@@ -349,3 +510,77 @@ p_category <- function(df, category){
 }
 
 
+#facet wrap plot by cansiter location
+fct_wrap <- function(df, site_id){
+  ggplot(df, aes(x = reorder(analyte, conc.),
+                     y = conc.)) +
+  geom_point(color = "#50C878", size = 3, shape = 18, alpha = 0.5) +
+  xlab("Analytes") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  facet_wrap(~room_name, scales = "free_y") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
+  labs(x = "Analytes",
+       y = expression(atop("Concentration",
+                           paste("(VOC ppbv or methane ppmv)")))) +
+  ggtitle(paste0("Site ", site_id," Summa Cannister Deployment",
+          "Grouped by Cannister Location"))
+  
+}
+
+#facet wrap plot by analyte category
+cat_fct_wrap <- function(df, site_id){
+  ggplot(df, aes(x = reorder(analyte, conc.),
+                 y = conc.)) +
+    geom_point(color = "#50C878", size = 3, shape = 18, alpha = 0.5) +
+    xlab("Analytes") +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    facet_wrap(~category, scales = "free_y") +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
+    labs(x = "Analytes",
+         y = expression(atop("Concentration",
+                             paste("(VOC ppbv or methane ppmv)")))) +
+    ggtitle(paste0("Site ", site_id," Summa Cannister Deployment",
+                   "Grouped by Analyte Category"))
+  
+}
+
+#facet wrap plot for ratios
+r_fct_wrap <- function(df, site_id){
+  
+  ggplot(df, aes(x = reorder(analyte, od_ratio),
+                         y = conc.)) +
+    geom_point(color = "#50C878", size = 3, shape = 18, alpha = 0.5) +
+    xlab("Analytes") +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    facet_wrap(~ category, scales = "free_y") +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
+    labs(x = "Analytes",
+         y = expression(atop("Indoor to Otdoor Ratios",
+                             paste("(VOC ppbv or methane ppmv)")))) +
+    ggtitle(paste0("Site ", site_id," Indoor to Outdoor Ratios"))
+  
+  
+}
+
+#plot for indiviudal rooms
+
+room_plot <- function(df, site_id, location){
+  
+  ggplot(df, aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
+    geom_point(color = "midnightblue", shape = 18, size = 5) +
+    scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+    theme(legend.position = "none") +
+    labs(x = "Analytes",
+         y = expression(atop("Concentration",
+                             paste("(VOC ppbv or methane ppmv)")))) +
+    ggtitle(paste0("Site ", site_id, paste0(" - ", (location))))
+  
+}
