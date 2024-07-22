@@ -8,9 +8,6 @@ source("source_data.R")
 #for plot colors: Location 1: "orchid", Location 2: "chocolate4",
 #Location 3: "goldenrod2",Location 4: "#50C878",
 #Location 5: "tomato2", Location 6: "midnightblue"
-#make sure to slice and select the correct rows! Will not be the same for all sites
-#load data
-
 
 #calculate ratios
 indoor_040 <- indoor_040 %>%
@@ -39,113 +36,32 @@ office <- site_040 %>%
 
 #data table
 
-site_040_table <- sites %>% 
-  select(4,7,9,18)
+site_040_table <- data_table(sites, "040")
 
-datatable(site_040_table, colnames = c("Location", "Analyte", "Concentration",
-                                    "Category"),
-          options = list(pageLenght = 10), rownames = FALSE,
-          caption = "Site 040 Table, Concentrations: ppb(v) or methane ppb(v)")
-
+site_dt(site_040_table, "040")
 
 #boxplot for all analytes
 
-bp_040 <- site_040 %>% 
-  ggplot(aes(x = reorder(analyte, conc.), y = conc.)) +
-  geom_boxplot() +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  ggtitle("Boxplot for All Ananlytes")
+bp_040 <- box_plot(site_040)
 bp_040
 
-
 #plot all VOCs at site
-p_040 <- ggplot(site_040, aes(x = reorder(analyte, conc.),
-                            y = conc., color = room_name)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.)) +
-  # guides(size = "none") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Analytes", y = "Concentration\n(VOC ppbv or methane ppmv)",
-       title = "Site 040 - Teaching Tree (Post), Summa Cannister Deployment\nOct. 24 - Oct. 31, 2023. Fort Collins, CO",
-       caption = "6 canisters deployed throughout site\n5 indoor: 4 first floor, 1 second floor\n1 outdoor, roof top")
-  
-p_040 +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  theme(legend.title = element_text(color = "black", face = "bold", size = 10),
-        legend.text = element_text(color = "#261e1b"),
-        legend.background = element_rect(color = "black"),
-        legend.key.height= unit(1, 'cm'),
-        legend.key.width= unit(2, 'cm'),
-        axis.line = element_line(color = "black"),
-        axis.text.y = element_text(size = 13))
-        #panel.grid.minor = element_line("black""))
-        #panel.grid.major = element_line("black"),
-        #plot.background = element_rect("#DADBDD"))
+p_040 <- p_site(site_040, "040")
 
-
+p_040
 #plotly output but y axis not formatted correctly and don't know how to fix
-#WHEN ADDING THIS TO RMD MAKE SURE TO CHANGE THE DF TO INLCUDE LONG CAT NAMES
-p_040_2 <- ggplot(site_040, aes(x = reorder(analyte, conc.),
-                              y = conc., color = room_name,
-                              text = paste("Analyte: ", analyte,
-                                           "<br> Conc. :", conc.,
-                                           "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 4, alpha = 0.5) +
-  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
-                labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() + #try using different themes here
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  xlab("Analytes") +
-  ylab("Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment, Oct. 24 - 31, 2023")
-
-ggplotly(p_040_2, tooltip = "text")
+ggplotly(p_040, tooltip = "text")
 
 #top 10 analyte concentrations for all locations
-site_040_top <- site_040 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-site_040_top <- top_n(ungroup(site_040_top), 25, conc.)
+site_040_top <- top_n_analytes(site_040, n = 25)
 
-site_040_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "chocolate4") +
-  labs(x = "Analyte", y = "Concentration") +
-  ggtitle("Site 040 (post) Top 10 Analytes") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
+site_040_top <- top_plot(site_040_top, "040")
+site_040_top
 
 #facet wrap by location
-p_040_fctw <- ggplot(site_040, aes(x = reorder(analyte, conc.),
-                            y = conc.)) +
-  geom_point(color = "#50C878", size = 3, shape = 18, alpha = 0.5) +
-  xlab("Analytes") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  facet_wrap(~room_name, scales = "free_y") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment",
-            "Grouped by Cannister location")
-p_040_fctw
+p_040_fctw <- fct_wrap(site_040, "040")
+
+p_040_fctw 
 
 #leave this out for now
 #Two plots together not joined
@@ -173,114 +89,34 @@ p_040_cat_fctw
 
 #indoor facet wrap by analyte class
 
-p_040_cat_fctw <- ggplot(indoor_040, aes(x = reorder(analyte, conc.),
-                                       y = conc.)) +
-  geom_point(color = "#50C878", size = 3, shape = 18, alpha = 0.5) +
-  xlab("Analytes") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  facet_wrap(~ category, scales = "free_y") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
-  labs(x = "Analytes",
-       y = expression(atop("Indoor Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment",
-          "Grouped by Analyte Category")
+p_040_cat_fctw <- cat_fct_wrap(indoor_040, "040")
 p_040_cat_fctw
 
 #plots for each room
 #outdoor
-p_040od <- outdoor_040 %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
-  geom_point(color = "midnightblue", shape = 18, size = 5) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site 040 - Teaching Tree (Post), Outdoor (Rooftop)")
+
+p_040od <- room_plot(outdoor_040, "040 Outdoor", "Rooftop")
+
 p_040od
 
 #bears
-p_bears <- bears %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
-  geom_point(color = "orchid", shape = 18, size = 5) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site 040 - Teaching Tree (Post), Bears",
-          "first floor classroom")
+p_bears <- room_plot(bears, "040", "Bears, first floor classroom")
 p_bears
 
 #frogs
-p_frogs <- frogs %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
-  geom_point(color = "chocolate4", shape = 18, size = 5) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site 040 - Teaching Tree (Post), Frogs",
-          "first floor classroom")
+p_frogs <- room_plot(frogs, "040", "Frogs, first floor classroom")
 p_frogs
 
 #lesson_prep
-p_lesson_prep <- lesson_prep %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
-  geom_point(color = "goldenrod2", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6)) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site 040 - Teaching Tree (Post), Lesson Prep",
-          "second floor office")
+p_lesson_prep <- room_plot(lesson_prep, "040", "Lesson Prep, second floor office")
 p_lesson_prep
 
 #monkeys
-p_monkeys <- monkeys %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
-  geom_point(color = "#50C878", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6, color ="red")) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site 040 - Teaching Tree (Post), Monkeys",
-          "first floor classroom")
+p_monkeys <- room_plot(monkeys, "040", "Monkeys, first floor classroom")
 p_monkeys
 
 #office
-p_office <- office %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
-  geom_point(color = "tomato2", shape = 18, size = 5) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("040 - Site Teaching Tree (Post), Office",
-          "first floor office")
+p_office <- room_plot(office, "040", "Large Office, first floor")
 p_office
 
 #all rooms
@@ -293,196 +129,79 @@ grid.arrange(p_bears, p_frogs, p_monkeys, p_lesson_prep, p_office, p_040od,
 #create object of the top 5 analytes by conc. for the indoor locations then plot
 #bears
 #testing something new for scale y in this plot
-bears_top <- bears %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-bears_top <- top_n(ungroup(bears_top), 5, conc.) 
+bears_top <- top_n_analytes(bears, n = 10)
 
-p_bears_top <- bears_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "orchid") +
-  labs(x = "Bears", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
+p_bears_top <- loc_top_plot(bears_top, "orchid", "Bears")
+
 p_bears_top
 
 #frogs
-frogs_top <- frogs %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-frogs_top <- top_n(ungroup(frogs_top), 5, conc.)
+frogs_top <- top_n_analytes(frogs, n = 10)
 
-p_frogs_top <- frogs_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "chocolate4") +
-  labs(x = "Frogs", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
+p_frogs_top <- loc_top_plot(frogs_top, "chocolate4", "Frogs")
+
 p_frogs_top
 
 #lesson_prep
-lesson_prep_top <- lesson_prep %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-lesson_prep_top <- top_n(ungroup(lesson_prep_top), 5, conc.)
+lesson_prep_top <- top_n_analytes(lesson_prep, n = 10)
 
-p_lesson_prep_top <- lesson_prep_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "goldenrod2") +
-  labs(x = "Lesson Prep", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
+p_lesson_prep_top <- loc_top_plot(lesson_prep_top, "goldenrod2", "Lesson Prep")
+
 p_lesson_prep_top
 
 #monkeys
-monkeys_top <- monkeys %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-monkeys_top <- top_n(ungroup(monkeys_top), 5, conc.)
+monkeys_top <- top_n_analytes(monkeys, n = 10)
 
-p_monkeys_top <- monkeys_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "#50C878") +
-  labs(x = "Monkeys", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
+p_monkeys_top <- loc_top_plot(monkeys_top, "#50c878", "Monkeys")
+
 p_monkeys_top
 
 #office
-office_top <- office %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-office_top <- top_n(ungroup(office_top), 6, conc.)
+office_top <- top_n_analytes(office, n = 10)
 
-p_office_top <- office_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "tomato2") +
-  labs(x = "Office", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
+p_office_top <- loc_top_plot(office_top, "tomato2", "Office")
+
 p_office_top
 
 #outdoor
-od_top <- outdoor %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-od_top <- top_n(ungroup(od_top), 10, conc.)
+outdoor_top <- top_n_analytes(outdoor_040, n = 10)
 
-p_od_top <- od_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "midnightblue") +
-  labs(x = "Outdoor", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_od_top
+p_outdoor_top <- loc_top_plot(outdoor_top, "midnightblue", "Outdoor")
+
+p_outdoor_top
 
 #all locations
 grid.arrange(p_bears_top, p_frogs_top, p_lesson_prep_top,
-             p_monkeys_top, p_office_top, p_od_top,
+             p_monkeys_top, p_office_top, p_outdoor_top,
              ncol = 3, nrow = 2,
-             top = "Top 5 Analytes at Each Location",
+             top = "Top 10 Analytes at Each Location",
              left = "Concentration\n(VOC ppbv or methane ppmv)")
 
 #indoor, outdoor ratio 
 
 #boxplot of indoor / outdoor ratios for all analytes
-p_040_bp <- indoor_040 %>% 
-  ggplot(aes(x = reorder(analyte, od_ratio), y = od_ratio)) +
-  geom_boxplot() +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  ggtitle("Boxplot for All Indoor to Outoodr Ratios")
+p_040_bp <- r_box_plot(indoor_040)
 
 p_040_bp
 
 #indoor to outdoor ratio plot for all analytes
-p_040_ratio <- ggplot(indoor_040, aes(x = reorder(analyte, od_ratio),
-                              y = od_ratio, color = room_name)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab("Indoor to Outdoor Ratios\n Concentration Ratios") +
-  ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment",
-          "Oct. 24 - Oct. 31, 2023. Fort Collins, CO")
-p_040_ratio +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  theme(legend.title = element_text(color = "black", face = "bold", size = 10),
-        legend.text = element_text(color = "#261e1b"),
-        legend.background = element_rect(color = "black"),
-        legend.key.height= unit(1, 'cm'),
-        legend.key.width= unit(2, 'cm'),
-        axis.line = element_line(color = "black"),
-        axis.text.y = element_text(size = 13))
-      #panel.grid.minor = element_line("black""))#,
-      #panel.grid.major = element_line("black"),
-      #plot.background = element_rect("#DADBDD"))
+p_040_ratio <- r_p_site(indoor_040, "040")
+
+p_040_ratio
 
 #plotly ratio
-p_040_r <- ggplot(indoor_040, aes(x = reorder(analyte, od_ratio),
-                              y = od_ratio, color = room_name,
-                              text = paste("Analyte: ", analyte,
-                                           "<br> Conc. :", od_ratio,
-                                           "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 4, alpha = 0.5) +
-  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
-                labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() + #try using different themes here
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  xlab("Analytes") +
-  ylab("Indoor to Outdoor Ratios\n Concentration Ratios") +
-  ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment: Oct. 24 - Oct. 31, 2023. Fort Collins, CO")
+ggplotly(p_040_ratio, tooltip = "text")
 
-ggplotly(p_040_r, tooltip = "text")
 
 #ratio plot with facet wrap
+p_040_r_fctw <- r_fct_wrap(indoor_040, "040")
 
-p_040_r_fctw <- ggplot(indoor_040, aes(x = reorder(analyte, od_ratio),
-                                         y = conc.)) +
-  geom_point(color = "#50C878", size = 3, shape = 18, alpha = 0.5) +
-  xlab("Analytes") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  facet_wrap(~ category, scales = "free_y") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
-  labs(x = "Analytes",
-       y = expression(atop("Indoor to Otdoor Ratios",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment",
-          "Grouped by Analyte Category")
 p_040_r_fctw
 
 #create object of the top 5 analytes by outdoor ratio then plot
 #bears od ratio
+bears_top_or <- top_n_or(indoor_040, "Bears", 10)
+
 bears_top_or <- indoor_040 %>% 
   filter(room_name == "Bears") %>% 
   group_by(analyte) %>% 
