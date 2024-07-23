@@ -391,34 +391,18 @@ twa_040
 ## Top 10 analytes across all sites
 
 ```{r top_10 analytes, message=FALSE, warning=FALSE}
+#chnage number to fetch the top 10, may need to use a number < 10
+sites_top <- top_n_analytes(sites, 45)
 
-top_10 <- sites %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-top_10 <- top_n(ungroup(top_10), 10, conc.)
-
-p_top_10 <- top_10 %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "tomato") +
-  labs(x = "Aanalyte", y = "Concentration ppb(v)") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
-p_top_10
-
-```
-```{r}
-sites %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "tomato") +
-  labs(x = "Aanalyte", y = "Concentration ppb(v)") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+ggplot(sites, aes(x = reorder(analyte, conc.), y = conc.)) +
+    geom_bar(stat = "identity", fill = fill) +
+    labs(x = "Analyte", y = "Concentration (ppb)") +
+    ggtitle("Top 10 Analytes Across All Sites") +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+  
 
 ```
 
@@ -435,8 +419,6 @@ donald <- sites %>%
   ungroup() %>% 
   mutate(od_ratio = donald$conc. / outdoor$conc.)
 
-donald <-  donald %>% 
-  mutate(od_ratio = round(od_ratio, 2))
 
 ```
 
