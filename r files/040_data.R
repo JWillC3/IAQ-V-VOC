@@ -55,7 +55,7 @@ ggplotly(p_040, tooltip = "text")
 #top 10 analyte concentrations for all locations
 site_040_top <- top_n_analytes(site_040, n = 25)
 
-site_040_top <- top_plot(site_040_top, "040")
+site_040_top <- top_plot(site_040_top, "040", fill = "blue")
 site_040_top
 
 #facet wrap by location
@@ -104,7 +104,7 @@ p_bears <- room_plot(bears, "040", "Bears, first floor classroom")
 p_bears
 
 #frogs
-p_frogs <- room_plot(frogs, "040", "Frogs, first floor classroom")
+p_frogs <- room_plot(frogs, "040", "red", "Frogs, first floor classroom")
 p_frogs
 
 #lesson_prep
