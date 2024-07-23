@@ -53,12 +53,16 @@ ggplotly(p_XXX, tooltip = "text")
 #top 10 analyte concentrations for all locations
 site_XXX_top <- top_n_analytes(site_XXX, 45)
 
-site_XXX_top <- top_plot(site_XXX_top, "XXX", fill = "blue")
+site_XXX_top <- top_plot(site_XXX_top, "XXX", fill = "darkgreen")
 site_XXX_top
 
 #facet wrap by location
 p_XXX_fctw <- fct_wrap(site_XXX, "XXX")
 p_XXX_fctw 
+
+#facet wrap by indoor location
+p_XXXi_fctw <- fct_wrap(indoor_XXX, "XXX")
+p_XXXi_fctw 
 
 #leave this out for now
 #Two plots together not joined
@@ -67,24 +71,11 @@ p_XXX_fctw
 #   plot_layout(nrow = 2, heights = c(1, 2))
 
 #facet wrap all analytes grouped by class
-p_XXX_cat_fctw <- ggplot(site_XXX, aes(x = reorder(analyte, conc.),
-                                       y = conc.)) +
-  geom_point(color = "orange", size = 3, shape = 18, alpha = 0.5) +
-  xlab("Analytes") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  facet_wrap(~ category, scales = "free_y") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX - [Site Name] , Summa Cannister Deployment",
-          "Grouped by Analyte Category")
-p_XXX_cat_fctw
+p_XXXi_cat_fctw <- cat_fct_wrap(indoor_XXX, "#50C878", "XXX")
+p_XXXi_cat_fctw
 
 #indoor facet wrap by analyte class
-p_XXX_cat_fctw <- cat_fct_wrap(indoor_XXX, "XXX")
+p_XXX_cat_fctw <- cat_fct_wrap(site_XXX, "XXX")
 p_XXX_cat_fctw
 
 #plots for each room
