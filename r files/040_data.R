@@ -53,7 +53,7 @@ ggplotly(p_040, tooltip = "text")
 #top 10 analyte concentrations for all locations
 site_040_top <- top_n_analytes(site_040, n = 45)
 
-site_040_top <- top_plot(site_040_top, "040", fill = "blue")
+site_040_top <- top_plot(site_040_top, "040", fill = "darkgreen")
 site_040_top
 
 #facet wrap by location
@@ -67,24 +67,11 @@ p_040_fctw
 #   plot_layout(nrow = 2, heights = c(1, 2))
 
 #facet wrap all analytes grouped by class
-p_040_cat_fctw <- ggplot(site_040, aes(x = reorder(analyte, conc.),
-                                   y = conc.)) +
-  geom_point(color = "orange", size = 3, shape = 18, alpha = 0.5) +
-  xlab("Analytes") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  facet_wrap(~ category, scales = "free_y") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site 040 - Teaching Tree (Post), Summa Cannister Deployment",
-          "Grouped by Analyte Category")
-p_040_cat_fctw
+p_040i_cat_fctw <- cat_fct_wrap(indoor_040, "#50C878", "040")
+p_040i_cat_fctw
 
 #indoor facet wrap by analyte class
-p_040_cat_fctw <- cat_fct_wrap(indoor_040, "040")
+p_040_cat_fctw <- cat_fct_wrap(site_040, "orange", "040")
 p_040_cat_fctw
 
 #plots for each room
