@@ -570,10 +570,10 @@ r_fct_wrap <- function(df, site_id){
 
 #plot for indiviudal rooms
 
-room_plot <- function(df, site_id, location){
+room_plot <- function(df, site_id, color, location){
   
-  ggplot(df, aes(x = reorder(analyte, conc.), y = conc., color = room_name)) +
-    geom_point(color = "midnightblue", shape = 18, size = 5) +
+  ggplot(df, aes(x = reorder(analyte, conc.), y = conc.)) +
+    geom_point(color = color, shape = 18, size = 5) +
     scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
     theme_bw() +
     theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
