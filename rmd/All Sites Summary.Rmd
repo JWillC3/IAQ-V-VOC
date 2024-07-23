@@ -1,29 +1,13 @@
 ---
 title: "Summa Canister Sites Summary, VOC Data"
-author: "Dr. Carter, Will Clagett, Jade Lippmann"
+author: "Dr. Ellison Carter, Will Clagett, Jade Lippmann"
 date: "2022 Oct - 2024 May"
 output: html_document
 ---
 
-```{r packages, include=FALSE}
-library(tidyverse)
-library(plyr)
-library(faraway)
-library(cowplot)
-library(reshape2)
-library(corrplot)
-library(scales)
-library(ggthemes)
-library(gridExtra)
-library(patchwork)
-library(gghighlight)
-library(ggdark)
-library(viridis)
-library(DT)
-library(plotly)
-library(readxl)
-library(knitr)
-library(magick)
+```{r load_packages_data, include=FALSE}
+
+source("../source_data.R")
 
 ```
 
@@ -61,10 +45,12 @@ From October 2022 to May 2024 we deployed Summa Canisters at 18 of the 50 CDPHE 
 | 094. Ability Advocates, Pagosa Springs |
 | 108. The Phoenix, Denver |
 | 106. Lawrence St. Shelter, Denver |
-| 109. Amaryllis, Denver |
+| 109. Amaryllis Therapy Network, Denver |
 | 105. Lawrence St. Center, Denver |
-| 101. Silverkey, Colorado Springs |
-| 104. CCS, Colorado Springs |
+| 101. Silverkey Senior Services, Colorado Springs |
+| 104. Child Community Services, Colorado Springs |
+| 089. Cortez Public Library, Cortez |
+| 002. Routt Co. Detention Center, Steamboat Springs |
 
 | Room type categories |
 |:------|
@@ -77,149 +63,22 @@ From October 2022 to May 2024 we deployed Summa Canisters at 18 of the 50 CDPHE 
 | 7. Lobbys/waiting rooms |
 | 8. Recreation*/Gyms |
 | 9. Medical/clinic exam rooms |
-| 10. Other
+| 10. Corridors**
 
 
 *includes open spaces for social gathering and general activity areas
+** includes hallways, balcony, etc.
 
 
 ---
 
-```{r load_data, include=FALSE}
-
-# read site data
-sites <- read_excel("../data/voc_samples_all.xlsx")
-
-#sites
-#site 040
-site_040 <- sites %>% 
-  filter(site_id == "040")
-#SITE 063 A
-site_063A <- sites %>% 
-  filter(site_id == "063 A")
-#SITE 063 B
-site_063B <- sites %>% 
-  filter(site_id == "063 B")
-#SITE 066
-site_066 <- sites %>% 
-  filter(site_id == "066")
-# SITE 079
-site_079 <- sites %>% 
-  filter(site_id == "079")
-# SITE 085
-site_085 <- sites %>% 
-  filter(site_id == "085")
-# SITE 086
-site_086 <- sites %>% 
-  filter(site_id == "086")
-# SITE 099
-site_099 <- sites %>% 
-  filter(site_id == "099")
-# SITE 103
-site_103 <- sites %>% 
-  filter(site_id == "103")
-# SITE 107
-site_107 <- sites %>% 
-  filter(site_id == "107")
-# site 108
-site_108 <- sites %>% 
-  filter(site_id == "108")
-# site 094
-site_094 <- sites %>% 
-  filter(site_id == "094")
-#site 106
-site_106 <- sites %>% 
-  filter(site_id == "106")
-# site 105
-site_105 <- sites %>% 
-  filter(site_id == "105")
-# site 104
-site_104 <- sites %>% 
-  filter(site_id == "104")
-#site 089
-site_089 <- sites %>% 
-  filter(site_id == "089")
-# site 002
-site_002 <- sites %>% 
-  filter(site_id == "002")
-# site 101
-site_101 <- sites %>% 
-  filter(site_id == "101")
-# site 109
-site_109 <- sites %>% 
-  filter(site_id == "109")
-
-#locations
-table(sites$type)
-#outdoor
-outdoor <- sites %>% 
-  filter(type == "Outdoor")
-#kitchens
-kitchens <- sites %>% 
-  filter(type =="kitchen/dining")
-#staff locations
-offices <- sites %>% 
-  filter(type %in% c("office" , "lounge"))
-#classrooms
-classrooms <- sites %>% 
-  filter(type == "classroom")
-#temp living
-temp_living <- sites %>% 
-  filter(type == "barrack")
-#apartments
-apartments <- sites %>% 
-  filter(type == "apartment")
-#lobbys
-lobby <- sites %>% 
-  filter(type == "lobby")
-#others
-other <- sites %>% 
-  filter(type == "other")
-#recreation
-recreation <- sites %>% 
-  filter(type == "recreation")
-#medical
-medical <- sites %>% 
-  filter(type == "exam")
-#indoor locations
-indoor <- sites %>% 
-  filter(type != "Outdoor")
-
-#analyte category objects
-#Alcohol
-alcohol <- sites %>%
-  filter(category == "alcohol")
-#Aldehyde
-aldehyde <- sites %>% 
-  filter(category == "aldehyde")
-#Straight Chain
-straight_chain <- sites %>% 
-  filter(category == "straight chain")
-#Aromatic
-aromatic <- sites %>% 
-  filter(category == "aromatic")
-#Btex
-btex <- sites %>% 
-  filter(category == "btex")
-#chlorinated
-chlorinated <- sites %>% 
-  filter(category == "chlorinated")
-#Ketone
-ketone <- sites %>% 
-  filter(category == "ketone")
-#Other
-other <- sites %>% 
-  filter(category == "other")
-
-#data table
-sites_table <- sites %>% 
-  select(1:3,6,7,16)
-
-```
-
 
 ## Data Table
 ```{r data_table, warning=FALSE,message=FALSE}
+#data table
+sites_table <- sites %>% 
+  select(1:4,7,9,18)
+
 datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
                               "Concentration", "Category"),
           options = list(pageLenght = 10), rownames = FALSE,
@@ -229,7 +88,7 @@ datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
 
 ---
 
-## Summary Plots of all VOC Locations
+## Box Plot of VOC Concentrations for Indoor Locations
 
 ```{r boxplot, dpi= 250, warning=FALSE, message=FALSE}
 
@@ -241,61 +100,29 @@ bp_indoor <- ggplot(indoor, aes(x = reorder(analyte, conc., FUN = median),
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
-  ggtitle("VOC Conectrations: All Indoor Locations in CO\n (n = 11)") +
+  ggtitle("VOC Conectrations: All Indoor Locations in CO\n (n = 18)") +
   theme(axis.text.x = element_text(size = 7, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration")
+  labs(x = "Ananlyte", y = "Concentration ppb(v)")
 bp_indoor 
 
 ```
-
+## Summary Plots of all Location Types
 
 ```{r kitchens_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 #kitchen/dinning locations
-pc_kitchens <- ggplot(kitchens, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = site_id,
-                                  text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.,
-                                               "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  ggtitle("VOC Conectrations: Kitchen & Dining Locations in CO") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  scale_color_manual(name = "Site ID",
-                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc"))
-ggplotly(pc_kitchens, tooltip = "text")
+
+p_kitchens <- p_locations(kitchens, "Kitchen & Dining")
+
+ggplotly(p_kitchens, tooltip = "text")
 
 ```
 
 
 ```{r staff_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
-
 #staff locations
-pc_offices <- ggplot(offices, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = site_id,
-                                  text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.,
-                                               "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  ggtitle("VOC Conectrations: Staff Locations in CO") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  scale_color_manual(name = "Site ID",
-                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc"))
-ggplotly(pc_offices, tooltip = "text")
+p_offices <- p_locations(offices, "Office")
+
+ggplotly(p_offices, tooltip = "text")
 
 ```
 
@@ -303,25 +130,9 @@ ggplotly(pc_offices, tooltip = "text")
 ```{r classrooms_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #classroom locations
-pc_classrooms <- ggplot(classrooms, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = site_id,
-                                  text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.,
-                                               "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  ggtitle("VOC Conectrations: Classrooms in CO") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  scale_color_manual(name = "Site ID",
-                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc"))
-ggplotly(pc_classrooms, tooltip = "text")
+p_classrooms <- p_locations(classrooms, "Classroom")
+  
+ggplotly(p_classrooms, tooltip = "text")
 
 
 ```
@@ -330,50 +141,18 @@ ggplotly(pc_classrooms, tooltip = "text")
 ```{r templiving_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #temp living locations
-pc_temp_living <- ggplot(temp_living, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = site_id,
-                                  text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.,
-                                               "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  ggtitle("VOC Conectrations: Temp Living Locations in CO") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  scale_color_manual(name = "Site ID",
-                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc"))
-ggplotly(pc_temp_living, tooltip = "text")
+p_temp_living <- p_locations(temp_living, "Temp. Living")
+  
+ggplotly(p_temp_living, tooltip = "text")
 
 ```
 
 
 ```{r apartments_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 #apartment locations
-pc_apartments <- ggplot(apartments, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = site_id,
-                                  text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.,
-                                               "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  ggtitle("VOC Conectrations: Semi-Perminant Living Locations in CO") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  scale_color_manual(name = "Site ID",
-                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc"))
-ggplotly(pc_apartments, tooltip = "text")
+p_apartments <- p_locations(apartments, "Apartment")
+  
+ggplotly(p_apartments, tooltip = "text")
 
 
 ```
@@ -382,25 +161,9 @@ ggplotly(pc_apartments, tooltip = "text")
 ```{r lobbys_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #lobby locations
-pc_lobby <- ggplot(lobby, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = site_id,
-                                  text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.,
-                                               "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  ggtitle("VOC Conectrations: Lobbys & Waiting Room Locations in CO") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  scale_color_manual(name = "Site ID",
-                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc"))
-ggplotly(pc_lobby, tooltip = "text")
+p_lobby <- p_locations(lobby, "Lobby")
+  
+ggplotly(p_lobby, tooltip = "text")
 
 
 ```
@@ -409,25 +172,9 @@ ggplotly(pc_lobby, tooltip = "text")
 ```{r recreation_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #rec locations
-pc_recreation <- ggplot(recreation, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = site_id,
-                                  text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.,
-                                               "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  ggtitle("VOC Conectrations: Rec & Acitivy Locations in CO") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  scale_color_manual(name = "Site ID",
-                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc"))
-ggplotly(pc_recreation, tooltip = "text")
+p_recreation <- p_locations(recreation, "Recreation")
+  
+ggplotly(p_recreation, tooltip = "text")
 
 ```
 
@@ -435,25 +182,9 @@ ggplotly(pc_recreation, tooltip = "text")
 ```{r exam_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
 #medical locations
-pc_medical <- ggplot(medical, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = site_id,
-                                  text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.,
-                                               "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  ggtitle("VOC Conectrations: Exam Rooms & Med Locations in CO") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  scale_color_manual(name = "Site ID",
-                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc"))
-ggplotly(pc_medical, tooltip = "text")
+p_medical <- p_locations(medical, "Medical")
+  
+ggplotly(p_medical, tooltip = "text")
 
 ```
 
@@ -461,176 +192,84 @@ ggplotly(pc_medical, tooltip = "text")
 
 ```{r other_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 
-#other locations
-pc_other <- ggplot(other, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = site_id,
-                                  text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.,
-                                               "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  ggtitle("VOC Conectrations: Miscellaneous Locations in CO") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  scale_color_manual(name = "Site ID",
-                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc"))
-ggplotly(pc_other, tooltip = "text")
+#corridor locations
+p_other <- p_locations(corridors, "Corridor")
+  
+ggplotly(p_other, tooltip = "text")
 
 ```
 
 
 ```{r outdoor_plotly, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
 #outdoor concentrations
-pc_outdoor <- ggplot(outdoor, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = site_id,
-                     text = paste("Analyte: ", analyte,
-                                  "<br> Conc. :", conc.,
-                                  "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  ggtitle("VOC Conectrations: Outdoor Locations in CO") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  scale_color_manual(name = "Site ID",
-                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc"))
-ggplotly(pc_outdoor, tooltip = "text")
+p_outdoor <- p_locations(outdoor, "Outdoor")
+  
+ggplotly(p_outdoor, tooltip = "text")
 
 ```
+Sites 109 and 104 did not have an outdoor canister measurement.
 
 ## VOC Sum Plots for Each Site
 ```{r voc_sums, include=FALSE}
 #site voc concentration sums
+
 #site 040
-site_040_sum <- ggplot(site_040, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 040") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_040_sum <- p_conc_room(site_040, "040 Post")
 
 #SITE 063 A
-site_063a_sum <- ggplot(site_063A, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 063A") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_063a_sum <- p_conc_room(site_063A, "063 Building A")
 
 #SITE 063 B
-site_063b_sum <- ggplot(site_063B, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 063B") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_063b_sum <- p_conc_room(site_063B, "063 Building B")
 
 #SITE 066
-site_066_sum <- ggplot(site_066, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 066") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_066_sum <- p_conc_room(site_066, "066")
 
 # SITE 079
-site_079_sum <- ggplot(site_079, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 079") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_079_sum <- p_conc_room(site_079, "079")
 
 # SITE 085
-site_085_sum <- ggplot(site_085, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 085") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_085_sum <- p_conc_room(site_085, "085")
 
 # SITE 086
-site_086_sum <- ggplot(site_086, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 086") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_086_sum <- p_conc_room(site_086, "086")
 
 # SITE 099
-site_099_sum <- ggplot(site_099, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 099") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_099_sum <- p_conc_room(site_099, "099")
 
 # SITE 103
-site_103_sum <- ggplot(site_103, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 103") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_103_sum <- p_conc_room(site_103, "103")
 
 # SITE 107
-site_107_sum <- ggplot(site_107, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 107") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_107_sum <- p_conc_room(site_107, "107")
 
 #sites 108
-site_108_sum <- ggplot(site_108, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 108") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_108_sum <- p_conc_room(site_108, "108")
 
 #site 094
-site_094_sum <- ggplot(site_094, aes(x = room, y = conc.)) +
-  geom_bar(stat = "identity", fill = "midnightblue") +
-  stat_summary(aes(label = stat(y)), fun = "sum", geom = "text",
-               col = "white", vjust = 1.5) +
-  ggtitle("Site 094") +
-  labs(x = "", y = "")+
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10), axis.text.y = element_blank())
+p_094_sum <- p_conc_room(site_094, "094")
+
+#site 106
+p_106_sum <- p_conc_room(site_106, "106")
+
+#site 105
+p_105_sum <- p_conc_room(site_105, "105")
+
+#site 109
+p_109_sum <- p_conc_room(site_109, "109")
+
+#site 101
+p_101_sum <- p_conc_room(site_101, "101")
+
+#site 104
+p_104_sum <- p_conc_room(site_104, "104")
+
+#site 089
+p_089_sum <- p_conc_room(site_089, "089")
+
+#site 002
+p_002_sum <- p_conc_room(site_002, "002")
+
 
 
 ```
@@ -638,66 +277,20 @@ site_094_sum <- ggplot(site_094, aes(x = room, y = conc.)) +
 
 ```{r all_voc_sum_plots, fig.height= 30, fig.width = 15, dpi = 200, warning=FALSE, message=FALSE}
 
-grid.arrange(site_094_sum, site_063a_sum, site_063b_sum, site_066_sum, 
-             site_079_sum, site_085_sum, site_086_sum, site_099_sum,
-             site_103_sum, site_107_sum, site_108_sum, site_094_sum,
-             ncol = 2, nrow = 6,
+grid.arrange(p_094_sum, p_063a_sum, p_063b_sum, p_066_sum, p_079_sum, p_085_sum,
+             p_086_sum, p_099_sum, p_103_sum, p_107_sum, p_108_sum, p_094_sum,
+             p_106_sum, p_105_sum, p_109_sum, p_101_sum, p_104_sum, p_089_sum,
+             p_002_sum,
+             ncol = 3,
              bottom = "Rooms Sampled", left = "Sum of VOC Sampled (ppb(v))")
 
 ```
 
 
 ## Plots for each analyte category
-```{r analyte_data, include=FALSE}
-
-#create category objects
-#Alcohol
-alcohol <- sites %>%
-  filter(category == "alcohol")
-#Aldehyde
-aldehyde <- sites %>% 
-  filter(category == "aldehyde")
-#Straight Chain
-straight_chain <- sites %>% 
-  filter(category == "straight chain")
-#Aromatic
-aromatic <- sites %>% 
-  filter(category == "aromatic")
-#Btex
-btex <- sites %>% 
-  filter(category == "btex")
-#chlorinated
-chlorinated <- sites %>% 
-  filter(category == "chlorinated")
-#Ketone
-ketone <- sites %>% 
-  filter(category == "ketone")
-#Other
-other <- sites %>% 
-  filter(category == "other")
-
-```
-
 ```{r alcohol_plot, warning=FALSE, message=FALSE}
 
-p_alcohol <- ggplot(alcohol, aes(x = reorder(analyte, conc.),
-                                 y = conc., color = site_id,
-                                 text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10)) +
-  labs(x = "", y = "") +
-  ggtitle("Alcohols") +
-  scale_color_manual(name = "Room ID",
-                    values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc")) +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
+p_alcohol <- p_category(alcohol, "Alcohols")
 
 ggplotly(p_alcohol, tooltip = "text")
 
@@ -706,24 +299,7 @@ ggplotly(p_alcohol, tooltip = "text")
 
 ```{r aldehyde_plot, warning=FALSE, message=FALSE}
 
-p_aldehyde <- ggplot(aldehyde, aes(x = reorder(analyte, conc.),
-                                 y = conc., color = site_id,
-                                 text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10)) +
-  labs(x = "", y = "") +
-  ggtitle("Aldehydes") +
-  scale_color_manual(name = "Room ID",
-                    values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc")) +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
+p_aldehyde <- p_category(aldehyde, "Aldehydes")
 
 ggplotly(p_aldehyde, tooltip = "text")
 
@@ -733,24 +309,7 @@ ggplotly(p_aldehyde, tooltip = "text")
 
 ```{r straight_chain_plot, warning=FALSE, message=FALSE}
 
-p_straight_chain <- ggplot(straight_chain, aes(x = reorder(analyte, conc.),
-                                 y = conc., color = site_id,
-                                 text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "", y = "") +
-  ggtitle("Straigh Chains") +
-  scale_color_manual(name = "Room ID",
-                    values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc")) +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
+p_straight_chain <- p_category(straight_chain, "Straight Chains")
 
 ggplotly(p_straight_chain, tooltip = "text")
 
@@ -760,24 +319,7 @@ ggplotly(p_straight_chain, tooltip = "text")
 
 ```{r aromatic_plot, warning=FALSE, message=FALSE}
 
-p_aromatic <- ggplot(aromatic, aes(x = reorder(analyte, conc.),
-                                 y = conc., color = site_id,
-                                 text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10)) +
-  labs(x = "", y = "") +
-  ggtitle("Aromatics") +
-  scale_color_manual(name = "Room ID",
-                    values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc")) +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
+p_aromatic <- p_category(aromatic, "Aromatics")
 
 ggplotly(p_aromatic, tooltip = "text")
 
@@ -787,24 +329,7 @@ ggplotly(p_aromatic, tooltip = "text")
 
 ```{r btex_plot, warning=FALSE, message=FALSE}
 
-p_btex <- ggplot(btex, aes(x = reorder(analyte, conc.),
-                                 y = conc., color = site_id,
-                                 text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) +
-  labs(x = "", y = "") +
-  ggtitle("Btex") +
-  scale_color_manual(name = "Room ID",
-                    values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc")) +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
+p_btex <- p_category(btex, "BTex")
 
 ggplotly(p_btex, tooltip = "text")
 
@@ -813,24 +338,7 @@ ggplotly(p_btex, tooltip = "text")
 
 ```{r chlorinated_plot, warning=FALSE, message=FALSE}
 
-p_chlorinated <- ggplot(chlorinated, aes(x = reorder(analyte, conc.),
-                                 y = conc., color = site_id,
-                                 text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10)) +
-  labs(x = "", y = "") +
-  ggtitle("Chlorinated") +
-  scale_color_manual(name = "Room ID",
-                    values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc")) +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
+p_chlorinated <- p_category(chlorinated, "Chlorinated")
 
 ggplotly(p_chlorinated, tooltip = "text")
 
@@ -839,24 +347,7 @@ ggplotly(p_chlorinated, tooltip = "text")
 
 ```{r ketone_plot, message=FALSE, warning=FALSE}
 
-p_ketone <- ggplot(ketone, aes(x = reorder(analyte, conc.),
-                                 y = conc., color = site_id,
-                                 text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10)) +
-  labs(x = "", y = "") +
-  ggtitle("Ketones") +
-  scale_color_manual(name = "Room ID",
-                    values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc")) +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
+p_ketone <- p_category(ketone, "Ketones")
 
 ggplotly(p_ketone, tooltip = "text")
 
@@ -865,24 +356,7 @@ ggplotly(p_ketone, tooltip = "text")
 
 ```{r other_plot, message=FALSE, warning=FALSE}
 
-p_other <- ggplot(other, aes(x = reorder(analyte, conc.),
-                                 y = conc., color = site_id,
-                                 text = paste("Analyte: ", analyte,
-                                               "<br> Conc. :", conc.))) +
-  geom_point(shape = 18, size = 3, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) +
-  labs(x = "", y = "") +
-  ggtitle("Other") +
-  scale_color_manual(name = "Room ID",
-                    values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                "#d9c937", "#9f04fc")) +
-  theme(panel.grid.minor = element_line(linetype = "dashed"))
+p_other <- p_category(other, "Others")
 
 ggplotly(p_other, tooltip = "text")
 
@@ -914,13 +388,50 @@ twa_040
 
 ---
 
+## Top 10 analytes across all sites
+
+```{r top_10 analytes, message=FALSE, warning=FALSE}
+#chnage number to fetch the top 10, may need to use a number < 10
+sites_top <- top_n_analytes(sites, 45)
+
+ggplot(sites, aes(x = reorder(analyte, conc.), y = conc.)) +
+    geom_bar(stat = "identity", fill = fill) +
+    labs(x = "Analyte", y = "Concentration (ppb)") +
+    ggtitle("Top 10 Analytes Across All Sites") +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+  
+
+```
+
+---
+## Indoor / Outdoor Ratios
+
+```{r}
+
+# sites with Outdoor canister
+
+donald <- sites %>% 
+  filter(! site_id %in% c("104", "109")) %>% 
+  group_by(site_id, room_name, analyte) %>% 
+  ungroup() %>% 
+  mutate(od_ratio = donald$conc. / outdoor$conc.)
+
+
+```
+
+
+
+---
 ## ROOM PAIR CORRELATIONS
 
 ```{r rp_correlations, echo=TRUE}
 
 # select bears & frogs rooms from site data sheeet 
-bears_data <- subset(site_040, room == "Bears")
-frogs_data <- subset(site_040, room == "Frogs")
+bears_data <- subset(site_040, room_name == "Bears")
+frogs_data <- subset(site_040, room_name == "Frogs")
 
 # Select only the columns containing concentration data associated with each analyte 
 bears_conc <- select(bears_data, conc., analyte)

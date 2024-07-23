@@ -1,851 +1,286 @@
-#packages
-library(tidyverse)
-library(plyr)
-library(faraway)
-library(cowplot)
-library(reshape2)
-library(corrplot)
-library(scales)
-library(ggthemes)
-library(gridExtra)
-library(patchwork)
-library(gghighlight)
-library(ggdark)
-library(viridis)
-library(DT)
-library(plotly)
-
-
-#replace the site number and name first, select match case
-#CHECK ORDER and NAMES for ratio plots!!! b/c outdoor isn't always "location 6",
-#use "LOCATION_1" for ratio naming convention
-#change the dates for plots "Mmm. dd - Mmm. dd, YYYY."
-#change [Add date] for plotlys
-#change the site location "[Name]" and [City]"
-#change [location info] for where the canisters were located
-#"Location X]" for all indoor locations
-#for plot colors: Location 1: "orchid", Location 2: "chocolate4",
-#Location 3: "goldenrod2",Location 4: "#50C878",
-#Location 5: "tomato2", Location 6: "midnightblue"
-#make sure to slice and select the correct rows! Will not be the same for all sites
 #load data
-site_XXX <- (read_csv(file = "../data/site_XXX_summa_data.csv")) %>% 
-  slice(2:5, 7:8) %>%
-  select(1,7:67)
+source("source_data.R")
 
-#pivot data for plots
-p.analytes <- site_XXX %>% 
-  pivot_longer(- ID,
-               names_to = "analyte",
-               values_to = "conc.")
+#replace the site number and name first
+#change the dates for plots "Oct. 24 - Oct. 31, 2023."
+#change the site location "[Site Name] " 
+#location1, location2, ect. for objects and plots
+#location_1, location_2, ect. for name in plot titles or axis
+#change "[floor] [room type]" for where the canisters were located
 
-p.analytes$conc. <- as.numeric(as.character(p.analytes$conc.))
-
-#VOC classes as objects
-alc <- c("isopropanol", "butanol")
-ald <- c("acetaldehyde")
-aro <- c("cyclopentane", "cyclohexane", "methylcyclohexane")
-btx <- c("benzene", "toluene", "ethylbenzene", "m+p-xylene", "o-xylene",
-          "isopropylbenzene", "n-propylbenzene", "3-ethyltoluene",
-          "4-ethyltoluene", "1,3,5-trimethylbenzene", "2-ethyltoluene",
-          "1,2,4-trimethylbenzene", "1,2,3-trimethylbenzene",
-          "1,3-diethylbenzene", "1,4-diethylbenzene")
-chl <- c("C2HCl3", "C2Cl4")
-kt <- c("acetone")
-oth <- c("isoprene", "styrene", "acetonitrile", "methylethylketone",
-           "a-pinene", "b-pinene", "limonene", "camphene", "methane")
-stc <- c("ethane", "propane", "i-butane", "n-butane", "i-pentane",
-                    "n-pentane", "n-hexane", "2,4 dimethylpentane", "n-heptane",
-                    "2,3-dimethylpentane", "2-methylhexane", "3-methylhexane",
-                    "2,2,4-trimethylpentane", "2,3,4-trimethylpentane",
-                    "2-methylheptane", "3-methylheptane", "n-octane", "n-nonane",
-                    "n-decane", "ethene", "propene", "t-2-butene", "1-butene",
-                    "c-2-butene", "t-2-pentene", "1-pentene", "cis-2-pentene",
-                    "ethyne")
-
-#new 'voc' object becomes the new df for plots
-#add voc categories to df
-voc <- p.analytes %>% 
-  mutate(category = case_when(p.analytes$analyte %in% alc ~ "Alc.",
-                              p.analytes$analyte %in% ald ~ "Ald.",
-                              p.analytes$analyte %in% stc ~ "Stc.",
-                              p.analytes$analyte %in% aro ~ "Aro.",
-                              p.analytes$analyte %in% btx ~ "Btx.",
-                              p.analytes$analyte %in% chl ~ "Chl.",
-                              p.analytes$analyte %in% kt ~ "Ktn.",
-                              p.analytes$analyte %in% oth ~ "Oth."))
-
-#UPDATE LOCATIONS FOR THE SITE YOU ARE CURRENTLY WORKING ON Location 1, 2, etc.!
-#location order should be alphabetical
-#subgroups,
-#location 1
-location1 <- voc %>% 
-  filter(ID == "[Location1]")
-#location 2
-location2 <- voc %>% 
-  filter(ID == "[Location2]")
-#location 3
-location3 <- voc %>% 
-  filter(ID == "[Location3]")
-#location 4
-location4 <- voc %>% 
-  filter(ID == "[Location4]")
-#location 5
-location5 <- voc %>% 
-  filter(ID == "[Location5]")
-#location 6
-location6 <- voc %>% 
-  filter(ID == "[Location6]")
-
-#indoor
-indoor <- voc %>% 
-  filter(ID != "Outdoor")
-
-#highlight methane
-methane <- voc %>% 
-  filter(analyte == "methane")
 
 #calculate ratios
-voc <- voc %>%
-  group_by(ID, analyte) %>%
+indoor_XXX <- indoor_XXX %>%
+  group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = round(as.numeric(voc$conc.)/as.numeric(outdoor$conc.), 2))
+  mutate(od_ratio = (indoor_XXX$conc./outdoor_XXX$conc.))
+
+#UPDATE LOCATIONS FOR THE SITE YOU ARE CURRENTLY WORKING ON, Location 1, 2, etc.!
+#location order should be alphabetical
+
+#location1
+location1 <- site_XXX %>% 
+  filter(room_name == "location_1")
+#location2
+location2 <- site_XXX %>% 
+  filter(room_name == "location_2")
+#location3
+location3 <- site_XXX %>% 
+  filter(room_name == "location_3")
+#location4
+location4 <- site_XXX %>% 
+  filter(room_name == "location_4")
+#location5
+location5 <- site_XXX %>% 
+  filter(room_name == "location_5")
 
 #data table
-#for data table
-voc2 <- voc %>% 
-  mutate(category = case_when(p.analytes$analyte %in% alc ~ "Alcohol",
-                              p.analytes$analyte %in% ald ~ "Aldehyde",
-                              p.analytes$analyte %in% stc ~ "Straight Chain",
-                              p.analytes$analyte %in% aro ~ "Aromatic",
-                              p.analytes$analyte %in% btx ~ "Btex",
-                              p.analytes$analyte %in% chl ~ "Chlorinated",
-                              p.analytes$analyte %in% kt ~ "Ketone",
-                              p.analytes$analyte %in% oth ~ "Other"))
+site_XXX_table <- data_table(sites, "XXX")
 
-datatable(voc2, colnames = c("Location", "Analyte", "Concentration",
-                             "Category", "Outdoor Ratio"),
-          options = list(pageLength = 10), rownames = FALSE)
+site_dt(site_XXX_table, "XXX")
 
-#for ratio plots
-indoor <- voc %>% 
-  filter(ID != "Outdoor")
-#indoor group for plotly ratio plots
-indoor2 <- voc2 %>% 
-  filter(ID != "Outdoor")
+#box plot for all analytes
+bp_XXX <- box_plot(site_XXX)
+bp_XXX
 
-#create category objects
-#Alcohol
-alcohol <- voc2 %>%
-  filter(category == "Alcohol")
-#Aldehyde
-aldehyde <- voc2 %>% 
-  filter(category == "Aldehyde")
-#Straight Chain
-straight_chain <- voc2 %>% 
-  filter(category == "Straight Chain")
-#Aromatic
-aromatic <- voc2 %>% 
-  filter(category == "Aromatic")
-#Btex
-btex <- voc2 %>% 
-  filter(category == "Btex")
-#Chlorinated
-chlorinated <- voc2 %>% 
-  filter(category == "Chlorinated")
-#Ketone
-ketone <- voc2 %>% 
-  filter(category == "Ketone")
-#Other
-other <- voc2 %>% 
-  filter(category == "Other")
- 
 #plot all VOCs at site
-voc_plot <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                            y = conc., color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.)) +
-  # guides(size = "none") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Analytes", y = "Concentration\n(VOC ppbv or methane ppmv)",
-       title = "Site XXX - [Name], Summa Cannister Deployment\nMmm. dd - Mmm. dd, YYYY. [City], CO",
-       caption = "X canisters deployed throughout site\nX indoor, [location info]\nX outdoor, [location info]")
-  
-voc_plot +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  theme(legend.title = element_text(color = "black", face = "bold", size = 10),
-        legend.text = element_text(color = "#261e1b"),
-        legend.background = element_rect(color = "black"),
-        legend.key.height= unit(1, 'cm'),
-        legend.key.width= unit(2, 'cm'),
-        axis.line = element_line(color = "black"),
-        axis.text.y = element_text(size = 13))
-        #panel.grid.minor = element_line("maroon"))
-        #panel.grid.major = element_line("black"),
-        #plot.background = element_rect("#DADBDD"))
-
+p_XXX <- p_site(site_XXX, "XXX")
+p_XXX
 
 #plotly output but y axis not formatted correctly and don't know how to fix
-#WHEN ADDING THIS TO RMD MAKE SURE TO CHANGE THE DF TO INLCUDE LONG CAT NAMES
-voc_plot2 <- ggplot(voc2, aes(x = reorder(analyte, conc.),
-                              y = conc., color = ID,
-                              text = paste("Analyte: ", analyte,
-                                           "<br> Conc. :", conc.,
-                                           "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 4, alpha = 0.5) +
-  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
-                labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() + #try using different themes here
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  xlab("Analytes") +
-  ylab("Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Site XXX - [Name], Summa Cannister Deployment, [Add date]")
-ggplotly(voc_plot2, tooltip = "text")
+ggplotly(p_XXX, tooltip = "text")
 
+#top 10 analyte concentrations for all locations
+site_XXX_top <- top_n_analytes(site_XXX, 45)
 
-#combo__plot (not working ATM)
-# add after 'group = ID' if want the line thicker" , linewidth = 1, alpha = 0.5
-# voc_combo_col <- ggplot(indoor, aes(fill = ID, x = analyte, y = conc.)) +
-#   geom_col(position = position_dodge(1.5)) +
-#   geom_line(data = outdoor, aes(x = analyte, y =  conc.,
-#                                 group = ID)) +
-#   #guides(linewidth = "none", alpha = "none") +
-#   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-# voc_combo_col
-#combo point plot
-
-# voc_combo_point <- ggplot(indoor, aes(color = ID, x = analyte, y = conc.)) +
-#   geom_point(data = indoor, aes(x = analyte, y = conc.),
-#              shape = 18, alpha = 0.5) +
-#   geom_line(data = outdoor, aes(x = analyte, y =  conc.,
-#                                 group = ID, alpha = 0.5)) +
-#   guides(alpha = "none") +
-#   xlab("Analytes") +
-#   ylab(expression(atop("Concentration",paste("(VOC ppbv or methane ppmv)")))) +
-#   scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-#   theme_bw() +
-#   theme(axis.text.x = element_text(size = 3, angle = 45, hjust = 1)) +
-#   ggtitle("Site XXX Summa Cannister Deployment",
-#           "Mmm. dd - Mmm. dd, YYYY. City, CO")
-# voc_combo_point
+site_XXX_top <- top_plot(site_XXX_top, "XXX", fill = "darkgreen")
+site_XXX_top
 
 #facet wrap by location
-loc_fctw <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                            y = conc.)) +
-  geom_point(color = "#50C878", size = 3, shape = 18, alpha = 0.5) +
-  geom_point(data = methane, aes(x = analyte, y = conc.,
-                                 color ="red", size = 5)) +
-  guides(size = "none", color = "none") +
-  xlab("Analytes") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  facet_wrap(~ID, scales = "free_y") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1)) +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX - [Name], Summa Cannister Deployment",
-            "Grouped by Cannister location")
-loc_fctw
+p_XXX_fctw <- fct_wrap(site_XXX, "XXX")
+p_XXX_fctw 
+
+#facet wrap by indoor location
+p_XXXi_fctw <- fct_wrap(indoor_XXX, "XXX")
+p_XXXi_fctw 
 
 #leave this out for now
 #Two plots together not joined
-voc_plot +
-  loc_fctw +
-  plot_layout(nrow = 2, heights = c(1, 2))
+# p_XXX +
+#   p_XXX_fctw +
+#   plot_layout(nrow = 2, heights = c(1, 2))
 
-#facet grid all analytes grouped by class
-voc_fctg <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                            y = conc., color = ID)) +
-  geom_point(data = voc, aes(x = reorder(analyte, conc.), y = conc.),
-             size = 4, shape = 18, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  facet_grid(.~ category, scales = "free", switch = "x", space = "free_x") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Analytes Grouped by VOC Categories",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX - [Name], Summa Cannister Deployment",
-          "Grouped by Analyte Class")
-voc_fctg +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  theme(legend.title = element_text(color = "black", face = "bold", size = 10),
-        legend.text = element_text(color = "#261e1b"),
-        legend.background = element_rect(color = "black"),
-        legend.key.height= unit(1, 'cm'),
-        legend.key.width= unit(2, 'cm'),
-        axis.line = element_line(color = "black"),
-        axis.text.y = element_text(size = 13))
+#facet wrap all analytes grouped by class
+p_XXXi_cat_fctw <- cat_fct_wrap(indoor_XXX, "#50C878", "XXX")
+p_XXXi_cat_fctw
 
-#indoor facet grid by analyte class
-indoor_fctg <- ggplot(indoor, aes(x = reorder(analyte, conc.),
-                                  y = conc., color = ID)) +
-  geom_point(data = indoor, aes(x = reorder(analyte, conc.), y = conc.),
-             size = 5, shape = 18, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  facet_grid(.~ category, scales = "free", switch = "x", space = "free_x") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Analytes Grouped by VOC Categories",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX - [Name], Summa Cannister Deployment",
-          "Grouped by Analyte Class")
-indoor_fctg +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  theme(legend.title = element_text(color = "black", face = "bold", size = 10),
-        legend.text = element_text(color = "#261e1b"),
-        legend.background = element_rect(color = "black"),
-        legend.key.height= unit(1, 'cm'),
-        legend.key.width= unit(2, 'cm'),
-        axis.line = element_line(color = "black"),
-        axis.text.y = element_text(size = 13))
+#indoor facet wrap by analyte class
+p_XXX_cat_fctw <- cat_fct_wrap(site_XXX, "XXX")
+p_XXX_cat_fctw
 
 #plots for each room
+#outdoor
+p_XXXooutdoor <- room_plot(outdoor_XXX, "XXX", "midnightblue", "Outdoor, rooftop")
+
+p_XXXoutdoor
+
 #location1
-l1_plot <- location1 %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "orchid", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6)) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX - [Name], [Location1]",
-          "[additional info if needed]")
-l1_plot
+p_location1 <- room_plot(location1, "XXX", "orchid", "location_1, [floor] [room type]")
+p_location1
 
 #location2
-l2_plot <- location2 %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "chocolate4", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6)) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX - [Name], [Location2]",
-          "[additional info if needed]")
-l2_plot
+p_location2 <- room_plot(location2, "XXX", "chocolate4", "location_2, [floor] [room type]")
+p_location2
 
 #location3
-l3_plot <- location3 %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "goldenrod2", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6)) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX - [Name], [Location3]",
-          "[additional info if needed]")
-l3_plot
+p_location3 <- room_plot(location3, "XXX", "goldenrod2", "location_3, [floor] [room type]")
+p_location3
 
 #location4
-l4_plot <- location4 %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "#50C878", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6, color ="red")) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX - [Name], [Location4]",
-          "[additional info if needed]")
-l4_plot
+p_location4 <- room_plot(location4, "XXX", "#50c878", "location_4, [floor] [room type]")
+p_location4
 
 #location5
-l5_plot <- location5 %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "tomato2", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6)) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("XXX - Site [Name], [Location5]",
-          "[additional info if needed]")
-l5_plot
+p_location5 <- room_plot(location5, "XXX", "tomato2", "location_5, [floor] [room type]")
+p_location5
 
-#location6
-l6_plot <- location6 %>%
-  ggplot(aes(x = reorder(analyte, conc.), y = conc., color = ID)) +
-  geom_point(color = "midnightblue", shape = 18, size = 5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.,
-  #                                size = 6, color ="red")) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  theme(legend.position = "none") +
-  labs(x = "Analytes",
-       y = expression(atop("Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX - [Name], [Location6]",
-          "([location of can])")
-l6_plot
+#all rooms
+grid.arrange(p_location1, p_location2, p_location4, p_location3, p_location5, p_XXXod, 
+             ncol = 3,
+             bottom = "Rooms Sampled", left = "Sum of VOC Sampled (ppb(v))")
+
+
+#create object of the top 5 analytes by conc. for the indoor locations then plot
+#location1
+#testing something new for scale y in this plot
+location1_top <- top_n_analytes(location1, 10)
+
+p_location1_top <- loc_top_plot(location1_top, "orchid", "location_1")
+p_location1_top
+
+#location2
+location2_top <- top_n_analytes(location2, 10)
+
+p_location2_top <- loc_top_plot(location2_top, "chocolate4", "location_2")
+p_location2_top
+
+#location3
+location3_top <- top_n_analytes(location3, 10)
+
+p_location3_top <- loc_top_plot(location3_top, "goldenrod2", "location_3")
+p_location3_top
+
+#location4
+location4_top <- top_n_analytes(location4, 10)
+
+p_location4_top <- loc_top_plot(location4_top, "#50c878", "location_4")
+p_location4_top
+
+#location5
+location5_top <- top_n_analytes(location5, 10)
+
+p_location5_top <- loc_top_plot(location5_top, "tomato2", "location_5")
+p_location5_top
+
+#outdoor
+outdoor_top <- top_n_analytes(outdoor_XXX, 10)
+
+p_outdoor_top <- loc_top_plot(outdoor_top, "midnightblue", "Outdoor")
+p_outdoor_top
+
+#all locations
+grid.arrange(p_location1_top, p_location2_top, p_location3_top,
+             p_location4_top, p_location5_top, p_outdoor_top,
+             ncol = 3, nrow = 2,
+             top = "Top 10 Analytes at Each Location",
+             left = "Concentration\n(VOC ppbv or methane ppmv)")
 
 #indoor, outdoor ratio 
-#without facet
-ratio_plot <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
-                              y = od_ratio, color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
-  # guides(size = "none") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab("Indoor to Outdoor Ratios\n Concentration Ratios") +
-  ggtitle("Site XXX - [Name], Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. [City], CO")
-ratio_plot +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  theme(legend.title = element_text(color = "black", face = "bold", size = 10),
-        legend.text = element_text(color = "#261e1b"),
-        legend.background = element_rect(color = "black"),
-        legend.key.height= unit(1, 'cm'),
-        legend.key.width= unit(2, 'cm'),
-        axis.line = element_line(color = "black"),
-        axis.text.y = element_text(size = 13))
-      #panel.grid.minor = element_line("maroon"))#,
-      #panel.grid.major = element_line("black"),
-      #plot.background = element_rect("#DADBDD"))
+
+#boxplot of indoor / outdoor ratios for all analytes
+p_XXX_bp <- r_box_plot(indoor_XXX)
+p_XXX_bp
+
+#indoor to outdoor ratio plot for all analytes
+p_XXX_ratio <- r_p_site(indoor_XXX, "XXX")
+p_XXX_ratio
 
 #plotly ratio
-ratio_plotly <- ggplot(indoor2, aes(x = reorder(analyte, od_ratio),
-                              y = od_ratio, color = ID,
-                              text = paste("Analyte: ", analyte,
-                                           "<br> Conc. :", od_ratio,
-                                           "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 4, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
-  # guides(size = "none") +
-  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
-                labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() + #try using different themes here
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  xlab("Analytes") +
-  ylab("Indoor to Outdoor Ratios\n Concentration Ratios") +
-  ggtitle("Site XXX - [Name], Summa Cannister Deployment, [Add date]")
-ggplotly(ratio_plotly, tooltip = "text")
+ggplotly(p_XXX_ratio, tooltip = "text")
 
-#ratio plot with facet grid
-fctg_ratio_plot <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
-                                      y = od_ratio, color = ID)) +
-  geom_point(size = 5, shape = 18, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  facet_grid(.~ category, scales = "free", switch = "x", space = "free_x") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Analytes Grouped by VOC Categories",
-       y = expression(atop("Outdoor Ratio Concentration",
-                           paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX - [Name], Indoor Summa Cannister Deployment",
-          "Grouped by Analyte Class")
-fctg_ratio_plot +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  theme(legend.title = element_text(color = "black", face = "bold", size = 10),
-        legend.text = element_text(color = "#261e1b"),
-        legend.background = element_rect(color = "black"),
-        legend.key.height= unit(1, 'cm'),
-        legend.key.width= unit(2, 'cm'),
-        axis.line = element_line(color = "black"),
-        axis.text.y = element_text(size = 13))
-      #panel.grid.minor = element_line("maroon"))#,
-      #panel.grid.major = element_line("black"),
-      #plot.background = element_rect("#DADBDD"))
+#ratio plot with facet wrap
+p_XXX_r_fctw <- r_fct_wrap(indoor_XXX, "XXX")
+p_XXX_r_fctw
 
-#create object of the top 5 analytes by outdoor ratio then plot
-#LOCATION_1 od ratio
-LOCATION_1_top_or <- LOCATION_1 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(od_ratio))
-LOCATION_1_top_or <- top_n(ungroup(LOCATION_1_top_or), 5, od_ratio) 
+#create object of the top 10 analytes by outdoor ratio then plot
+#location1 outdoor ratio
+location1_top_or <- top_n_or(indoor_XXX, "location_1", 10)
 
-p_LOCATION_1_top_or <- LOCATION_1_top_or %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
-           stat = "identity", fill = "orchid") +
-  labs(x = "Bears", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_LOCATION_1_top_or
+p_location1_top_or <- or_top_plot(location1_top_or, "orchid", "location_1")
+p_location1_top_or
 
-#LOCATION_2 od ratio
-LOCATION_2_top_or <- LOCATION_2 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(od_ratio))
-LOCATION_2_top_or <- top_n(ungroup(LOCATION_2_top_or), 5, od_ratio)
+#location2 outdoor ratio
+location2_top_or <- top_n_or(indoor_XXX, "location_1", 10)
 
-p_LOCATION_2_top_or <- LOCATION_2_top_or %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
-           stat = "identity", fill = "chocolate4") +
-  labs(x = "Frogs", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_LOCATION_2_top_or
+p_location2_top_or <- or_top_plot(location2_top_or, "chocolate4", "location_2")
+p_location2_top_or
 
-#LOCATION_3 od ratio
-LOCATION_3_top_or <- LOCATION_3 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(od_ratio))
-LOCATION_3_top_or <- top_n(ungroup(LOCATION_3_top_or), 5, od_ratio)
+#location3 outdoor ratio
+location3_top_or <- top_n_or(indoor_XXX, "location_3", 10)
 
-p_LOCATION_3_top_or <- LOCATION_3_top_or %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
-           stat = "identity", fill = "goldenrod2") +
-  labs(x = "Lesson Prep", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_LOCATION_3_top_or
+p_location3_top_or <- or_top_plot(location3_or, "goldenrod2", "location_3")
+p_location3_top_or
 
-#LOCATION_4 od ratio
-LOCATION_4_top_or <- LOCATION_4 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(od_ratio))
-LOCATION_4_top_or <- top_n(ungroup(LOCATION_4_top_or), 5, od_ratio)
+#location4 outdoor ratio
+location4_top_or <- top_n_or(indoor_XXX, "location_4", 10)
 
-p_LOCATION_4_top_or <- LOCATION_4_top_or %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
-           stat = "identity", fill = "#50C878") +
-  labs(x = "Monkeys", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_LOCATION_4_top_or
+p_location4_top_or <- or_top_plot(location4_top_or, "#50C878", "location_4")
+p_location4_top_or
 
-#LOCATION_5 od ratio
-LOCATION_5_top_or <- LOCATION_5 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(od_ratio))
-LOCATION_5_top_or <- top_n(ungroup(LOCATION_5_top_or), 5, od_ratio)
+#location5 outdoor ratio
+location5_top_or <- top_n_or(indoor_XXX, "location_5", 10)
 
-p_LOCATION_5_top_or <- LOCATION_5_top_or %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, od_ratio), y = od_ratio),
-           stat = "identity", fill = "tomato2") +
-  labs(x = "Office", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_LOCATION_5_top_or
+p_location5_top_or <- or_top_plot(location5_top_or, "tomato2", "location_5")
+p_location5_top_or
 
-#all locations od ratio
-grid.arrange(p_LOCATION_1_top_or, p_LOCATION_2_top_or, p_LOCATION_3_top_or,
-             p_LOCATION_4_top_or, p_LOCATION_5_top_or,
+#all locations outdoor ratio
+grid.arrange(p_location1_top_or, p_location2_top_or, p_location3_top_or,
+             p_location4_top_or, p_location5_top_or,
              ncol = 3, nrow = 2,
-             top = "Top 5 Analytes at Each Location",
+             top = "Top 10 I/O Ratios in Each Location",
              left = "Concentration\n(VOC ppbv or methane ppmv)")
 
 #category plots
-p_alcohol <- ggplot(alcohol, aes(x = reorder(analyte, conc.),
-                                 y = conc., color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5, show.legend = FALSE) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10)) +
-  labs(x = "", y = "") +
-  ggtitle("Alcohols")
-p_alcohol +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue"))
+#alcohol
+p_alcohol <- p_category(alcohol, "Alcohols")
+p_alcohol
 
-p_aldehyde <- ggplot(aldehyde, aes(x = reorder(analyte, conc.),
-                                   y = conc., color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5, show.legend = FALSE) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10)) +
-  labs(x = "", y = "") +
-  ggtitle("Aldehydes")
-p_aldehyde +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue"))
+#aldehyde
+p_aldehyde <- p_category(aldehyde, "Aldehydes")
+p_aldehyde
 
-p_straight_chain <- ggplot(straight_chain, aes(x = reorder(analyte, conc.),
-                                               y = conc., color = ID)) +
-  geom_point(shape = 18, size = 4, alpha = 0.5, show.legend = FALSE) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 9, angle = 45, hjust = 1)) +
-  labs(x = "", y = "") +
-  ggtitle("Straight Chains")
-p_straight_chain +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue"))
+#straight chain
+p_straight_chain <- p_category(straight_chain, "Straight Chains")
+p_straight_chain
 
-p_aromatic <- ggplot(aromatic, aes(x = reorder(analyte, conc.),
-                                   y = conc., color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "", y = "") +
-  ggtitle("Aromatics")
-p_aromatic +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  theme(legend.title = element_text(color = "black", face = "bold", size = 10),
-        legend.text = element_text(color = "#261e1b"),
-        legend.background = element_rect(color = "black"),
-        legend.key.height= unit(1, 'cm'),
-        legend.key.width= unit(2, 'cm'),
-        axis.line = element_line(color = "black"),
-        axis.text.y = element_text(size = 13))
+#aromatic
+p_aromatic <- p_category(aromatic, "Aromatics")
+p_aromatic
 
-p_btex <- ggplot(btex, aes(x = reorder(analyte, conc.),
-                           y = conc., color = ID)) +
-  geom_point(shape = 18, size = 4, alpha = 0.5, show.legend = FALSE) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 9, angle = 45, hjust = 1)) +
-  labs(x = "", y = "") +
-  ggtitle("Btex")
-p_btex +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue"))
+#btex
+p_btex <- p_category(btex, "Btex")
+p_btex
 
-p_chlorinated <- ggplot(chlorinated, aes(x = reorder(analyte, conc.),
-                                         y = conc., color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5, show.legend = FALSE) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10)) +
-  labs(x = "", y = "") +
-  ggtitle("Chlorinated")
-p_chlorinated +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue"))
+#chlorinated
+p_chlorinated <- p_category(chlorinated, "Chlorinated")
+p_chlorinated
 
-p_ketone <- ggplot(ketone, aes(x = reorder(analyte, conc.),
-                               y = conc., color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5, show.legend = FALSE) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10)) +
-  labs(x = "", y = "") +
-  ggtitle("Ketones")
-p_ketone +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue"))
+#ketone
+p_ketone <- p_category(ketone, "Ketones")
+p_ketone
 
-p_other <- ggplot(other, aes(x = reorder(analyte, conc.),
-                             y = conc., color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "", y = "") +
-  ggtitle("Other")
-p_other +
-  scale_color_manual(name = "Room ID",
-                     values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                "tomato2", "midnightblue")) +
-  theme(legend.title = element_text(color = "black", face = "bold", size = 10),
-        legend.text = element_text(color = "#261e1b"),
-        legend.background = element_rect(color = "black"),
-        legend.key.height= unit(1, 'cm'),
-        legend.key.width= unit(2, 'cm'),
-        axis.line = element_line(color = "black"),
-        axis.text.y = element_text(size = 13))
+#others
+p_other <- p_category(other, "Other")
+p_other
 
 #categories plotted together
 grid.arrange(p_alcohol, p_aldehyde, p_straight_chain, p_aromatic,
              ncol = 2, nrow = 2,
-             top = "Analytes Grouped by Category", left = "Concentraion\n (VOC ppbv or methane ppmv")
+             top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
 
 grid.arrange(p_btex, p_chlorinated, p_ketone, p_other, ncol = 2, nrow = 2,
-             top = "Analytes Grouped by Category", left = "Concentraion\n (VOC ppbv or methane ppmv")
+             top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
 
-#create object of the top 5 analytes by conc. for the indoor locations then plot
-#location 1
-location1_top <- location1 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-location1_top <- top_n(ungroup(location1_top), 5, conc.) 
-
-p_location1_top <- location1_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "orchid") +
-  labs(x = "[Location1]", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_location1_top
-
-#location2
-location2_top <- location2 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-location2_top <- top_n(ungroup(location2_top), 5, conc.)
-
-p_location2_top <- location2_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "chocolate4") +
-  labs(x = "[Location2]", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_location2_top
-
-#location3
-location3_top <- location3 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-location3_top <- top_n(ungroup(location3_top), 5, conc.)
-
-p_location3_top <- location3_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "goldenrod2") +
-  labs(x = "[Location3]", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_location3_top
-
-#location4
-location4_top <- location4 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-location4_top <- top_n(ungroup(location4_top), 5, conc.)
-
-p_location4_top <- location4_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "#50C878") +
-  labs(x = "[Location4]", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_location4_top
-
-#location5
-location5_top <- location5 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-location5_top <- top_n(ungroup(location5_top), 5, conc.)
-
-p_location5_top <- location5_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "tomato2") +
-  labs(x = "[Location5]", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_location5_top
-
-#location6
-location6_top <- location6 %>% 
-  group_by(analyte) %>% 
-  arrange(desc(conc.))
-location6_top <- top_n(ungroup(location6_top), 5, conc.)
-
-p_location6_top <- location6_top %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(analyte, conc.), y = conc.),
-           stat = "identity", fill = "midnightblue") +
-  labs(x = "[Location6]", y = "") +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) 
-p_location6_top
-
-#all locations
-grid.arrange(p_location1_top, p_location2_top, p_location3_top,
-             p_location4_top, p_location5_top, p_location6_top,
-             ncol = 3, nrow = 2,
-             top = "Top 5 Analytes at Each Location",
-              left = "Concentration\n(VOC ppbv or methane ppmv)")
-
-
-#correlations
-cor(outdoor$conc., location1$conc., method = "spearman")
+# #correlations
+cor(location2$conc., location1$conc., method = "spearman")
 #repeat the above for all location you want correlation for
 #create a new df for correlation. Slice out "outdoor" col. num. [-X]
-voc_cor <- site_XXX %>% 
-  slice(-X)
+voc_cor <- site_XXX %>%
+  slice(1:2)
+
+#get all TVOC signals for each room, ex. "sum(location5$conc., na.rm = TRUE)"
+p.analytes$conc. <- as.numeric(as.character(p.analytes$conc.))
+
+tvoc_location1 <- p.analytes %>%
+  filter(ID == "location_1")
+sum(tvoc_location1$conc.)
+tvoc_location2 <- p.analytes %>% 
+  filter(ID == "location_2")
+sum(tvoc_location2$conc., na.rm = TRUE)
+tvoc_lessonprep <- p.analytes %>% 
+  filter(ID == "location_3")
+sum(tvoc_lessonprep$conc., na.rm = TRUE)  
+tvoc_location4 <- p.analytes %>% 
+  filter(ID == "location_4")
+sum(tvoc_location4$conc., na.rm = TRUE)
+tvoc_location5 <- p.analytes %>% 
+  filter(ID == "location_5")
+sum(tvoc_location5$conc., na.rm = TRUE)
+tvoc_outdoor <- p.analytes %>% 
+  filter(ID == "Outdoor")
+sum(tvoc_outdoor$conc., na.rm = TRUE)
+
+
 #convert select rows to numeric
 voc_cor[2:62] <- lapply(voc_cor[2:62], as.numeric)
 #run the correlation
@@ -863,341 +298,4 @@ corrplot(vcor, method = "color", type = "upper", tl.col = "black",
 corrplot(vcor, method = "color", tl.col = "black", tl.cex = 0.5,
          col=colorRampPalette(c("blue","white","red"))(200))
 #another method for correlation
-library(corrr)
 cor2 <- correlate(voc_cor, method = "spearman", diagonal = 1)
-
-----------------------------------------------------------------------
-  
-#AES Test Lab
-#add theme in line 408 to keep axis label angle
-#point
-#theme minimal
-voc_plot_min <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                            y = conc., color = ID)) +
-  geom_point(shape = 18, size = 1.5, alpha = 0.5) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(size = 4, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab(expression(atop("Concentration",paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. City, CO")
-voc_plot_min + 
- scale_color_brewer(palette = "Dark2")
-  #scale_color_manual(values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                              # "tomato2", "midnightblue"))
-
-#bar/col, YUCK!
-voct1 <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                            y = conc., color = ID)) +
-  geom_col(position = "dodge", fill = "lightblue", color = "darkblue") +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(size = 4, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab(expression(atop("Concentration",paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle("Site XXX Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. City, CO")
-voct1
-
-#location1 vs outdoor
-goofy <- ggplot() +
-  geom_point(data = location1, aes(x = analyte, y = conc., color = "location1")) +
-  geom_point(data = outdoor, aes(x = analyte, y = conc., color = "Outdoor")) +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(size = 4, angle = 45, hjust = 1)) +
-  scale_color_manual(name = "[Location]", 
-                     values = c("#0041C2", "#FFDB58"),
-                     labels = c("[Location]", "Outdoor"))
-goofy +theme(
-  # Change legend background color
-  legend.background = element_rect(fill = "darkgray"),
-  legend.key = element_rect(fill = NA, color = NA))  
-
-#working with custom legend
-donald <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                            y = conc., color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.)) +
-  # guides(size = "none") +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  dark_theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab("Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Site XXX Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. City, CO")
-
-#dark theme with viridis colors manual
-donald +
-  scale_color_manual(values = c("#fde725", "#7ad151",
-                                  "#22a884", "#2a788e", "#414487",
-                                  "#440154"),
-                       labels = c("Location 1", "Location 2",
-                                       "Location 3\nInfo", "Location 4",
-                                       "Location 5", "Location 6")) +
-  theme(legend.title = element_text(color = "cyan", size = 10),
-                 legend.text = element_text(color = "white"))
-
-#dark w/ lava theme
-donald +
-  scale_color_manual(values = c("#c33b18", "#351d19",
-                                "#f28525", "#fbd449", "#ae5c5f",
-                                "#7f3029"),
-                     labels = c("Location 1", "Location 2",
-                                "Location 3\nInfo", "Location 4",
-                                "Location 5", "Location 6")) +
-  theme(legend.title = element_text(color = "#6c7476", size = 10),
-        legend.text = element_text(color = "#f3d18c"))
-
-#gray lava
-gr_lava <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                y = conc., color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.)) +
-  # guides(size = "none") +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab("Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Site XXX Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. City, CO")
-gr_lava +
-  scale_color_manual(values = c("#bc2e16", "#7a2a1c",
-                                "#f64009", "#af6f70", "#e66d1d",
-                                "#fbc117"),
-                     labels = c("Location 1", "Location 2",
-                                "Location 3\nInfo", "Location 4",
-                                "Location 5", "Location 6")) +
-  theme(legend.title = element_text(color = "#d1644b", size = 10),
-        legend.text = element_text(color = "#261e1b"))
-
-
-#summer theme with
-summer <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                          y = conc., color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.)) +
-  # guides(size = "none") +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab("Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Site XXX Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. City, CO")
-summer +
-  scale_color_manual(values = c("#065143", "#839b5d",
-                                "#df5e21", "#3f88c5", "#aab6cb",
-                                "#bc2e16"),
-                     labels = c("Location 1", "Location 2",
-                                "Location 3\nInfo", "Location 4",
-                                "Location 5", "Location 6")) +
-  theme(legend.title = element_text(color = "black", size = 10),
-        legend.text = element_text(color = "black"))
-
-#alaska air theme
-summer +
-  scale_color_manual(values = c("#065143", "#b1d887",
-                                "#00b2d6", "#007cba", "#01416e",
-                                "#aaaaaa"),
-                     labels = c("Location 1", "Location 2",
-                                "Location 3\nInfo", "Location 4",
-                                "Location 5", "Location 6")) +
-  theme(legend.title = element_text(color = "black", size = 10),
-        legend.text = element_text(color = "black"))
-
-#70s theme
-summer +
-  scale_color_manual(values = c("#FFE5B4", "#CD853F",
-                                "#EB5406", "#007cba", "#191970",
-                                "#659EC7"),
-                     labels = c("Location 1", "Location 2",
-                                "Location 3\nInfo", "Location 4",
-                                "Location 5", "Location 6")) +
-  theme(legend.title = element_text(color = "black", size = 10),
-        legend.text = element_text(color = "black"))
-
-#summer colorful
-summer +
-  scale_color_manual(values = c("#3090C7", "#FFE87C",
-                                "#A74AC7", "#12AD2B", "#C04000",
-                                "#F98B88"),
-                     labels = c("Location 1", "Location 2",
-                                "Location 3\nInfo", "Location 4",
-                                "Location 5", "Location 6")) +
-  theme(legend.title = element_text(color = "black", size = 10),
-        legend.text = element_text(color = "black"))
-
-
-#pink foam
-pink_foam <- ggplot(voc, aes(x = reorder(analyte, conc.),
-                           y = conc., color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc.)) +
-  # guides(size = "none") +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_gray() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab("Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle("Site XXX Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. City, CO")
-pink_foam +
-  scale_color_manual(values = c("#54bebe", "#006A4E",
-                                "#e27c7c", "#503f3f", "#df979e",
-                                "#c80064"),
-                     labels = c("Location 1", "Location 2",
-                                "Location 3\nInfo", "Location 4",
-                                "Location 5", "Location 6")) +
-  theme(legend.title = element_text(color = "black", size = 10),
-        legend.text = element_text(color = "#261e1b"))
-
-#ratio w/ yellowrainbow
-yellowrainbow <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
-                                 y = od_ratio, color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
-  # guides(size = "none") +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  #theme_bw() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab(expression(atop("Indoor to Outdoor Ratios"))) +
-  ggtitle("Site XXX Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. City, CO")
-
-yellowrainbow + scale_color_manual(values = c("#EDDA74", "#ffc501",
-                                              "#ff9801", "#037d50", "#024b30"),
-                                   labels = c("Location 1", "Location 2",
-                                              "Location 3\nInfo", "Location 4",
-                                              "Location 5", "Location 6")) +
-  theme(legend.title = element_text(color = "black", size = 10),
-        legend.text = element_text(color = "#261e1b"))
-
-#icecream
-yellowrainbow + scale_color_manual(values = c("orchid", "chocolate4",
-                                              "goldenrod2", "tomato2", "midnightblue"),
-                                   labels = c("Location 1", "Location 2",
-                                              "Location 3\nInfo", "Location 4",
-                                              "Location 5", "Location 6")) +
-  theme(legend.title = element_text(color = "black", size = 10),
-        legend.text = element_text(color = "#261e1b"))
-
-#viridis discrete
-yellowrainbow + scale_colour_viridis(discrete = TRUE,
-                                     labels = c("Location 1", "Location 2",
-                                                "Location 3\nInfo", "Location 4",
-                                                "Location 5", "Location 6")) +
-  theme(legend.title = element_text(color = "black", size = 10),
-        legend.text = element_text(color = "#261e1b"))
-
-#viridis magama
-viridismagma <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
-                                    y = od_ratio, color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
-  # guides(size = "none") +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  dark_theme_gray() +
-  scale_color_viridis(option = "plasma", discrete = TRUE) +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab(expression(atop("Indoor to Outdoor Ratios"))) +
-  ggtitle("Site XXX Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. City, CO")
-viridismagma
-
-#google docs
-googledocs <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
-                                   y = od_ratio, color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
-  # guides(size = "none") +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_gdocs() +
-  scale_color_gdocs() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab(expression(atop("Indoor to Outdoor Ratios"))) +
-  ggtitle("Site XXX, [Name] Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. City, CO")
-googledocs
-#tableau
-tableau <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
-                                 y = od_ratio, color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
-  # guides(size = "none") +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_igray() +
-  scale_color_tableau() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab(expression(atop("Indoor to Outdoor Ratios"))) +
-  ggtitle("Site XXX, [Name] Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. [City], CO")
-tableau
-
-#economist
-eco <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
-                      y = od_ratio, color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
-  # guides(size = "none") +
-  scale_y_log10(labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_economist() +
-  scale_color_economist() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 0)) +
-  xlab("Analytes") +
-  ylab(expression(atop("Indoor to Outdoor Ratios"))) +
-  ggtitle("Site XXX, [Name] Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. [City], CO")
-
-eco + theme(legend.key.size = unit(2, "cm"))
-
-#solarized
-solarized <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
-                          y = od_ratio, color = ID)) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
-  # guides(size = "none") +
-  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
-                labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_solarized() +
-  scale_color_solarized() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab("Indoor to Outdoor Ratios") +
-  ggtitle("Site XXX, [Name] Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. [City], CO")
-solarized + theme(
-  # Change legend background color
-  legend.background = element_rect(fill = NA),
-  legend.key = element_rect(fill = NA, color = NA))  
-
-#solarized plotly
-solarized2 <- ggplot(indoor, aes(x = reorder(analyte, od_ratio),
-                                y = od_ratio, color = ID,
-                                text = paste("Analyte: ", analyte,
-                                             "<br> Conc. :", conc.,
-                                             "<br> Class: ", category))) +
-  geom_point(shape = 18, size = 5, alpha = 0.5) +
-  # geom_point(data = methane, aes(x = analyte, y = conc., size = 1.5)) +
-  # guides(size = "none") +
-  scale_y_log10(breaks = c(10e3, 10e2, 10e1, 10e0, 10e-1, 10e-2, 10e-3),
-                labels = trans_format(`log10`, math_format(10^.x))) +
-  theme_solarized() +
-  scale_color_solarized() +
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-  xlab("Analytes") +
-  ylab("Indoor to Outdoor Ratios") +
-  ggtitle("Site XXX, [Name] Summa Cannister Deployment",
-          "Mmm. dd - Mmm. dd, YYYY. [City], CO")
-solarized2 + theme(
-  # Change legend background color
-  legend.background = element_rect(fill = NA),
-  legend.key = element_rect(fill = NA, color = NA))
-ggplotly(solarized2, tooltip = "text")
