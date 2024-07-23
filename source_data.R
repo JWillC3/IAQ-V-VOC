@@ -295,16 +295,16 @@ data_table <- function(sites, site_id){
 }
 
 #data table
-site_dt <- function(data, site_id) {
-  datatable(data, colnames = c("Location", "Analyte", "Concentration", "Category"),
+site_dt <- function(df, site_id) {
+  datatable(df, colnames = c("Location", "Analyte", "Concentration", "Category"),
             options = list(pageLength = 10), rownames = FALSE,
             caption = paste("Site"
                             , site_id, "Table, Concentrations: ppb(v) or methane ppb(v)"))
 }
 
 #Get top n analytes
-top_n_analytes <- function(data, n = 61) {
-  top_analytes <- data %>% 
+top_n_analytes <- function(df, n = 61) {
+  top_analytes <- df %>% 
     group_by(analyte) %>% 
     arrange(desc(conc.)) %>% 
     ungroup() %>% 
@@ -315,8 +315,8 @@ top_n_analytes <- function(data, n = 61) {
 }
 
 #Get top 10 ratios
-top_n_or <- function(data, room_name, n = 61) {
-  top_n_or <- data %>% 
+top_n_or <- function(df, room_name, n = 61) {
+  top_n_or <- df %>% 
   filter(room_name == room_name) %>% 
   group_by(analyte) %>% 
   arrange(desc(od_ratio)) %>% 
@@ -329,8 +329,8 @@ top_n_or <- function(data, room_name, n = 61) {
 
 
 #from chat gpt for the above
-get_top_analytes <- function(data, room_name, n = 5) {
-  top_analytes <- data %>% 
+get_top_analytes <- function(df, room_name, n = 5) {
+  top_analytes <- df %>% 
     filter(room_name == room_name) %>% 
     group_by(analyte) %>% 
     arrange(desc(od_ratio)) %>% 
