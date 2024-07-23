@@ -41,7 +41,7 @@ indoor_040 <- site_040 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_040 <- site_040 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 #SITE 063 A
 site_063A <- sites %>% 
@@ -212,7 +212,6 @@ site_109 <- sites %>%
   filter(site_id == "109")
 
 
-
 #-----------
 #locations
 table(sites$type)
@@ -251,7 +250,6 @@ indoor <- sites %>%
   filter(type != "Outdoor")
 
 
-
 #-----------
 #analyte categories
 #Alcohol
@@ -280,10 +278,8 @@ other <- sites %>%
   filter(category == "other")
 
 
-
 #-----------
 #functions
-
 #data table object
 data_table <- function(sites, site_id){
   filtered_table <- sites %>%
@@ -294,6 +290,7 @@ data_table <- function(sites, site_id){
   
 }
 
+
 #data table
 site_dt <- function(df, room) {
   datatable(df, colnames = c("Location", "Analyte", "Concentration", "Category"),
@@ -301,6 +298,7 @@ site_dt <- function(df, room) {
             caption = paste("Site"
                             , room, "Table, Concentrations: ppb(v) or methane ppb(v)"))
 }
+
 
 #Get top n analytes
 top_n_analytes <- function(df, n = 61) {
@@ -314,22 +312,9 @@ top_n_analytes <- function(df, n = 61) {
   
 }
 
+
 #Get top 10 ratios
-top_n_or <- function(df, room, n = 61) {
-  top_n_or <- df %>% 
-  filter(room_name == room) %>% 
-  group_by(analyte) %>% 
-  arrange(desc(od_ratio)) %>% 
-    ungroup() %>% 
-    top_n_or(n, od_ratio)
-  
-  return(top_n_or)
-
-}
-
-
-#from chat gpt for the above
-get_top_analytes <- function(df, room, n = 5) {
+top_n_or <- function(df, room, n) {
   top_analytes <- df %>% 
     filter(room_name == room) %>% 
     group_by(analyte) %>% 
@@ -340,9 +325,9 @@ get_top_analytes <- function(df, room, n = 5) {
   return(top_analytes)
 }
 
+
 #-----------
 #plot functions
-
 #box plot 
 box_plot <- function(df){
    
@@ -395,7 +380,7 @@ top_plot <- function(df, fill, site){
 }
 
 
-#top 10 analytes plot for loactions
+#top 10 analytes plot for locations
 loc_top_plot <- function(df, fill, location){
   
   ggplot(df, aes(x = reorder(analyte, conc.), y = conc.)) +
@@ -408,6 +393,7 @@ loc_top_plot <- function(df, fill, location){
     theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
   
 }
+
 
 #ratios box plot
 r_box_plot <- function(df){
@@ -422,6 +408,7 @@ r_box_plot <- function(df){
     ggtitle("Boxplot for All Indoor Ananlytes")
   
 }
+
 
 #ratio plot for all locations
 r_p_site <- function(df, site){
@@ -445,6 +432,21 @@ r_p_site <- function(df, site){
 }
 
 
+#top 10 I/O ratios plot for locations
+or_top_plot <- function(df, fill, location){
+  
+  ggplot(df, aes(x = reorder(analyte, od_ratio), y = od_ratio)) +
+    geom_bar(stat = "identity", fill = fill) +
+    labs(x = "", y = "") +
+    ggtitle(location) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+  
+}
+
+
 #to plot total voc conc by room
 p_conc_room <- function(df, site){
 
@@ -458,6 +460,7 @@ ggplot(df, aes(x = reorder(room_name, conc.),
   theme_bw() +
   theme(axis.text.y = element_blank())
 }
+
 
 #location type plots
 p_locations <- function(df, type){
@@ -483,6 +486,7 @@ p_locations <- function(df, type){
   
 }
 
+
 #analyte category plots
 p_category <- function(df, category){
   
@@ -496,7 +500,7 @@ p_category <- function(df, category){
     theme_bw() +
     theme(axis.text.x = element_text(size = 10)) +
     labs(x = "", y = "") +
-    ggtitle(paste0("VOC Concentrations for ", category)) +
+    ggtitle(paste0("040 ", category, " Concentrations")) +
     theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
     labs(x = "Ananlyte", y = "Concentration ppb(v)") +
     scale_color_manual(name = "Room ID",
@@ -529,6 +533,7 @@ fct_wrap <- function(df, site){
   
 }
 
+
 #facet wrap plot by analyte category
 cat_fct_wrap <- function(df, site){
   ggplot(df, aes(x = reorder(analyte, conc.),
@@ -547,6 +552,7 @@ cat_fct_wrap <- function(df, site){
                    "Grouped by Analyte Category"))
   
 }
+
 
 #facet wrap plot for ratios
 r_fct_wrap <- function(df, site){
@@ -567,6 +573,7 @@ r_fct_wrap <- function(df, site){
   
   
 }
+
 
 #plot for individual rooms
 
