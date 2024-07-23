@@ -301,7 +301,7 @@ site_dt <- function(df, room) {
 
 
 #Get top n analytes
-top_n_analytes <- function(df, n = 61) {
+top_n_analytes <- function(df, n) {
   top_analytes <- df %>% 
     group_by(analyte) %>% 
     arrange(desc(conc.)) %>% 
