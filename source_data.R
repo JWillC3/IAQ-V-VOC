@@ -295,11 +295,11 @@ data_table <- function(sites, site_id){
 }
 
 #data table
-site_dt <- function(df, site_id) {
+site_dt <- function(df, room) {
   datatable(df, colnames = c("Location", "Analyte", "Concentration", "Category"),
             options = list(pageLength = 10), rownames = FALSE,
             caption = paste("Site"
-                            , site_id, "Table, Concentrations: ppb(v) or methane ppb(v)"))
+                            , room, "Table, Concentrations: ppb(v) or methane ppb(v)"))
 }
 
 #Get top n analytes
@@ -315,9 +315,9 @@ top_n_analytes <- function(df, n = 61) {
 }
 
 #Get top 10 ratios
-top_n_or <- function(df, room_name, n = 61) {
+top_n_or <- function(df, room, n = 61) {
   top_n_or <- df %>% 
-  filter(room_name == room_name) %>% 
+  filter(room_name == room) %>% 
   group_by(analyte) %>% 
   arrange(desc(od_ratio)) %>% 
     ungroup() %>% 
@@ -329,9 +329,9 @@ top_n_or <- function(df, room_name, n = 61) {
 
 
 #from chat gpt for the above
-get_top_analytes <- function(df, room_name, n = 5) {
+get_top_analytes <- function(df, room, n = 5) {
   top_analytes <- df %>% 
-    filter(room_name == room_name) %>% 
+    filter(room_name == room) %>% 
     group_by(analyte) %>% 
     arrange(desc(od_ratio)) %>% 
     ungroup() %>% 
@@ -359,7 +359,7 @@ box_plot <- function(df){
 
 
 #all analytes plots by room id
-p_site <- function(df, site_id){
+p_site <- function(df, site){
   
   ggplot(df, aes(x = reorder(analyte, conc.),
                               y = conc., color = room_name,
@@ -372,7 +372,7 @@ p_site <- function(df, site_id){
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Analytes", y = "Concentration\n(VOC ppbv or methane ppmv)") +
-  ggtitle(paste0("Site: ", site_id, " Summa Canister Deployment")) +
+  ggtitle(paste0("Site: ", site, " Summa Canister Deployment")) +
   scale_color_manual(name = "Room ID",
                      values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                 "tomato2", "midnightblue")) 
@@ -381,12 +381,12 @@ p_site <- function(df, site_id){
 
 
 #top 10 analytes plot for site
-top_plot <- function(df, site_id, fill){
+top_plot <- function(df, fill, site){
   
   ggplot(df, aes(x = reorder(analyte, conc.), y = conc.)) +
     geom_bar(stat = "identity", fill = fill) +
     labs(x = "Analyte", y = "Concentration (ppb)") +
-    ggtitle(paste0("Site: ", site_id, " Top 10 Analytes")) +
+    ggtitle(paste0("Site: ", site, " Top 10 Analytes")) +
     scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                   labels = trans_format("log10", math_format(10^.x))) +
     theme_bw() +
@@ -424,7 +424,7 @@ r_box_plot <- function(df){
 }
 
 #ratio plot for all locations
-r_p_site <- function(df, site_id){
+r_p_site <- function(df, site){
   
   ggplot(df, aes(x = reorder(analyte, od_ratio),
                  y = od_ratio, color = room_name,
@@ -437,7 +437,7 @@ r_p_site <- function(df, site_id){
     theme_bw() +
     theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
     labs(x = "Analytes", y = "Concentration\n(VOC ppbv or methane ppmv)") +
-    ggtitle(paste0("Site: ", site_id, " Indoor to Outdoor Ratios")) +
+    ggtitle(paste0("Site: ", site, " Indoor to Outdoor Ratios")) +
     scale_color_manual(name = "Room ID",
                        values = c("orchid", "chocolate4", "goldenrod2","#50C878",
                                   "tomato2", "midnightblue")) 
@@ -446,14 +446,14 @@ r_p_site <- function(df, site_id){
 
 
 #to plot total voc conc by room
-p_conc_room <- function(df, site_id){
+p_conc_room <- function(df, site){
 
 ggplot(df, aes(x = reorder(room_name, conc.),
                y = conc.)) +
   geom_bar(stat = "identity", fill = "midnightblue") +
   stat_summary(aes(label = after_stat(y)), fun = "sum", geom = "text",
                col = "white", vjust = 1.5) +
-  ggtitle(paste0("Site: ", site_id,  " VOC Samples by Canister Location")) +
+  ggtitle(paste0("Site: ", site,  " VOC Samples by Canister Location")) +
   labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))") +
   theme_bw() +
   theme(axis.text.y = element_blank())
@@ -511,7 +511,7 @@ p_category <- function(df, category){
 
 
 #facet wrap plot by cansiter location
-fct_wrap <- function(df, site_id){
+fct_wrap <- function(df, site){
   ggplot(df, aes(x = reorder(analyte, conc.),
                      y = conc.)) +
   geom_point(color = "#50C878", size = 3, shape = 18, alpha = 0.5) +
@@ -524,13 +524,13 @@ fct_wrap <- function(df, site_id){
   labs(x = "Analytes",
        y = expression(atop("Concentration",
                            paste("(VOC ppbv or methane ppmv)")))) +
-  ggtitle(paste0("Site ", site_id," Summa Cannister Deployment",
+  ggtitle(paste0("Site ", site," Summa Cannister Deployment",
           "Grouped by Cannister Location"))
   
 }
 
 #facet wrap plot by analyte category
-cat_fct_wrap <- function(df, site_id){
+cat_fct_wrap <- function(df, site){
   ggplot(df, aes(x = reorder(analyte, conc.),
                  y = conc.)) +
     geom_point(color = "#50C878", size = 3, shape = 18, alpha = 0.5) +
@@ -543,13 +543,13 @@ cat_fct_wrap <- function(df, site_id){
     labs(x = "Analytes",
          y = expression(atop("Concentration",
                              paste("(VOC ppbv or methane ppmv)")))) +
-    ggtitle(paste0("Site ", site_id," Summa Cannister Deployment",
+    ggtitle(paste0("Site ", site," Summa Cannister Deployment",
                    "Grouped by Analyte Category"))
   
 }
 
 #facet wrap plot for ratios
-r_fct_wrap <- function(df, site_id){
+r_fct_wrap <- function(df, site){
   
   ggplot(df, aes(x = reorder(analyte, od_ratio),
                          y = conc.)) +
@@ -563,14 +563,14 @@ r_fct_wrap <- function(df, site_id){
     labs(x = "Analytes",
          y = expression(atop("Indoor to Otdoor Ratios",
                              paste("(VOC ppbv or methane ppmv)")))) +
-    ggtitle(paste0("Site ", site_id," Indoor to Outdoor Ratios"))
+    ggtitle(paste0("Site ", site," Indoor to Outdoor Ratios"))
   
   
 }
 
-#plot for indiviudal rooms
+#plot for individual rooms
 
-room_plot <- function(df, site_id, color, location){
+room_plot <- function(df, site, color, location){
   
   ggplot(df, aes(x = reorder(analyte, conc.), y = conc.)) +
     geom_point(color = color, shape = 18, size = 5) +
@@ -581,6 +581,6 @@ room_plot <- function(df, site_id, color, location){
     labs(x = "Analytes",
          y = expression(atop("Concentration",
                              paste("(VOC ppbv or methane ppmv)")))) +
-    ggtitle(paste0("Site ", site_id, paste0(" - ", (location))))
+    ggtitle(paste0("Site ", site, paste0(" - ", (location))))
   
 }
