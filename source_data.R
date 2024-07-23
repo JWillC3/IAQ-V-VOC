@@ -535,10 +535,10 @@ fct_wrap <- function(df, site){
 
 
 #facet wrap plot by analyte category
-cat_fct_wrap <- function(df, site){
+cat_fct_wrap <- function(df, color, site){
   ggplot(df, aes(x = reorder(analyte, conc.),
                  y = conc.)) +
-    geom_point(color = "#50C878", size = 3, shape = 18, alpha = 0.5) +
+    geom_point(color = color, size = 3, shape = 18, alpha = 0.5) +
     xlab("Analytes") +
     scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                   labels = trans_format("log10", math_format(10^.x))) +
