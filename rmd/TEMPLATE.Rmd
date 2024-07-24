@@ -16,7 +16,7 @@ output: html_document
 
 ```{r load data, include=FALSE}
 
-source("source_data.R")
+source("../source_data.R")
 
 ```
 
@@ -33,6 +33,12 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r, site_photo, out.width="50%"}
 
 include_graphics("../graphics/XXX.png")
+
+#calculate ratios
+indoor_XXX <- indoor_XXX %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_XXX$conc./outdoor_XXX$conc.))
 
 ```
 
@@ -232,7 +238,7 @@ include_graphics("../graphics/XXX_outdoor.jpg")
 ```{r outdoor_plot, out.width = "125%", warning=FALSE, message=FALSE}
 
 #outdoor
-p_XXXooutdoor <- room_plot(outdoor_XXX, "XXX", "midnightblue", "Outdoor, rooftop")
+p_XXXoutdoor <- room_plot(outdoor_XXX, "XXX", "midnightblue", "Outdoor, rooftop")
 
 p_XXXoutdoor
 
@@ -242,11 +248,10 @@ All locations grouped by canister location
 ```{r grid_all, out.width = "125%", warning=FALSE, message=FALSE}
 
 #all locations
-grid.arrange(p_location1_top, p_location2_top, p_location3_top,
-             p_location4_top, p_location5_top, p_outdoor_top,
-             ncol = 3, nrow = 2,
-             top = "Top 10 Analytes at Each Location",
-             left = "Concentration\n(VOC ppbv or methane ppmv)")
+grid.arrange(p_location1, p_location2, p_location3,
+             p_location4, p_location5, p_XXXoutdoor,
+             ncol = 2,
+             top = "Sample Locations")
 
 ```
 
@@ -267,7 +272,10 @@ Alcohols
 ```{r alcohol_plot, fig.align = "center", warning=FALSE, message=FALSE}
 
 #alcohol
-p_alcohol <- p_category(alcohol, "Alcohols")
+p_alcohol <- alcohol %>% 
+  filter(site_id == "XXX")
+
+p_category(p_alcohol, "XXX ", "Alcohols")
 p_alcohol
 
 ```
@@ -276,7 +284,10 @@ Aldehydes
 ```{r aldehyde_plot, fig.align = "center", warning=FALSE, message=FALSE}
 
 #aldehyde
-p_aldehyde <- p_category(aldehyde, "Aldehydes")
+p_aldehyde <- aldehyde %>% 
+  filter(site_id == "XXX")
+
+p_category(p_aldehyde, "XXX ", "Aldehydes")
 p_aldehyde
 
 ```
@@ -285,7 +296,10 @@ Straight Chains
 ```{r straight_chain_plot, fig.align = "center", out.width= "100%", warning=FALSE, message=FALSE}
 
 #straight chain
-p_straight_chain <- p_category(straight_chain, "Straight Chains")
+p_straight_chain <- straight_chain %>% 
+  filter(site_id == "XXX")
+  
+p_category(p_straight_chain, "XXX ", "Straight Chains")
 p_straight_chain
 
 ```
@@ -294,7 +308,10 @@ Aromatics
 ```{r aromatic_plot, fig.align = "center", warning=FALSE, message=FALSE}
 
 #aromatic
-p_aromatic <- p_category(aromatic, "Aromatics")
+p_aromatic <- aromatic %>% 
+  filter(site_id == "XXX")
+
+p_category(p_aromatic, "XXX ", "Aromatics")
 p_aromatic
 
 ```
@@ -303,7 +320,10 @@ BTex
 ```{r btex_plot, fig.align = "center", out.width= "100%", warning=FALSE, message=FALSE}
 
 #btex
-p_btex <- p_category(btex, "Btex")
+p_btex <- btex %>% 
+  filter(site_id == "XXX")
+  
+p_category(p_btex, "XXX ", "Btex")
 p_btex
 
 ```
@@ -312,7 +332,10 @@ Chlorinated
 ```{r chlorinated_plot, fig.align = "center", warning=FALSE, message=FALSE}
 
 #chlorinated
-p_chlorinated <- p_category(chlorinated, "Chlorinated")
+p_chlorinated <- chlorinated %>% 
+  filter(site_id == "XXX")
+  
+p_category(p_chlorinated, "XXX ", "Chlorinated")
 p_chlorinated
 
 ```
@@ -321,7 +344,10 @@ Ketones
 ```{r ketone_plot, fig.align = "center", message=FALSE, warning=FALSE}
 
 #ketone
-p_ketone <- p_category(ketone, "Ketones")
+p_ketone <- ketone %>% 
+  filter(site_id == "XXX")
+  
+p_category(p_ketone, "XXX ", "Ketones")
 p_ketone
 
 ```
@@ -330,7 +356,10 @@ Others
 ```{r other_plot, fig.align = "center", message=FALSE, warning=FALSE}
 
 #others
-p_other <- p_category(other, "Other")
+p_other <- other %>% 
+  filter(site_id == "XXX")
+  
+p_category(p_other, "XXX ", "Other")
 p_other
 
 ```
@@ -339,12 +368,12 @@ All analyte catergories plotted together
 ```{r cat_grids, fig.align = "center", message=FALSE, warning=FALSE}
 
 #categories plotted together
-grid.arrange(p_alcohol, p_aldehyde, p_straight_chain, p_aromatic,
-             ncol = 2, nrow = 2,
-             top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
-
-grid.arrange(p_btex, p_chlorinated, p_ketone, p_other, ncol = 2, nrow = 2,
-             top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
+# grid.arrange(p_alcohol, p_aldehyde, p_straight_chain, p_aromatic,
+#              ncol = 2, nrow = 2,
+#              top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
+# 
+# grid.arrange(p_btex, p_chlorinated, p_ketone, p_other, ncol = 2, nrow = 2,
+#              top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
 
 
 ```
@@ -490,7 +519,7 @@ location_3
 #location3 outdoor ratio
 location3_top_or <- top_n_or(indoor_XXX, "location_3", 10)
 
-p_location3_top_or <- or_top_plot(location3_or, "goldenrod2", "location_3")
+p_location3_top_or <- or_top_plot(location3_top__or, "goldenrod2", "location_3")
 p_location3_top_or
 
 ```

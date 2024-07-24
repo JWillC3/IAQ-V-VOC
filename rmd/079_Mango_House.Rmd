@@ -1,0 +1,564 @@
+
+<!-- replace the site number, 079 and name first -->
+<!-- change the dates for plots "Ddd. XX - Ddd. XX, 079X." -->
+<!-- change the site name, and city "Mango House & [City]"  -->
+<!-- balcony, clinic_waiting, etc. for objects and plots -->
+<!-- Balcony, Clinic Waiting, etc. for name in plot titles or axis -->
+<!-- change "[floor] [room type]" for where the canisters were located -->
+<!-- Don't forget to update information for all [ ] in the rmd -->
+
+---
+title: "CDPHE/CSU IAQ-V Project VOC Data"
+author: "Dr. Ellison Carter, Will Clagett, Jade Lippman"
+date: "2024-07-24"
+output: html_document
+---
+
+```{r load data, include=FALSE}
+
+source("../source_data.R")
+
+#calculate ratios
+indoor_079 <- indoor_079 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_079$conc./outdoor_079$conc.))
+
+```
+
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# **Summa Canister Deployment**
+## **Site 079 - Mango House**
+## **Feb. 23 - Mar. 2, 2023**
+## *Denver, CO*
+
+```{r, site_photo, out.width="50%"}
+
+include_graphics("../graphics/079.jpg")
+
+```
+
+
+---
+
+## Data set
+[Site info and summary]:
+
+ - [X Outdoor on [location info]
+ - [X Inside facility]
+
+| Rooms sampled inside facility |
+|:------|
+| 1. [] |
+| 2. [] |
+| 3. [] |
+| 4. [] |
+| 5. [] |
+
+---
+
+## Data Table
+```{r data_table}
+
+site_079_table <- data_table(sites, "079")
+
+site_dt(site_079_table, "079")
+
+```
+
+---
+
+## Summary Plots of all VOCs
+TVOC for Site 079 by canister location
+```{r voc_sum, include=FALSE}
+
+p_079_sum <- p_conc_room(site_079, "079 Mango House")
+
+```
+
+all VOC's at the site
+```{r plotly_all_VOCs, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
+#plot all VOCs at site
+p_079 <- p_site(site_079, "079")
+
+ggplotly(p_079, tooltip = "text")
+
+```
+
+Box plot for all VOC's at the site for all canister locations
+```{r boxplot, dpi= 250, warning=FALSE, message=FALSE}
+
+#box plot for all indoor locations
+bp_079 <- box_plot(site_079)
+
+bp_079
+
+```
+
+Top 10 analytes by concentration for all canister locations
+```{r site top 10 plot, dpi= 250, warning=FALSE, message=FALSE}
+
+#top 10 analyte concentrations for all locations, update number to #fetch the top 10, might need to be a number larger than 10
+site_079_top <- top_n_analytes(site_079, 45)
+
+site_079_top <- top_plot(site_079_top, "079", fill = "darkgreen")
+site_079_top
+
+```
+
+Facet wrap grouped by canister location
+```{r facet wrap plot for site, dpi= 250, warning=FALSE, message=FALSE}
+
+#facet wrap by location
+p_079_fctw <- fct_wrap(site_079, "079")
+
+p_079_fctw 
+
+```
+
+Facet wrap for indoor locations grouped by canister location
+```{r facet wrap plot for site, dpi= 250, warning=FALSE, message=FALSE}
+
+#facet wrap by location
+p_079i_fctw <- fct_wrap(indoor_079, "079")
+
+p_079i_fctw 
+
+```
+
+## Plots by canister location
+
+[location & room info] 
+```{r, Balcony_photo, out.width="75%"}
+
+include_graphics("../graphics/079_balcony.jpg")
+
+```
+
+
+```{r Balcony_plot, out.width = "125%", warning=FALSE, message=FALSE}
+
+#balcony
+balcony <- site_079 %>% 
+  filter(room_name == "Balcony")
+
+p_balcony <- room_plot(balcony, "079", "orchid", "Balcony, 2nd floor balcony")
+p_balcony
+
+```
+
+[location & room info]
+```{r, Clinic Waiting_photo, out.width="75%"}
+
+include_graphics("../graphics/079_clinic_waiting.jpg")
+
+```
+
+```{r Clinic Waiting_plot, out.width = "125%", warning=FALSE, message=FALSE}
+
+#clinic_waiting
+clinic_waiting <- site_079 %>% 
+  filter(room_name == "Clinic Waiting")
+
+p_clinic_waiting <- room_plot(clinic_waiting, "079", "chocolate4", "Clinic Waiting, 1st floor waiting room")
+
+p_clinic_waiting
+
+```
+
+[location & room info]
+```{r, Food Court N_photo, out.width="75%"}
+
+include_graphics("../graphics/079_entrance.jpg")
+
+```
+
+```{r Entrance_plot, out.width = "125%", warning=FALSE, message=FALSE}
+
+#entrance
+entrance <- site_079 %>% 
+  filter(room_name == "Entrance")
+
+p_entrance <- room_plot(entrance, "079", "goldenrod2", "Entrance, 1st floor entrance/lobby")
+p_entrance
+
+```
+
+
+[location & room info]
+```{r, Food Court N, out.width="75%"}
+
+include_graphics("../graphics/079_food_court_n.jpg")
+
+```
+
+```{r Food_Court_N_plot, out.width = "125%", warning=FALSE, message=FALSE}
+
+#food_court_n
+food_court_n <- site_079 %>% 
+  filter(room_name == "Food Court N")
+
+p_food_court_n <- room_plot(food_court_n, "079", "#50c878", "Food Court N, 1st floor open food court")
+p_food_court_n
+
+```
+
+
+[location & room info]
+```{r, Food Court S_photo, out.width="75%"}
+
+include_graphics("../graphics/079_food_court_s.jpg")
+
+```
+
+```{r Food Court S_plot, out.width = "125%", warning=FALSE, message=FALSE}
+
+#food_court_s
+food_court_s <- site_079 %>% 
+  filter(room_name == "Food Court S")
+
+p_food_court_s <- room_plot(food_court_s, "079", "tomato2", "Food Court S, 1st floor open food court")
+p_food_court_s
+
+```
+
+
+[Outdoor location info]
+```{r, outdoor_photo, out.width="75%"}
+
+include_graphics("../graphics/079_outdoor.jpg")
+
+```
+
+
+```{r outdoor_plot, out.width = "125%", warning=FALSE, message=FALSE}
+
+#outdoor
+p_079outdoor <- room_plot(outdoor_079, "079", "midnightblue", "Outdoor, rooftop")
+
+p_079outdoor
+
+```
+
+All locations grouped by canister location
+```{r grid_all, out.width = "125%", warning=FALSE, message=FALSE}
+
+#all locations
+grid.arrange(p_balcony, p_clinic_waiting, p_entrance,
+             p_food_court_n, p_food_court_s, p_079outdoor,
+             ncol = 2,
+             top = "Sample Locations")
+
+```
+
+
+---
+
+## Plots for each analyte category
+Facet by canister location
+```{r {r category facet wrap plot for site, dpi= 250, warning=FALSE, message=FALSE}}
+
+#indoor facet wrap by analyte class
+p_079_cat_fctw <- cat_fct_wrap(indoor_079, "079")
+p_079_cat_fctw
+
+```
+
+Alcohols
+```{r alcohol_plot, fig.align = "center", warning=FALSE, message=FALSE}
+
+#alcohol
+p_alcohol <- alcohol %>% 
+  filter(site_id == "079")
+
+p_category(p_alcohol, "079 ", "Alcohols")
+p_alcohol
+
+```
+
+Aldehydes
+```{r aldehyde_plot, fig.align = "center", warning=FALSE, message=FALSE}
+
+#aldehyde
+p_aldehyde <- aldehyde %>% 
+  filter(site_id == "079")
+
+p_category(p_aldehyde, "079 ", "Aldehydes")
+p_aldehyde
+
+```
+
+Straight Chains
+```{r straight_chain_plot, fig.align = "center", out.width= "100%", warning=FALSE, message=FALSE}
+
+#straight chain
+p_straight_chain <- straight_chain %>% 
+  filter(site_id == "079")
+  
+p_category(p_straight_chain, "079 ", "Straight Chains")
+p_straight_chain
+
+```
+
+Aromatics
+```{r aromatic_plot, fig.align = "center", warning=FALSE, message=FALSE}
+
+#aromatic
+p_aromatic <- aromatic %>% 
+  filter(site_id == "079")
+
+p_category(p_aromatic, "079 ", "Aromatics")
+p_aromatic
+
+```
+
+BTex
+```{r btex_plot, fig.align = "center", out.width= "100%", warning=FALSE, message=FALSE}
+
+#btex
+p_btex <- btex %>% 
+  filter(site_id == "079")
+  
+p_category(p_btex, "079 ", "Btex")
+p_btex
+
+```
+
+Chlorinated
+```{r chlorinated_plot, fig.align = "center", warning=FALSE, message=FALSE}
+
+#chlorinated
+p_chlorinated <- chlorinated %>% 
+  filter(site_id == "079")
+  
+p_category(p_chlorinated, "079 ", "Chlorinated")
+p_chlorinated
+
+```
+
+Ketones
+```{r ketone_plot, fig.align = "center", message=FALSE, warning=FALSE}
+
+#ketone
+p_ketone <- ketone %>% 
+  filter(site_id == "079")
+  
+p_category(p_ketone, "079 ", "Ketones")
+p_ketone
+
+```
+
+Others
+```{r other_plot, fig.align = "center", message=FALSE, warning=FALSE}
+
+#others
+p_other <- other %>% 
+  filter(site_id == "079")
+  
+p_category(p_other, "079 ", "Other")
+p_other
+
+```
+
+All analyte catergories plotted together
+```{r cat_grids, fig.align = "center", message=FALSE, warning=FALSE}
+
+#categories plotted together
+grid.arrange(p_alcohol, p_aldehyde, p_straight_chain, p_aromatic,
+             ncol = 2, nrow = 2,
+             top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
+
+grid.arrange(p_btex, p_chlorinated, p_ketone, p_other,
+             ncol = 2, nrow = 2,
+             top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
+
+
+```
+
+---
+
+## Plots for the Top 10 Analytes by Location
+```{r balcony_t, warning=FALSE, message=FALSE}
+
+balcony_top <- top_n_analytes(balcony, 10)
+
+p_balcony_top <- loc_top_plot(balcony_top, "orchid", "Balcony")
+p_balcony_top
+
+```
+
+
+```{r clinic_waiting_t, warning=FALSE, message=FALSE}
+
+#clinic_waiting
+clinic_waiting_top <- top_n_analytes(clinic_waiting, 10)
+
+p_clinic_waiting_top <- loc_top_plot(clinic_waiting_top, "chocolate4", "Clinic Waiting")
+p_clinic_waiting_top
+
+```
+
+
+```{r entrance_t, warning=FALSE, message=FALSE}
+
+#entrance
+entrance_top <- top_n_analytes(entrance, 10)
+
+p_entrance_top <- loc_top_plot(entrance_top, "goldenrod2", "Food Court N")
+p_entrance_top
+
+```
+
+
+```{r food_court_n_t, warning=FALSE, message=FALSE}
+
+#food_court_n
+food_court_n_top <- top_n_analytes(food_court_n, 10)
+
+p_food_court_n_top <- loc_top_plot(food_court_n_top, "#50c878", "Entrance")
+p_food_court_n_top
+
+```
+
+
+```{r food_court_s_t, warning=FALSE, message=FALSE}
+
+#food_court_s
+food_court_s_top <- top_n_analytes(food_court_s, 10)
+
+p_food_court_s_top <- loc_top_plot(food_court_s_top, "tomato2", "Food Court S")
+p_food_court_s_top
+
+```
+
+
+```{r, outdoor_t, warning=FALSE, message=FALSE}
+
+#outdoor
+outdoor_top <- top_n_analytes(outdoor_079, 10)
+
+p_outdoor_top <- loc_top_plot(outdoor_top, "midnightblue", "Outdoor")
+p_outdoor_top
+
+```
+
+All top 10 plots together
+```{r, top_10_grid, warning=FALSE, out.width = "140%", message=FALSE}
+
+#all locations
+grid.arrange(p_balcony_top, p_clinic_waiting_top, p_entrance_top,
+             p_food_court_n_top, p_food_court_s_top, p_outdoor_top,
+             ncol = 3, nrow = 2,
+             top = "Top 10 Analytes at Each Location",
+             left = "Concentration\n(VOC ppbv or methane ppmv)")
+
+```
+
+---
+
+## Indoor to Outdoor Ratio Plots
+All canister locations
+```{r , ratio_plot, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
+
+#indoor to outdoor ratio plot for all analytes
+p_079_ratio <- r_p_site(indoor_079, "079")
+
+
+#plotly ratio
+ggplotly(p_079_ratio, tooltip = "text")
+
+```
+
+Box plot of all I/O ratios
+```{r , bp_ratio_plot, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
+
+#boxplot of indoor / outdoor ratios for all analytes
+p_079_bp <- r_box_plot(indoor_079)
+p_079_bp
+
+```
+
+Facet wrap of all I/O ratios
+```{r , fct_ratio_plot, fig.align = "center", fig.dim=c(12,8), warning=FALSE, message=FALSE}
+
+#ratio plot with facet wrap
+p_079_r_fctw <- r_fct_wrap(indoor_079, "079")
+p_079_r_fctw
+
+```
+
+## Plots for the Top 10 Outdoor Ratios by Location
+Balcony
+```{r balcony_or_t, warning=FALSE, message=FALSE}
+
+#balcony outdoor ratio
+balcony_top_or <- top_n_or(indoor_079, "Balcony", 10)
+
+p_balcony_top_or <- or_top_plot(balcony_top_or, "orchid", "Balcony")
+p_balcony_top_or
+
+```
+
+Clinic Waiting
+```{r clinic_waiting_or_t, warning=FALSE, message=FALSE}
+
+#clinic_waiting outdoor ratio
+clinic_waiting_top_or <- top_n_or(indoor_079, "Balcony", 10)
+
+p_clinic_waiting_top_or <- or_top_plot(clinic_waiting_top_or, "chocolate4", "Clinic Waiting")
+p_clinic_waiting_top_or
+
+```
+
+Food Court N
+```{r entrance_or_t, warning=FALSE, message=FALSE}
+
+#entrance outdoor ratio
+entrance_top_or <- top_n_or(indoor_079, "Food Court N", 10)
+
+p_entrance_top_or <- or_top_plot(entrance_top_or, "goldenrod2", "Food Court N")
+p_entrance_top_or
+
+```
+
+Entrance
+```{r food_court_n_or_t, warning=FALSE, message=FALSE}
+
+#food_court_n outdoor ratio
+food_court_n_top_or <- top_n_or(indoor_079, "Entrance", 10)
+
+p_food_court_n_top_or <- or_top_plot(food_court_n_top_or, "#50C878", "Entrance")
+p_food_court_n_top_or
+
+```
+
+Food Court S
+```{r food_court_s_or_t, warning=FALSE, message=FALSE}
+
+#food_court_s outdoor ratio
+food_court_s_top_or <- top_n_or(indoor_079, "Food Court S", 10)
+
+p_food_court_s_top_or <- or_top_plot(food_court_s_top_or, "tomato2", "Food Court S")
+p_food_court_s_top_or
+
+```
+
+All locations plotted together
+```{r, all_ratio_plots, warning=FALSE, out.width = "140%", message=FALSE}
+
+#all locations outdoor ratio
+grid.arrange(p_balcony_top_or, p_clinic_waiting_top_or, p_entrance_top_or,
+             p_food_court_n_top_or, p_food_court_s_top_or,
+             ncol = 3, nrow = 2,
+             top = "Top 10 I/O Ratios in Each Location",
+             left = "Concentration\n(VOC ppbv or methane ppmv)")
+
+```
+
+---
+
+## Correlations
