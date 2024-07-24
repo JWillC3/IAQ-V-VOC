@@ -19,10 +19,13 @@ library(readxl)
 library(knitr)
 library(magick)
 library(corrr)
+library(googlesheets4)
 
 
 #-----------
 # read site data
+#figure out how ot use google sheets function
+
 sites <- read_excel("C:/Users/wclagett/Documents/IAQ-V-VOC/data/site_info.xlsx") %>% 
   select(1:19)
 
