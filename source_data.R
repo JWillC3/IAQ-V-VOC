@@ -488,7 +488,7 @@ p_locations <- function(df, type){
 
 
 #analyte category plots
-p_category <- function(df, category){
+p_sites_cat <- function(df, category){
   
   ggplot(df, aes(x = reorder(analyte, conc.),
                       y = conc., color = site_id,
@@ -500,15 +500,38 @@ p_category <- function(df, category){
     theme_bw() +
     theme(axis.text.x = element_text(size = 10)) +
     labs(x = "", y = "") +
-    ggtitle(paste0("040 ", category, " Concentrations")) +
+    ggtitle(paste0(category, " Concentrations")) +
     theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
     labs(x = "Ananlyte", y = "Concentration ppb(v)") +
-    scale_color_manual(name = "Room ID",
+    scale_color_manual(name = "Site ID",
                        values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
                                   "#e28de2", "#934270", "#e72fc2", "#5361c7",
                                   "#b9cda1", "#096013", "#afe642", "#3aa609",
                                   "#2af464", "#683d0d", "#efaa79", "#d6061a",
                                   "#d9c937", "#9f04fc")) +
+    theme(panel.grid.minor = element_line(linetype = "dashed"))
+  
+}
+
+#analyte category plots for specific sites
+p_category <- function(df, site, category){
+  
+  ggplot(df, aes(x = reorder(analyte, conc.),
+                 y = conc., color = room_name,
+                 text = paste("Site: ", site_id,
+                              "<br> Conc. :", conc.))) +
+    geom_point(shape = 18, size = 3, alpha = 0.5) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 10)) +
+    labs(x = "", y = "") +
+    ggtitle(paste0(site, category, " Concentrations")) +
+    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+    labs(x = "Ananlyte", y = "Concentration ppb(v)") +
+    scale_color_manual(name = "Room ID",
+                       values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                  "tomato2", "midnightblue")) +
     theme(panel.grid.minor = element_line(linetype = "dashed"))
   
 }
@@ -535,10 +558,10 @@ fct_wrap <- function(df, site){
 
 
 #facet wrap plot by analyte category
-cat_fct_wrap <- function(df, color, site){
+cat_fct_wrap <- function(df, site){
   ggplot(df, aes(x = reorder(analyte, conc.),
                  y = conc.)) +
-    geom_point(color = color, size = 3, shape = 18, alpha = 0.5) +
+    geom_point(color = "goldenrod2", size = 3, shape = 18, alpha = 0.5) +
     xlab("Analytes") +
     scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                   labels = trans_format("log10", math_format(10^.x))) +
