@@ -19,16 +19,27 @@ library(readxl)
 library(knitr)
 library(magick)
 library(corrr)
+library(googlesheets4)
 
 
 #-----------
 # read site data
-sites <- read_excel("C:/Users/wclagett/Documents/IAQ-V-VOC/data/site_info.xlsx") %>% 
-  select(1:19)
+#figure out how to use Google sheets function
+sites <- 
+  read_sheet("https://docs.google.com/spreadsheets/d/1s34WArIxQtaPa8HHk_6iRN9osTeJPnUU5HqpEplh5dU/edit?gid=0#gid=0",
+             "info", col_types = "c")
+
+cols_to_convert <- c("value", "conc.", "ug_m3", "ppm(v)", "M", "OSHA_8hr")
+
+sites <- sites %>% mutate_at(vars(cols_to_convert), ~ signif(as.numeric(.), 4))
+print(sites)
+
+
+# sites <- read_excel("C:/Users/wclagett/Documents/IAQ-V-VOC/data/site_info.xlsx") %>% 
+#   select(1:19)
 
 #load limit of detection
-lod <- read_excel("C:/Users/wclagett/Documents/IAQ-V-VOC/data/summa_lod.xlsx") %>% 
-  select(2:4)
+lod <- read_sheet("https://docs.google.com/spreadsheets/d/1IONR7Kq4XkqtCqXE_M_YW8zXxwoYnpIu-cQjRPUyk34/edit?gid=0#gid=0")
 
 
 #-----------

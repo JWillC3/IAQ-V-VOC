@@ -77,6 +77,7 @@ TVOC for Site 079 by canister location
 ```{r voc_sum, include=FALSE}
 
 p_079_sum <- p_conc_room(site_079, "079 Mango House")
+p_079_sum
 
 ```
 
