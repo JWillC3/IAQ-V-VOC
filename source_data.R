@@ -24,7 +24,8 @@ library(googlesheets4)
 
 #-----------
 # read site data
-#figure out how ot use google sheets function
+#figure out how to use Google sheets function
+
 
 sites <- read_excel("C:/Users/wclagett/Documents/IAQ-V-VOC/data/site_info.xlsx") %>% 
   select(1:19)
