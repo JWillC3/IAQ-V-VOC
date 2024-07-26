@@ -279,6 +279,12 @@ p_other
 #              top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
 
 #----
+#SRA means
+#compute median I/O for each analyte in each indoor location. 
+
+
+
+#----
 # #correlations
 cor(frogs$conc., bears$conc., method = "spearman")
 #repeat the above for all location you want correlation for
