@@ -416,7 +416,7 @@ r_box_plot <- function(df){
     theme_bw() +
     theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
     labs(x = "Ananlyte", y = "Concentration") +
-    ggtitle("Boxplot for All Indoor Ananlytes")
+    ggtitle("Boxplot for All Ananlyte I/O Ratios")
   
 }
 
@@ -563,7 +563,7 @@ fct_wrap <- function(df, site){
        y = expression(atop("Concentration",
                            paste("(VOC ppbv or methane ppmv)")))) +
   ggtitle(paste0("Site ", site," Summa Cannister Deployment",
-          "Grouped by Cannister Location"))
+          " Grouped by Cannister Location"))
   
 }
 
@@ -583,7 +583,7 @@ cat_fct_wrap <- function(df, site){
          y = expression(atop("Concentration",
                              paste("(VOC ppbv or methane ppmv)")))) +
     ggtitle(paste0("Site ", site," Summa Cannister Deployment",
-                   "Grouped by Analyte Category"))
+                   " Grouped by Analyte Category"))
   
 }
 
