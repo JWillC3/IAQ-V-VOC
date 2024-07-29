@@ -71,7 +71,7 @@ p_XXXi_fctw
 #   plot_layout(nrow = 2, heights = c(1, 2))
 
 #facet wrap all analytes grouped by class
-p_XXXi_cat_fctw <- cat_fct_wrap(indoor_XXX, "#50C878", "XXX")
+p_XXXi_cat_fctw <- cat_fct_wrap(indoor_XXX, "XXX")
 p_XXXi_cat_fctw
 
 #indoor facet wrap by analyte class
@@ -115,37 +115,37 @@ grid.arrange(p_location1, p_location2, p_location4, p_location3, p_location5, p_
 #testing something new for scale y in this plot
 location1_top <- top_n_analytes(location1, 10)
 
-p_location1_top <- loc_top_plot(location1_top, "orchid", "location_1")
+p_location1_top <- loc_top_plot(location1_top, "orchid", "location_1 top 10")
 p_location1_top
 
 #location2
 location2_top <- top_n_analytes(location2, 10)
 
-p_location2_top <- loc_top_plot(location2_top, "chocolate4", "location_2")
+p_location2_top <- loc_top_plot(location2_top, "chocolate4", "location_2 top 10")
 p_location2_top
 
 #location3
 location3_top <- top_n_analytes(location3, 10)
 
-p_location3_top <- loc_top_plot(location3_top, "goldenrod2", "location_3")
+p_location3_top <- loc_top_plot(location3_top, "goldenrod2", "location_3 top 10")
 p_location3_top
 
 #location4
 location4_top <- top_n_analytes(location4, 10)
 
-p_location4_top <- loc_top_plot(location4_top, "#50c878", "location_4")
+p_location4_top <- loc_top_plot(location4_top, "#50c878", "location_4 top 10")
 p_location4_top
 
 #location5
 location5_top <- top_n_analytes(location5, 10)
 
-p_location5_top <- loc_top_plot(location5_top, "tomato2", "location_5")
+p_location5_top <- loc_top_plot(location5_top, "tomato2", "location_5 top 10")
 p_location5_top
 
 #outdoor
 outdoor_top <- top_n_analytes(outdoor_XXX, 10)
 
-p_outdoor_top <- loc_top_plot(outdoor_top, "midnightblue", "Outdoor")
+p_outdoor_top <- loc_top_plot(outdoor_top, "midnightblue", "Outdoor top 10")
 p_outdoor_top
 
 #all locations
@@ -176,31 +176,36 @@ p_XXX_r_fctw
 #location1 outdoor ratio
 location1_top_or <- top_n_or(indoor_XXX, "location_1", 10)
 
-p_location1_top_or <- or_top_plot(location1_top_or, "orchid", "location_1")
+p_location1_top_or <- or_top_plot(location1_top_or, "orchid",
+                                  "location_1 top 10 I/O Ratios")
 p_location1_top_or
 
 #location2 outdoor ratio
 location2_top_or <- top_n_or(indoor_XXX, "location_1", 10)
 
-p_location2_top_or <- or_top_plot(location2_top_or, "chocolate4", "location_2")
+p_location2_top_or <- or_top_plot(location2_top_or, "chocolate4",
+                                  "location_2 top 10 I/O Ratios")
 p_location2_top_or
 
 #location3 outdoor ratio
 location3_top_or <- top_n_or(indoor_XXX, "location_3", 10)
 
-p_location3_top_or <- or_top_plot(location3_or, "goldenrod2", "location_3")
+p_location3_top_or <- or_top_plot(location3_top_or, "goldenrod2",
+                                  "location_3 top 10 I/O Ratios")
 p_location3_top_or
 
 #location4 outdoor ratio
 location4_top_or <- top_n_or(indoor_XXX, "location_4", 10)
 
-p_location4_top_or <- or_top_plot(location4_top_or, "#50C878", "location_4")
+p_location4_top_or <- or_top_plot(location4_top_or, "#50C878",
+                                  "location_4 top 10 I/O Ratios")
 p_location4_top_or
 
 #location5 outdoor ratio
 location5_top_or <- top_n_or(indoor_XXX, "location_5", 10)
 
-p_location5_top_or <- or_top_plot(location5_top_or, "tomato2", "location_5")
+p_location5_top_or <- or_top_plot(location5_top_or, "tomato2",
+                                  "location_5 top 10 I/O Ratios")
 p_location5_top_or
 
 #all locations outdoor ratio
@@ -211,36 +216,68 @@ grid.arrange(p_location1_top_or, p_location2_top_or, p_location3_top_or,
              left = "Concentration\n(VOC ppbv or methane ppmv)")
 
 #category plots
+#facet wrap by analyte class
+p_XXX_cat_fctw <- cat_fct_wrap(site_XXX, "XXX (All Locations)")
+p_XXX_cat_fctw
+
+#indoor facet wrap by analyte class
+p_XXX_cat_fctw <- cat_fct_wrap(indoor_XXX, "XXX (Indoor Locations)")
+p_XXX_cat_fctw
+
 #alcohol
-p_alcohol <- p_category(alcohol, "Alcohols")
+p_alcohol <- alcohol %>% 
+  filter(site_id == "XXX")
+
+p_category(p_alcohol, "XXX ", "Alcohols")
 p_alcohol
 
 #aldehyde
-p_aldehyde <- p_category(aldehyde, "Aldehydes")
+p_aldehyde <- aldehyde %>% 
+  filter(site_id == "XXX")
+
+p_category(p_aldehyde, "XXX ", "Aldehydes")
 p_aldehyde
 
 #straight chain
-p_straight_chain <- p_category(straight_chain, "Straight Chains")
+p_straight_chain <- straight_chain %>% 
+  filter(site_id == "XXX")
+
+p_category(p_straight_chain, "XXX ", "Straight Chains")
 p_straight_chain
 
 #aromatic
-p_aromatic <- p_category(aromatic, "Aromatics")
+p_aromatic <- aromatic %>% 
+  filter(site_id == "XXX")
+
+p_category(p_aromatic, "XXX ", "Aromatics")
 p_aromatic
 
 #btex
-p_btex <- p_category(btex, "Btex")
+p_btex <- btex %>% 
+  filter(site_id == "XXX")
+
+p_category(p_btex, "XXX ", "Btex")
 p_btex
 
 #chlorinated
-p_chlorinated <- p_category(chlorinated, "Chlorinated")
+p_chlorinated <- chlorinated %>% 
+  filter(site_id == "XXX")
+
+p_category(p_chlorinated, "XXX ", "Chlorinated")
 p_chlorinated
 
 #ketone
-p_ketone <- p_category(ketone, "Ketones")
+p_ketone <- ketone %>% 
+  filter(site_id == "XXX")
+
+p_category(p_ketone, "XXX ", "Ketones")
 p_ketone
 
 #others
-p_other <- p_category(other, "Other")
+p_other <- other %>% 
+  filter(site_id == "XXX")
+
+p_category(p_other, "XXX ", "Other")
 p_other
 
 #categories plotted together
@@ -251,6 +288,8 @@ grid.arrange(p_alcohol, p_aldehyde, p_straight_chain, p_aromatic,
 grid.arrange(p_btex, p_chlorinated, p_ketone, p_other, ncol = 2, nrow = 2,
              top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
 
+
+#----
 # #correlations
 cor(location2$conc., location1$conc., method = "spearman")
 #repeat the above for all location you want correlation for

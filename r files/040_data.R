@@ -66,18 +66,9 @@ p_040_fctw
 #   p_040_fctw +
 #   plot_layout(nrow = 2, heights = c(1, 2))
 
-#facet wrap all analytes grouped by class
-p_040i_cat_fctw <- cat_fct_wrap(indoor_040, "#50C878", "040")
-p_040i_cat_fctw
-
-#indoor facet wrap by analyte class
-p_040_cat_fctw <- cat_fct_wrap(site_040, "orange", "040")
-p_040_cat_fctw
-
 #plots for each room
 #outdoor
 p_040od <- room_plot(outdoor_040, "040", "midnightblue", "Outdoor, rooftop")
-
 p_040od
 
 #bears
@@ -113,37 +104,38 @@ grid.arrange(p_bears, p_frogs, p_monkeys, p_lesson_prep, p_office, p_040od,
 #testing something new for scale y in this plot
 bears_top <- top_n_analytes(bears, n = 10)
 
-p_bears_top <- loc_top_plot(bears_top, "orchid", "Bears")
+p_bears_top <- loc_top_plot(bears_top, "orchid", "Bears top 10")
 p_bears_top
 
 #frogs
 frogs_top <- top_n_analytes(frogs, n = 10)
 
-p_frogs_top <- loc_top_plot(frogs_top, "chocolate4", "Frogs")
+p_frogs_top <- loc_top_plot(frogs_top, "chocolate4", "Frogs top 10")
 p_frogs_top
 
 #lesson_prep
 lesson_prep_top <- top_n_analytes(lesson_prep, n = 10)
 
-p_lesson_prep_top <- loc_top_plot(lesson_prep_top, "goldenrod2", "Lesson Prep")
+p_lesson_prep_top <- loc_top_plot(lesson_prep_top, "goldenrod2",
+                                  "Lesson Prep top 10")
 p_lesson_prep_top
 
 #monkeys
 monkeys_top <- top_n_analytes(monkeys, n = 10)
 
-p_monkeys_top <- loc_top_plot(monkeys_top, "#50c878", "Monkeys")
+p_monkeys_top <- loc_top_plot(monkeys_top, "#50c878", "Monkeys top 10")
 p_monkeys_top
 
 #office
 office_top <- top_n_analytes(office, n = 10)
 
-p_office_top <- loc_top_plot(office_top, "tomato2", "Office")
+p_office_top <- loc_top_plot(office_top, "tomato2", "Office top 10")
 p_office_top
 
 #outdoor
 outdoor_top <- top_n_analytes(outdoor_040, n = 10)
 
-p_outdoor_top <- loc_top_plot(outdoor_top, "midnightblue", "Outdoor")
+p_outdoor_top <- loc_top_plot(outdoor_top, "midnightblue", "Outdoor top 10")
 p_outdoor_top
 
 #all locations
@@ -174,31 +166,36 @@ p_040_r_fctw
 #bears outdoor ratio
 bears_top_or <- top_n_or(indoor_040, "Bears", 10)
 
-p_bears_top_or <- or_top_plot(bears_top_or, "orchid", "Bears")
+p_bears_top_or <- or_top_plot(bears_top_or, "orchid",
+                              "Bears top 10 I/O Ratios")
 p_bears_top_or
 
 #frogs outdoor ratio
-frogs_top_or <- top_n_or(indoor_040, "Bears", 10)
+frogs_top_or <- top_n_or(indoor_040, "Frogs", 10)
 
-p_frogs_top_or <- or_top_plot(frogs_top_or, "chocolate4", "Frogs")
+p_frogs_top_or <- or_top_plot(frogs_top_or, "chocolate4",
+                              "Frogs top 10 I/O Ratios")
 p_frogs_top_or
 
 #lesson_prep outdoor ratio
 lesson_prep_top_or <- top_n_or(indoor_040, "Lesson Prep", 10)
 
-p_lesson_prep_top_or <- or_top_plot(lesson_prep_or, "goldenrod2", "Lesson Prep")
+p_lesson_prep_top_or <- or_top_plot(lesson_prep_top_or, "goldenrod2",
+                                    "Lesson Prep top 10 I/O Ratios")
 p_lesson_prep_top_or
 
 #monkeys outdoor ratio
 monkeys_top_or <- top_n_or(indoor_040, "Monkeys", 10)
 
-p_monkeys_top_or <- or_top_plot(monkeys_top_or, "#50C878", "Monkeys")
+p_monkeys_top_or <- or_top_plot(monkeys_top_or, "#50C878",
+                                "Monkeys top 10 I/O Ratios")
 p_monkeys_top_or
 
 #office outdoor ratio
 office_top_or <- top_n_or(indoor_040, "Office", 10)
 
-p_office_top_or <- or_top_plot(office_top_or, "tomato2", "Office")
+p_office_top_or <- or_top_plot(office_top_or, "tomato2",
+                               "Office top 10 I/O Ratios")
 p_office_top_or
 
 #all locations outdoor ratio
@@ -209,46 +206,85 @@ grid.arrange(p_bears_top_or, p_frogs_top_or, p_lesson_prep_top_or,
              left = "Concentration\n(VOC ppbv or methane ppmv)")
 
 #category plots
+#facet wrap by analyte class
+p_040_cat_fctw <- cat_fct_wrap(site_040, "040 (All Locations)")
+p_040_cat_fctw
+
+#indoor facet wrap by analyte class
+p_040_cat_fctw <- cat_fct_wrap(indoor_040, "040 (Indoor Locations)")
+p_040_cat_fctw
+
 #alcohol
-p_alcohol <- p_category(alcohol, "Alcohols")
+p_alcohol <- alcohol %>% 
+  filter(site_id == "040")
+
+p_category(p_alcohol, "040 ", "Alcohols")
 p_alcohol
 
 #aldehyde
-p_aldehyde <- p_category(aldehyde, "Aldehydes")
+p_aldehyde <- aldehyde %>% 
+  filter(site_id == "040")
+
+p_category(p_aldehyde, "040 ", "Aldehydes")
 p_aldehyde
 
 #straight chain
-p_straight_chain <- p_category(straight_chain, "Straight Chains")
+p_straight_chain <- straight_chain %>% 
+  filter(site_id == "040")
+
+p_category(p_straight_chain, "040 ", "Straight Chains")
 p_straight_chain
 
 #aromatic
-p_aromatic <- p_category(aromatic, "Aromatics")
+p_aromatic <- aromatic %>% 
+  filter(site_id == "040")
+
+p_category(p_aromatic, "040 ", "Aromatics")
 p_aromatic
 
 #btex
-p_btex <- p_category(btex, "Btex")
+p_btex <- btex %>% 
+  filter(site_id == "040")
+
+p_category(p_btex, "040 ", "Btex")
 p_btex
 
 #chlorinated
-p_chlorinated <- p_category(chlorinated, "Chlorinated")
+p_chlorinated <- chlorinated %>% 
+  filter(site_id == "040")
+
+p_category(p_chlorinated, "040 ", "Chlorinated")
 p_chlorinated
 
 #ketone
-p_ketone <- p_category(ketone, "Ketones")
+p_ketone <- ketone %>% 
+  filter(site_id == "040")
+
+p_category(p_ketone, "040 ", "Ketones")
 p_ketone
 
 #others
-p_other <- p_category(other, "Other")
+p_other <- other %>% 
+  filter(site_id == "040")
+
+p_category(p_other, "040 ", "Other")
 p_other
 
-#categories plotted together
-grid.arrange(p_alcohol, p_aldehyde, p_straight_chain, p_aromatic,
-             ncol = 2, nrow = 2,
-             top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
+# #categories plotted together
+# grid.arrange(p_alcohol, p_aldehyde, p_straight_chain, p_aromatic,
+#              ncol = 2, nrow = 2,
+#              top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
+# 
+# grid.arrange(p_btex, p_chlorinated, p_ketone, p_other, ncol = 2, nrow = 2,
+#              top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
 
-grid.arrange(p_btex, p_chlorinated, p_ketone, p_other, ncol = 2, nrow = 2,
-             top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
+#----
+#SRA means
+#compute median I/O for each analyte in each indoor location. 
 
+
+
+#----
 # #correlations
 cor(frogs$conc., bears$conc., method = "spearman")
 #repeat the above for all location you want correlation for
