@@ -64,6 +64,10 @@ site_040_top
 p_040_fctw <- fct_wrap(site_040, "040")
 p_040_fctw 
 
+#facet wrap by indoor location
+p_040i_fctw <- fct_wrap(indoor_040, "040 (indoor locations)")
+p_040i_fctw 
+
 #leave this out for now
 #Two plots together not joined
 # p_040 +
@@ -215,8 +219,8 @@ p_040_cat_fctw <- cat_fct_wrap(site_040, "040 (All Locations)")
 p_040_cat_fctw
 
 #indoor facet wrap by analyte class
-p_040_cat_fctw <- cat_fct_wrap(indoor_040, "040 (Indoor Locations)")
-p_040_cat_fctw
+p_040i_cat_fctw <- cat_fct_wrap(indoor_040, "040 (Indoor Locations)")
+p_040i_cat_fctw
 
 #alcohol
 p_alcohol <- alcohol %>% 
@@ -283,9 +287,45 @@ p_other
 #              top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
 
 #----
-#SRA means
+#SRA meadians
 #compute median I/O for each analyte in each indoor location. 
+analytes <- as.data.frame(unique(sites$analyte))
+analytes <- rename(analytes, analyte = "unique(sites$analyte)")
 
+# indoor_040 %>% 
+#   filter(analyte == "acetone") %>% 
+#   group_by(room_name, analyte) %>% 
+#   summarize(median_or_ratio = median(od_ratio))
+# 
+# acetone_040 <- indoor_040 %>% 
+#   filter(analyte == "acetone") %>% 
+#   select("room_name", "od_ratio") %>% 
+#   mutate(median_or = median(od_ratio))
+
+#function
+filter_and_summarize <- function(df, analytes) {
+  # Extract the list of analyte names
+  analytes_list <- analytes$analyte
+  
+  # Initialize an empty list to store results
+  results_list <- list()
+  
+  for (analyte in analytes_list) {
+    result <- df %>%
+      filter(analyte == !!analyte) %>%
+      group_by(room_name, analyte) %>%
+      summarize(median_or_ratio = median(od_ratio, na.rm = TRUE), .groups = 'drop')
+    
+    results_list[[analyte]] <- result
+  }
+  
+  # Combine results into a single data frame
+  combined_results <- bind_rows(results_list, .id = "analyte")
+  
+  return(combined_results)
+}
+
+median_040 <- filter_and_summarize(indoor_040, analytes)
 
 
 #----
@@ -337,43 +377,3 @@ corrplot(vcor, method = "color", tl.col = "black", tl.cex = 0.5,
          col=colorRampPalette(c("blue","white","red"))(200))
 #another method for correlation
 cor2 <- correlate(voc_cor, method = "spearman", diagonal = 1)
-
-#----
-#trying to accomplish DC's ask...
-analytes <- as.data.frame(unique(sites$analyte))
-analytes <- rename(analytes, analyte = "unique(sites$analyte)")
-
-# indoor_040 %>% 
-#   filter(analyte == "acetone") %>% 
-#   group_by(room_name, analyte) %>% 
-#   summarize(median_or_ratio = median(od_ratio))
-# 
-# acetone_040 <- indoor_040 %>% 
-#   filter(analyte == "acetone") %>% 
-#   select("room_name", "od_ratio") %>% 
-#   mutate(median_or = median(od_ratio))
-  
-#function
-filter_and_summarize <- function(df, analytes) {
-  # Extract the list of analyte names
-  analytes_list <- analytes$analyte
-  
-  # Initialize an empty list to store results
-  results_list <- list()
-  
-  for (analyte in analytes_list) {
-    result <- df %>%
-      filter(analyte == !!analyte) %>%
-      group_by(room_name, analyte) %>%
-      summarize(median_or_ratio = median(od_ratio, na.rm = TRUE), .groups = 'drop')
-    
-    results_list[[analyte]] <- result
-  }
-  
-  # Combine results into a single data frame
-  combined_results <- bind_rows(results_list, .id = "analyte")
-  
-  return(combined_results)
-}
-
-median_040 <- filter_and_summarize(indoor_040, analytes)
