@@ -27,17 +27,14 @@ dining <- site_063A %>%
 #room_09
 room_09 <- site_063A %>% 
   filter(room_name == "Room 09")
-#location4
-location4 <- site_063A %>% 
-  filter(room_name == "location_4")
-#location5
-location5 <- site_063A %>% 
-  filter(room_name == "location_5")
 
 #data table
-site_063A_table <- data_table2(sites, "High Desert A")
+site_063A_table <- sites %>% 
+  filter(name == "High Desert A") %>% 
+  select(4, 7, 9, 18)
 
 site_dt(site_063A_table, "063A")
+
 
 #box plot for all analytes
 bp_063A <- box_plot(site_063A)
