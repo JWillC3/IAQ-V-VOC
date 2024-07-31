@@ -76,7 +76,7 @@ p_XXXi_fctw
 
 #plots for each room
 #outdoor
-p_XXXooutdoor <- room_plot(outdoor_XXX, "XXX", "midnightblue", "Outdoor, rooftop")
+p_XXXoutdoor <- room_plot(outdoor_XXX, "XXX", "midnightblue", "Outdoor, rooftop")
 p_XXXoutdoor
 
 #location1
@@ -100,7 +100,8 @@ p_location5 <- room_plot(location5, "XXX", "tomato2", "location_5, [floor] [room
 p_location5
 
 #all rooms
-grid.arrange(p_location1, p_location2, p_location4, p_location3, p_location5, p_XXXod, 
+grid.arrange(p_location1, p_location2, p_location4, p_location3,
+             p_location5, p_XXXoutdoor, 
              ncol = 3,
              bottom = "Rooms Sampled", left = "Sum of VOC Sampled (ppb(v))")
 
@@ -287,34 +288,8 @@ grid.arrange(p_btex, p_chlorinated, p_ketone, p_other, ncol = 2, nrow = 2,
 #----
 #SRA medians
 #compute median I/O for each analyte in each indoor location.
-analytes <- as.data.frame(unique(sites$analyte))
-analytes <- rename(analytes, analyte = "unique(sites$analyte)")
-
-#function
-filter_and_summarize <- function(df, analytes) {
-  # Extract the list of analyte names
-  analytes_list <- analytes$analyte
-  
-  # Initialize an empty list to store results
-  results_list <- list()
-  
-  for (analyte in analytes_list) {
-    result <- df %>%
-      filter(analyte == !!analyte) %>%
-      group_by(room_name, analyte) %>%
-      summarize(median_or_ratio = median(od_ratio, na.rm = TRUE), .groups = 'drop')
-    
-    results_list[[analyte]] <- result
-  }
-  
-  # Combine results into a single data frame
-  combined_results <- bind_rows(results_list, .id = "analyte")
-  
-  return(combined_results)
-}
 
 median_XXX <- filter_and_summarize(indoor_XXX, analytes)
-
 
 #----
 # #correlations

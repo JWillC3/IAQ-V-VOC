@@ -112,7 +112,7 @@ indoor_086 <- site_086 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_086 <- site_086 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 # SITE 099
 site_099 <- sites %>% 
@@ -122,7 +122,7 @@ indoor_099 <- site_099 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_099 <- site_099 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 # SITE 103
 site_103 <- sites %>% 
@@ -132,7 +132,7 @@ indoor_103 <- site_103 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_103 <- site_103 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 # SITE 107
 site_107 <- sites %>% 
@@ -142,7 +142,7 @@ indoor_107 <- site_107 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_107 <- site_107 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 # site 108
 site_108 <- sites %>% 
@@ -152,7 +152,7 @@ indoor_108 <- site_108 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_108 <- site_108 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 # site 094
 site_094 <- sites %>% 
@@ -162,7 +162,7 @@ indoor_094 <- site_094 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_094 <- site_094 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 #site 106
 site_106 <- sites %>% 
@@ -172,7 +172,7 @@ indoor_106 <- site_106 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_106 <- site_106 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 # site 105
 site_105 <- sites %>% 
@@ -182,7 +182,7 @@ indoor_105 <- site_105 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_105 <- site_105 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 # site 104
 site_104 <- sites %>% 
@@ -196,7 +196,7 @@ indoor_089 <- site_089 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_089 <- site_089 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 # site 002
 site_002 <- sites %>% 
@@ -206,7 +206,7 @@ indoor_002 <- site_002 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_002 <- site_002 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 # site 101
 site_101 <- sites %>% 
@@ -216,7 +216,7 @@ indoor_101 <- site_101 %>%
   filter(room_name != "Outdoor")
 #outdoor group
 outdoor_101 <- site_101 %>% 
-  filter(room_name =="Outdoor")
+  filter(room_name == "Outdoor")
 
 # site 109
 site_109 <- sites %>% 
@@ -231,7 +231,7 @@ outdoor <- sites %>%
   filter(type == "Outdoor")
 #kitchens
 kitchens <- sites %>% 
-  filter(type =="kitchen/dining")
+  filter(type == "kitchen/dining")
 #staff locations
 offices <- sites %>% 
   filter(type %in% c("office" , "lounge"))
@@ -304,6 +304,35 @@ analytes_list <- c("1,2,3-trimethylbenzene", "1,2,4-trimethylbenzene",
                    "n-propylbenzene", "o-xylene", "propane", "propene", "styrene",
                    "t-2-butene", "t-2-pentene", "toluene")
 
+#create a df of median I/O ratios and apply function
+analytes <- as.data.frame(unique(sites$analyte))
+analytes <- rename(analytes, analyte = "unique(sites$analyte)")
+
+#function
+filter_and_summarize <- function(df, analytes) {
+  # Extract the list of analyte names
+  analytes_list <- analytes$analyte
+  
+  # Initialize an empty list to store results
+  results_list <- list()
+  
+  for (analyte in analytes_list) {
+    result <- df %>%
+      filter(analyte == !!analyte) %>%
+      group_by(room_name, analyte) %>%
+      summarize(median_or_ratio = median(od_ratio, na.rm = TRUE), .groups = 'drop')
+    
+    results_list[[analyte]] <- result
+  }
+  
+  # Combine results into a single data frame
+  combined_results <- bind_rows(results_list, .id = "analyte")
+  
+  return(combined_results)
+}
+
+
+
 #-----------
 #functions
 #data table object
@@ -316,7 +345,15 @@ data_table <- function(sites, site_id){
   
 }
 
-
+#for site 063
+data_table2 <- function(sites, name){
+  filtered_table <- sites %>%
+    filter(name == name) %>% 
+    select(4, 7, 9, 18)
+  
+  return(filtered_table)
+  
+}
 #data table
 site_dt <- function(df, site) {
   datatable(df, colnames = c("Location", "Analyte", "Concentration",
