@@ -76,7 +76,7 @@ p_XXXi_fctw
 
 #plots for each room
 #outdoor
-p_XXXooutdoor <- room_plot(outdoor_XXX, "XXX", "midnightblue", "Outdoor, rooftop")
+p_XXXoutdoor <- room_plot(outdoor_XXX, "XXX", "midnightblue", "Outdoor, rooftop")
 p_XXXoutdoor
 
 #location1
@@ -100,7 +100,8 @@ p_location5 <- room_plot(location5, "XXX", "tomato2", "location_5, [floor] [room
 p_location5
 
 #all rooms
-grid.arrange(p_location1, p_location2, p_location4, p_location3, p_location5, p_XXXod, 
+grid.arrange(p_location1, p_location2, p_location4, p_location3,
+             p_location5, p_XXXoutdoor, 
              ncol = 3,
              bottom = "Rooms Sampled", left = "Sum of VOC Sampled (ppb(v))")
 
