@@ -26,7 +26,9 @@ dining <- site_063B %>%
   filter(room_name == "Dining/Kitchen")
 
 #data table
-site_063B_table <- data_table(sites, "063")
+site_063B_table <- sites %>% 
+  filter(name == "High Desert B") %>% 
+  select(4, 7, 9, 18)
 
 site_dt(site_063B_table, "063B")
 
