@@ -345,7 +345,15 @@ data_table <- function(sites, site_id){
   
 }
 
-
+#for site 063
+data_table2 <- function(sites, name){
+  filtered_table <- sites %>%
+    filter(name == name) %>% 
+    select(4, 7, 9, 18)
+  
+  return(filtered_table)
+  
+}
 #data table
 site_dt <- function(df, site) {
   datatable(df, colnames = c("Location", "Analyte", "Concentration",
