@@ -74,18 +74,9 @@ p_XXXi_fctw
 #   p_XXX_fctw +
 #   plot_layout(nrow = 2, heights = c(1, 2))
 
-#facet wrap all analytes grouped by class
-p_XXXi_cat_fctw <- cat_fct_wrap(indoor_XXX, "XXX")
-p_XXXi_cat_fctw
-
-#indoor facet wrap by analyte class
-p_XXX_cat_fctw <- cat_fct_wrap(site_XXX, "XXX")
-p_XXX_cat_fctw
-
 #plots for each room
 #outdoor
 p_XXXooutdoor <- room_plot(outdoor_XXX, "XXX", "midnightblue", "Outdoor, rooftop")
-
 p_XXXoutdoor
 
 #location1
@@ -225,8 +216,8 @@ p_XXX_cat_fctw <- cat_fct_wrap(site_XXX, "XXX (All Locations)")
 p_XXX_cat_fctw
 
 #indoor facet wrap by analyte class
-p_XXX_cat_fctw <- cat_fct_wrap(indoor_XXX, "XXX (Indoor Locations)")
-p_XXX_cat_fctw
+p_XXXi_cat_fctw <- cat_fct_wrap(indoor_XXX, "XXX (Indoor Locations)")
+p_XXXi_cat_fctw
 
 #alcohol
 p_alcohol <- alcohol %>% 
@@ -294,7 +285,8 @@ grid.arrange(p_btex, p_chlorinated, p_ketone, p_other, ncol = 2, nrow = 2,
 
 
 #----
-#trying to accomplish DC's ask...
+#SRA medians
+#compute median I/O for each analyte in each indoor location.
 analytes <- as.data.frame(unique(sites$analyte))
 analytes <- rename(analytes, analyte = "unique(sites$analyte)")
 
