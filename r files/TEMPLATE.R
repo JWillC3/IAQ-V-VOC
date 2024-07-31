@@ -50,6 +50,10 @@ p_XXX
 #plotly output but y axis not formatted correctly and don't know how to fix
 ggplotly(p_XXX, tooltip = "text")
 
+#TVOC for site by room
+p_XXX_sum <- p_conc_room(site_XXX, "XXX [Site Name]")
+p_XXX_sum
+
 #top 10 analyte concentrations for all locations
 site_XXX_top <- top_n_analytes(site_XXX, 45)
 
@@ -287,6 +291,37 @@ grid.arrange(p_alcohol, p_aldehyde, p_straight_chain, p_aromatic,
 
 grid.arrange(p_btex, p_chlorinated, p_ketone, p_other, ncol = 2, nrow = 2,
              top = "", left = "Concentraion\n (VOC ppbv or methane ppmv")
+
+
+#----
+#trying to accomplish DC's ask...
+analytes <- as.data.frame(unique(sites$analyte))
+analytes <- rename(analytes, analyte = "unique(sites$analyte)")
+
+#function
+filter_and_summarize <- function(df, analytes) {
+  # Extract the list of analyte names
+  analytes_list <- analytes$analyte
+  
+  # Initialize an empty list to store results
+  results_list <- list()
+  
+  for (analyte in analytes_list) {
+    result <- df %>%
+      filter(analyte == !!analyte) %>%
+      group_by(room_name, analyte) %>%
+      summarize(median_or_ratio = median(od_ratio, na.rm = TRUE), .groups = 'drop')
+    
+    results_list[[analyte]] <- result
+  }
+  
+  # Combine results into a single data frame
+  combined_results <- bind_rows(results_list, .id = "analyte")
+  
+  return(combined_results)
+}
+
+median_XXX <- filter_and_summarize(indoor_XXX, analytes)
 
 
 #----

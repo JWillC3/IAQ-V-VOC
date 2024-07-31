@@ -288,6 +288,21 @@ ketone <- sites %>%
 other <- sites %>% 
   filter(category == "other")
 
+analytes_list <- c("1,2,3-trimethylbenzene", "1,2,4-trimethylbenzene", 
+                   "1,3,5-trimethylbenzene", "1,3-diethylbenzene", "1,4-diethylbenzene",
+                   "1-butene", "1-pentene", "2,2,4-trimethylpentane", "2,3,4-trimethylpentane",
+                   "2,3-dimethylpentane", "2,4-dimethylpentane", "2-ethyltoluene",
+                   "2-methylheptane", "2-methylhexane", "3-ethyltoluene", "3-methylheptane",
+                   "3-methylhexane", "4-ethyltoluene", "acetaldehyde", "acetone",
+                   "acetonitrile", "a-pinene", "benzene", "b-pinene", "butanol",
+                   "c-2-butene", "C2Cl4", "C2HCl3", "camphene", "cis-2-pentene",
+                   "cyclohexane", "cyclopentane", "ethane", "ethene", "ethylbenzene",
+                   "ethyne", "i-butane", "i-pentane", "isoprene", "isopropanol",
+                   "isopropylbenzene", "limonene", "m+p-xylene", "methane",
+                   "methylcyclohexane", "methylethylketone", "n-butane", "n-decane",
+                   "n-heptane", "n-hexane", "n-nonane", "n-octane", "n-pentane",
+                   "n-propylbenzene", "o-xylene", "propane", "propene", "styrene",
+                   "t-2-butene", "t-2-pentene", "toluene")
 
 #-----------
 #functions
@@ -303,11 +318,12 @@ data_table <- function(sites, site_id){
 
 
 #data table
-site_dt <- function(df, room) {
-  datatable(df, colnames = c("Location", "Analyte", "Concentration", "Category"),
+site_dt <- function(df, site) {
+  datatable(df, colnames = c("Location", "Analyte", "Concentration",
+                             "Category"),
             options = list(pageLength = 10), rownames = FALSE,
             caption = paste("Site"
-                            , room, "Table, Concentrations: ppb(v) or methane ppb(v)"))
+                            , site, "Table, Concentrations: ppb(v) or methane ppb(v)"))
 }
 
 

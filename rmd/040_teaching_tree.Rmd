@@ -6,23 +6,7 @@ output: html_document
 ---
 ```{r packages, include=FALSE}
 
-library(tidyverse)
-library(plyr)
-library(faraway)
-library(cowplot)
-library(reshape2)
-library(corrplot)
-library(scales)
-library(ggthemes)
-library(gridExtra)
-library(patchwork)
-library(gghighlight)
-library(ggdark)
-library(viridis)
-library(DT)
-library(plotly)
-library(knitr)
-library(magick)
+source("../source_data.R")
 
 ```
 
@@ -66,130 +50,12 @@ M - F & AM to 6 PM, located in an urban location on the north side of Fort Colli
 
 ---
 
-```{r load_data, include=FALSE}
-#load data
-#FIND AND REPLACE SITE_ID in csv file, double check rows to slice, col. to select
-site_040 <- (read_csv(file = "../data/site_040.csv")) %>% 
-  slice(2:7) %>%
-  select(1,7:67)
-
-#pivot data for plots
-p.analytes <- site_040 %>% 
-  pivot_longer(- ID,
-               names_to = "analyte",
-               values_to = "conc.")
-#VOC classes as objects
-alc <- c("isopropanol", "butanol")
-ald <- c("acetaldehyde")
-aro <- c("cyclopentane", "cyclohexane", "methylcyclohexane")
-btx <- c("benzene", "toluene", "ethylbenzene", "m+p-xylene", "o-xylene",
-          "isopropylbenzene", "n-propylbenzene", "3-ethyltoluene",
-          "4-ethyltoluene", "1,3,5-trimethylbenzene", "2-ethyltoluene",
-          "1,2,4-trimethylbenzene", "1,2,3-trimethylbenzene",
-          "1,3-diethylbenzene", "1,4-diethylbenzene")
-chl <- c("C2HCl3", "C2Cl4")
-kt <- c("acetone")
-oth <- c("isoprene", "styrene", "acetonitrile", "methylethylketone",
-           "a-pinene", "b-pinene", "limonene", "camphene", "methane")
-stc <- c("ethane", "propane", "i-butane", "n-butane", "i-pentane",
-                    "n-pentane", "n-hexane", "2,4 dimethylpentane", "n-heptane",
-                    "2,3-dimethylpentane", "2-methylhexane", "3-methylhexane",
-                    "2,2,4-trimethylpentane", "2,3,4-trimethylpentane",
-                    "2-methylheptane", "3-methylheptane", "n-octane", "n-nonane",
-                    "n-decane", "ethene", "propene", "t-2-butene", "1-butene",
-                    "c-2-butene", "t-2-pentene", "1-pentene", "cis-2-pentene",
-                    "ethyne")
-#add voc categories to dfs
-voc <- p.analytes %>% 
-  mutate(category = case_when(p.analytes$analyte %in% alc ~ "Alc.",
-                              p.analytes$analyte %in% ald ~ "Ald.",
-                              p.analytes$analyte %in% stc ~ "Stc.",
-                              p.analytes$analyte %in% aro ~ "Aro.",
-                              p.analytes$analyte %in% btx ~ "Btx.",
-                              p.analytes$analyte %in% chl ~ "Chl.",
-                              p.analytes$analyte %in% kt ~ "Ktn.",
-                              p.analytes$analyte %in% oth ~ "Oth."))
-
-#create outdoor group
-outdoor <- voc %>% 
-  filter(ID =="Outdoor")
-#change conc. to numeric
-voc$conc. <- as.numeric(as.character(voc$conc.))
-
-outdoor$conc. <- as.numeric(as.character(outdoor$conc.))
-#calculate ratios
-voc <- voc %>%
-  group_by(ID, analyte) %>%
-  ungroup() %>% 
-  mutate(od_ratio = round(as.numeric(voc$conc.)/as.numeric(outdoor$conc.), 2))
-
-#highlight methane
-methane <- voc %>% 
-  filter(analyte == "methane")
-
-#for DT and plotlys
-voc2 <- p.analytes %>% 
-  mutate(category = case_when(p.analytes$analyte %in% alc ~ "Alcohol",
-                              p.analytes$analyte %in% ald ~ "Aldehyde",
-                              p.analytes$analyte %in% stc ~ "Straight Chain",
-                              p.analytes$analyte %in% aro ~ "Aromatic",
-                              p.analytes$analyte %in% btx ~ "Btex",
-                              p.analytes$analyte %in% chl ~ "Chlorinated",
-                              p.analytes$analyte %in% kt ~ "Ketone",
-                              p.analytes$analyte %in% oth ~ "Other"))
-
-#plotlys
-voc2 <- voc2 %>%
-  group_by(ID, analyte) %>%
-  ungroup() %>% 
-  mutate(od_ratio = round(as.numeric(voc2$conc.)/as.numeric(outdoor$conc.), 2))
-
-voc2$conc. <- as.numeric(as.character(voc2$conc.))
-
-indoor2 <- voc2 %>% 
-  filter(ID != "Outdoor")
-
-#UPDATE LOCATIONS FOR THE SITE YOU ARE CURRENTLY WORKING ON Location 1, 2, etc.!
-#default is alphabetical order
-#subgroups,
-#all indoor locations
-indoor <- voc2 %>% 
-  filter(ID != "Outdoor")
-#bears
-bears <- voc2 %>% 
-  filter(ID == "Bears")
-#frogs
-frogs <- voc2 %>% 
-  filter(ID == "Frogs")
-#lesson_prep
-lesson_prep <- voc2 %>% 
-  filter(ID == "Lesson Prep")
-#monkeys
-monkeys <- voc2 %>% 
-  filter(ID == "Monkeys")
-#office
-office <- voc2 %>% 
-  filter(ID == "Office")
-
-# voc2 <- voc2 %>%
-#   group_by(ID, analyte) %>%
-#   ungroup() %>% 
-#   mutate(od_ratio = round(as.numeric(voc2$conc.)/as.numeric(outdoor$conc.), 2))
-# 
-# voc2$conc. <- as.numeric(as.character(voc2$conc.))
-# 
-# indoor2 <- voc2 %>% 
-#   filter(ID != "Outdoor")
-
-```
-
-
 ## Data Table
 ```{r data_table}
 
-datatable(voc2, colnames = c("Location", "Analyte", "Concentration",
-                               "Category", "Outdoor Ratio"),
-          options = list(pageLength = 10), rownames = FALSE)
+site_XXX_table <- data_table(sites, "XXX")
+
+site_dt(site_XXX_table, "XXX")
 
 ```
 
