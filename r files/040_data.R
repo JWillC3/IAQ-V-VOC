@@ -353,7 +353,7 @@ analytes <- rename(analytes, analyte = "unique(sites$analyte)")
 #   select("room_name", "od_ratio") %>% 
 #   mutate(median_or = median(od_ratio))
   
-# Sample function
+#function
 filter_and_summarize <- function(df, analytes) {
   # Extract the list of analyte names
   analytes_list <- analytes$analyte
