@@ -289,8 +289,8 @@ p_other
 #----
 #SRA meadians
 #compute median I/O for each analyte in each indoor location. 
-analytes <- as.data.frame(unique(sites$analyte))
-analytes <- rename(analytes, analyte = "unique(sites$analyte)")
+# analytes <- as.data.frame(unique(sites$analyte))
+# analytes <- rename(analytes, analyte = "unique(sites$analyte)")
 
 # indoor_040 %>% 
 #   filter(analyte == "acetone") %>% 
@@ -302,28 +302,28 @@ analytes <- rename(analytes, analyte = "unique(sites$analyte)")
 #   select("room_name", "od_ratio") %>% 
 #   mutate(median_or = median(od_ratio))
 
-#function
-filter_and_summarize <- function(df, analytes) {
-  # Extract the list of analyte names
-  analytes_list <- analytes$analyte
-  
-  # Initialize an empty list to store results
-  results_list <- list()
-  
-  for (analyte in analytes_list) {
-    result <- df %>%
-      filter(analyte == !!analyte) %>%
-      group_by(room_name, analyte) %>%
-      summarize(median_or_ratio = median(od_ratio, na.rm = TRUE), .groups = 'drop')
-    
-    results_list[[analyte]] <- result
-  }
-  
-  # Combine results into a single data frame
-  combined_results <- bind_rows(results_list, .id = "analyte")
-  
-  return(combined_results)
-}
+# #function
+# filter_and_summarize <- function(df, analytes) {
+#   # Extract the list of analyte names
+#   analytes_list <- analytes$analyte
+#   
+#   # Initialize an empty list to store results
+#   results_list <- list()
+#   
+#   for (analyte in analytes_list) {
+#     result <- df %>%
+#       filter(analyte == !!analyte) %>%
+#       group_by(room_name, analyte) %>%
+#       summarize(median_or_ratio = median(od_ratio, na.rm = TRUE), .groups = 'drop')
+#     
+#     results_list[[analyte]] <- result
+#   }
+#   
+#   # Combine results into a single data frame
+#   combined_results <- bind_rows(results_list, .id = "analyte")
+#   
+#   return(combined_results)
+# }
 
 median_040 <- filter_and_summarize(indoor_040, analytes)
 
