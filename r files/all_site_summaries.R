@@ -69,28 +69,11 @@ grid.arrange(site_094_sum, site_063a_sum, site_063b_sum, site_066_sum,
 
 
 #box plot for all indoor locations
-bp_indoor <- ggplot(indoor, aes(x = reorder(analyte, conc.), 
-                                y = conc., #fill = analyte
-)) +
-  geom_boxplot(show.legend = FALSE) +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  ggtitle("VOC Conectrations: All Indoor Locations in CO\n (n = 18)") +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration")
-bp_indoor 
+bp_indoor <- box_plot(indoor)
+bp_indoor
 
 #site_040 boxplot
-bp_040 <- site_040 %>% 
-  ggplot(aes(x = reorder(analyte, conc.), y = conc.)) +
-  geom_boxplot() +
-  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  theme_bw() +
-  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration")
-bp_040
+
 
 #apartments
 
@@ -121,13 +104,60 @@ bp_040
 
 
 #-----------
-#attempting ratios
+#median I/O ratios
+#calculate ratios
+
+# indoor2 %>%     
+#   filter(site_id != "104")
+#   filter(site_id != "109") 
+#   
+# result_df <- indoor2 %>%
+#   left_join(outdoor, by = c("site_id", "analyte")) %>%
+#   mutate(od_ratio = conc. / outdoor_conc) %>%
+#   select(-outdoor_conc)
+
+indoor_040 <- indoor_040 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_040$conc./outdoor_040$conc.))
+
+median_040 <- filter_and_summarize(indoor_040, analytes)
+median_040["site_id"] = "040"
+
+indoor_079 <- indoor_079 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_079$conc./outdoor_079$conc.))
+
+median_079 <- filter_and_summarize(indoor_079, analytes)
+median_079["site_id"] = "079"
+
+indoor_066 <- indoor_066 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_066$conc./outdoor_066$conc.))
+
+median_066 <- filter_and_summarize(indoor_066, analytes)
+median_066["site_id"] = "066"
+
+median_or <- median_040 %>% 
+  bind_rows(median_079) %>% 
+  bind_rows(median_066)
+
+median_or %>% 
+  select(-3)
+
+median_or %>% 
+  ggplot(aes(x = reorder(analyte, median_or_ratio),
+             y = median_or_ratio, color = site_id)) +
+  geom_jitter() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1))
 
 
 
-
-
-#-----------
 
 
 #-----------
@@ -342,7 +372,6 @@ voc <- voc %>%
 # Subtract the baseline from the voc values
 voc <- voc %>%
   mutate(voc_baseline_subtracted = voc + baseline_fix)
-#-----------
 
 
 #-----------
