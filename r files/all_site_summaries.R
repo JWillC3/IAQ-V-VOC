@@ -156,8 +156,20 @@ median_or %>%
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1))
 
+#----
+#ratio plot by analyte
 
 
+#----
+#ratio plot per analyte n = 61
+[df with od_ratios] %>% 
+  ggplot(aes(x = reorder(analyte, od_ratio),
+             y = median_or_ratio, color = site_id)) +
+  geom_jitter() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1))
 
 
 #-----------
