@@ -299,28 +299,6 @@ cor(location2$conc., location1$conc., method = "spearman")
 voc_cor <- site_XXX %>%
   slice(1:2)
 
-#get all TVOC signals for each room, ex. "sum(location5$conc., na.rm = TRUE)"
-p.analytes$conc. <- as.numeric(as.character(p.analytes$conc.))
-
-tvoc_location1 <- p.analytes %>%
-  filter(ID == "location_1")
-sum(tvoc_location1$conc.)
-tvoc_location2 <- p.analytes %>% 
-  filter(ID == "location_2")
-sum(tvoc_location2$conc., na.rm = TRUE)
-tvoc_lessonprep <- p.analytes %>% 
-  filter(ID == "location_3")
-sum(tvoc_lessonprep$conc., na.rm = TRUE)  
-tvoc_location4 <- p.analytes %>% 
-  filter(ID == "location_4")
-sum(tvoc_location4$conc., na.rm = TRUE)
-tvoc_location5 <- p.analytes %>% 
-  filter(ID == "location_5")
-sum(tvoc_location5$conc., na.rm = TRUE)
-tvoc_outdoor <- p.analytes %>% 
-  filter(ID == "Outdoor")
-sum(tvoc_outdoor$conc., na.rm = TRUE)
-
 
 #convert select rows to numeric
 voc_cor[2:62] <- lapply(voc_cor[2:62], as.numeric)
