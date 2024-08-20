@@ -304,7 +304,7 @@ analytes_list <- c("1,2,3-trimethylbenzene", "1,2,4-trimethylbenzene",
                    "n-propylbenzene", "o-xylene", "propane", "propene", "styrene",
                    "t-2-butene", "t-2-pentene", "toluene")
 
-#create a df of median I/O ratios and apply function
+#create a df of median I/O ratios for each analyte at each site and apply function
 analytes <- as.data.frame(unique(sites$analyte))
 analytes <- rename(analytes, analyte = "unique(sites$analyte)")
 
@@ -319,7 +319,7 @@ filter_and_summarize <- function(df, analytes) {
   for (analyte in analytes_list) {
     result <- df %>%
       filter(analyte == !!analyte) %>%
-      group_by(room_name, analyte) %>%
+      group_by(site_id, room_name, analyte) %>%
       summarize(median_or_ratio = median(od_ratio, na.rm = TRUE), .groups = 'drop')
     
     results_list[[analyte]] <- result
@@ -330,6 +330,9 @@ filter_and_summarize <- function(df, analytes) {
   
   return(combined_results)
 }
+
+#create a df of median I/O ratios for each analyte in each room at each site and apply function
+
 
 
 
