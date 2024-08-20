@@ -287,25 +287,17 @@ donald <- indoor_002 %>%
 
 #second boxplot of I/O
 ggplot(indoor_002,
-       aes(x = fct_reorder(analyte, od_ratio, fun = median, .desc = TRUE),
+       aes(x = fct_reorder(analyte, od_ratio, .fun = "median", .desc = TRUE),
            y = od_ratio)) +
   geom_boxplot() +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-  labs(x = "Ananlyte", y = "Concentration") +
-  ggtitle("Boxplot for All Ananlytes")
+  labs(x = "Ananlyte", y = "I/O Ratio") +
+  ggtitle("I/O Ratio for All Rooms Arranged by Median")
 
-# ggplot(iris, aes(x = fct_reorder(Species, Sepal.Width, fun = median, .desc =TRUE), y = Sepal.Width)) + 
-#   geom_boxplot(aes(fill = fct_reorder(Species, Sepal.Width, fun = median, .desc =TRUE))) + 
-#   geom_jitter(position=position_jitter(0.2)) +
-#   theme_bw(base_size = 14) +
-#   xlab("Species") +
-#   ylab("Sepal width") +
-#   scale_fill_discrete(guide = guide_legend(title = "Species"))
 
-#ggplot(iris, aes(x = fct_reorder(Species, Sepal.Width, fun = median, .desc =TRUE), y = Sepal.Width)) + geom_boxplot()
 
 
 #-----------
