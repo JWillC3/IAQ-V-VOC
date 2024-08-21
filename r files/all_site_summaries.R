@@ -284,6 +284,7 @@ median_list %>%
 
 donald <- indoor_002 %>% 
   select(1,4,7,9,20)
+print(donald, n = 100)
 
 #second boxplot of I/O
 ggplot(indoor_002,
@@ -295,7 +296,7 @@ ggplot(indoor_002,
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "I/O Ratio") +
-  ggtitle("I/O Ratio for All Rooms Arranged by Median")
+  ggtitle("Site 002 I/O Ratio for All Rooms Arranged by Median")
 
 
 
