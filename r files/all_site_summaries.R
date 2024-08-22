@@ -215,40 +215,39 @@ print(donald, n = 100)
 
 
 
-median_002 <- summarize_od_ratio(indoor_002, analytes) 
-# %>% 
-#   mutate(site_id = "002", .before = analyte)
-median_040 <- filter_and_summarize(indoor_040, analytes) %>% 
+median_002 <- filter_and_summarize(indoor_002, analytes_df) %>%
+  mutate(site_id = "002", .before = analyte)
+median_040 <- filter_and_summarize(indoor_040, analytes_df) %>% 
   mutate(site_id = "040", .before = analyte)
-median_063A <- filter_and_summarize(indoor_063A, analytes) %>% 
+median_063A <- filter_and_summarize(indoor_063A, analytes_df) %>% 
   mutate(site_id = "063A", .before = analyte)
-median_063B <- filter_and_summarize(indoor_063B, analytes) %>% 
+median_063B <- filter_and_summarize(indoor_063B, analytes_df) %>% 
   mutate(site_id = "063B", .before = analyte)
-median_066 <- filter_and_summarize(indoor_066, analytes) %>% 
+median_066 <- filter_and_summarize(indoor_066, analytes_df) %>% 
   mutate(site_id = "066", .before = analyte)
-median_079 <- filter_and_summarize(indoor_079, analytes) %>% 
+median_079 <- filter_and_summarize(indoor_079, analytes_df) %>% 
   mutate(site_id = "079", .before = analyte)
-median_085 <- filter_and_summarize(indoor_085, analytes) %>% 
+median_085 <- filter_and_summarize(indoor_085, analytes_df) %>% 
   mutate(site_id = "085", .before = analyte)
-median_086 <- filter_and_summarize(indoor_086, analytes) %>% 
+median_086 <- filter_and_summarize(indoor_086, analytes_df) %>% 
   mutate(site_id = "086", .before = analyte)
-median_089 <- filter_and_summarize(indoor_089, analytes) %>% 
+median_089 <- filter_and_summarize(indoor_089, analytes_df) %>% 
   mutate(site_id = "089", .before = analyte)
-median_094 <- filter_and_summarize(indoor_094, analytes) %>% 
+median_094 <- filter_and_summarize(indoor_094, analytes_df) %>% 
   mutate(site_id = "094", .before = analyte)
-median_099 <- filter_and_summarize(indoor_099, analytes) %>% 
+median_099 <- filter_and_summarize(indoor_099, analytes_df) %>% 
   mutate(site_id = "099", .before = analyte)
-median_101 <- filter_and_summarize(indoor_101, analytes) %>% 
+median_101 <- filter_and_summarize(indoor_101, analytes_df) %>% 
   mutate(site_id = "101", .before = analyte)
-median_103 <- filter_and_summarize(indoor_103, analytes) %>% 
+median_103 <- filter_and_summarize(indoor_103, analytes_df) %>% 
   mutate(site_id = "103", .before = analyte)
-median_105 <- filter_and_summarize(indoor_105, analytes) %>% 
+median_105 <- filter_and_summarize(indoor_105, analytes_df) %>% 
   mutate(site_id = "105", .before = analyte)
-median_106 <- filter_and_summarize(indoor_106, analytes) %>% 
+median_106 <- filter_and_summarize(indoor_106, analytes_df) %>% 
   mutate(site_id = "106", .before = analyte)
-median_107 <- filter_and_summarize(indoor_107, analytes) %>% 
+median_107 <- filter_and_summarize(indoor_107, analytes_df) %>% 
   mutate(site_id = "107", .before = analyte)
-median_108 <- filter_and_summarize(indoor_108, analytes) %>% 
+median_108 <- filter_and_summarize(indoor_108, analytes_df) %>% 
   mutate(site_id = "108", .before = analyte)
 
 median_list <- list(median_002, median_040, median_063A, median_063B, median_066,
