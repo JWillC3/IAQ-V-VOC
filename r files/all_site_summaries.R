@@ -208,13 +208,51 @@ indoor_108 <- indoor_108 %>%
   ungroup() %>% 
   mutate(od_ratio = (indoor_108$conc./outdoor_108$conc.))
 
-donald <- indoor_002 %>% 
-  select(1,4,7,9,20)
+# donald <- indoor_002 %>% 
+#   select(1,4,7,9,20)
+# 
+# print(donald, n = 100)
 
-print(donald, n = 100)
+#----
+#Help from Ben 8/22/24
+# List all objects in the environment
+all_objects <- ls()
 
+# Filter the objects that match the pattern "indoor_" followed by a number
+indoor_objects <- grep("^indoor_\\d+$", all_objects, value = TRUE)
 
+# Combine the dataframes while keeping only the specified columns
+indoor_all <- do.call(rbind, lapply(indoor_objects, function(df_name) {
+  df <- get(df_name)
+  df[, c("site_id", "room_name", "analyte", "od_ratio")]
+}))
 
+# Summarize the od_ratio by analyte for each site_id and room_name combination
+summary_stats <- as.data.frame(indoor_all) %>%
+  mutate(analyte = as.factor(analyte)) %>% 
+  group_by(room_name) %>%
+  summarize(
+    mean_od_ratio = mean(od_ratio, na.rm = TRUE),
+    median_od_ratio = median(od_ratio, na.rm = TRUE),
+    p5_od_ratio = quantile(od_ratio, 0.05, na.rm = TRUE),
+    p95_od_ratio = quantile(od_ratio, 0.95, na.rm = TRUE),
+    p25_od_ratio = quantile(od_ratio, 0.25, na.rm = TRUE),
+    p75_od_ratio = quantile(od_ratio, 0.75, na.rm = TRUE)
+  )
+
+# View the summary statistics
+summary_stats
+
+#
+median_df <- as.data.frame(median_list) %>%
+  group_by(analyte) %>%
+  summarize(median_analyte = median(median_or_ratio)) %>%
+  ungroup()
+
+# Check the structure of your dataframe
+str(indoor_all)
+
+#----
 median_002 <- filter_and_summarize(indoor_002, analytes_df) %>%
   mutate(site_id = "002", .before = analyte)
 median_040 <- filter_and_summarize(indoor_040, analytes_df) %>% 
@@ -277,6 +315,8 @@ median_list %>%
                                 "#d9c937", "#9f04fc"))
 
 #as boxplot
+#this is not working like it should, need to figure out how ot make the second
+#box plot work for all sites...
 median_list %>% 
   ggplot(aes(x = reorder(analyte, median_or_ratio), y = median_or_ratio,
              text = paste("Analyte: ", analyte,
@@ -288,6 +328,18 @@ median_list %>%
   ggtitle("VOC I/O Ratios") +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "I/O Ratio")
+
+ggplot(median_list,
+       aes(x = fct_reorder(analyte, median_or_ratio, .fun = "median", .desc = TRUE),
+           y = median_or_ratio)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "I/O Ratio") +
+  ggtitle("test plot")
+
 
 
 
