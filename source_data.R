@@ -311,9 +311,9 @@ analytes_df <- as.data.frame(unique(sites$analyte))
 analytes_df <- rename(analytes_df, analyte = "unique(sites$analyte)")
 
 # Function to summarize od_ratio by analyte
-filter_and_summarize <- function(df, analytes) {
+filter_and_summarize <- function(df, analytes_df) {
   # Extract the list of analyte names
-  results_list <- analytes$analyte
+  results_list <- analytes_df$analyte
   # Initialize an empty list to store results
   results_list <- list()
   for (analyte in analytes_list) { 
