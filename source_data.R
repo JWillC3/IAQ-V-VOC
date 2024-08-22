@@ -307,55 +307,31 @@ analytes_list <- c("1,2,3-trimethylbenzene", "1,2,4-trimethylbenzene",
 
 #-----
 #create a df of median I/O ratios for each analyte at each site and apply function
-analytes <- as.data.frame(unique(sites$analyte))
-analytes <- rename(analytes, analyte = "unique(sites$analyte)")
+analytes_df <- as.data.frame(unique(sites$analyte))
+analytes_df <- rename(analytes_df, analyte = "unique(sites$analyte)")
 
-#function
+# Function to summarize od_ratio by analyte
 filter_and_summarize <- function(df, analytes) {
   # Extract the list of analyte names
-  analytes_list <- analytes$analyte
-
+  results_list <- analytes$analyte
   # Initialize an empty list to store results
   results_list <- list()
-
-  for (analyte in analytes_list) {
+  for (analyte in analytes_list) { 
     result <- df %>%
-      filter(analyte == !!analyte) %>%
-      group_by(site_id, room_name, analyte) %>%
-      summarize(median_or_ratio = median(od_ratio, na.rm = TRUE), .groups = 'drop')
-
+     filter(analyte == !!analyte) %>%
+    group_by(site_id, room_name, analyte) %>%
+    summarize(median_or_ratio = median(od_ratio, na.rm = TRUE), .groups = 'drop')
+    
     results_list[[analyte]] <- result
+   
+    
   }
-
+  
   # Combine results into a single data frame
   combined_results <- bind_rows(results_list, .id = "analyte")
-
   return(combined_results)
+  
 }
-
-#----
-# Modified function with room_name included
-# analytes <- as.data.frame(unique(sites$analyte))
-# analytes <- rename(analytes, analyte = "unique(sites$analyte)")
-# #function
-# filter_and_summarize <- function(df, analytes) {
-#   # Extract the list of analyte names
-#   analytes_list <- analytes$analyte_name
-#   
-#   # Initialize an empty data frame to store results
-#   combined_results <- data.frame()
-#   
-#   for (analyte in analytes_list) {
-#     result <- df %>%
-#       filter(analyte == !!analyte) %>%
-#       group_by(site_id, room_name, analyte) %>%
-#       summarize(median_or_ratio = median(od_ratio, na.rm = TRUE), .groups = 'drop')
-#     
-#     combined_results <- bind_rows(combined_results, result)
-#   }
-#   
-#   return(combined_results)
-# }
 
 #create a df of median I/O ratios for each analyte in each room at each site and apply function
 
