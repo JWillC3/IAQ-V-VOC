@@ -22,13 +22,13 @@ datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
           options = list(pageLenght = 10), rownames = FALSE,
           caption = "All Sites Table, Concentrations: ppb(v) or methane ppb(v)")
 
+#----
 #site voc concentration sums
 #site 040
 p_conc_room(site_040, site_id = "040")
 
 #SITE 063 A
 p_conc_room(site_063A, site_id = "063A")
-
 
 #SITE 063 B
 
@@ -60,7 +60,6 @@ p_conc_room(site_063A, site_id = "063A")
 #site 094
 
 #grid for all summary plots
-
 grid.arrange(site_094_sum, site_063a_sum, site_063b_sum, site_066_sum, 
              site_079_sum, site_085_sum, site_086_sum, site_099_sum,
              site_103_sum, site_107_sum, site_108_sum, site_094_sum,
@@ -68,6 +67,7 @@ grid.arrange(site_094_sum, site_063a_sum, site_063b_sum, site_066_sum,
              bottom = "Rooms Sampled", left = "Sum of VOC Sampled (ppb(v))")
 
 
+#----
 #box plot for all indoor locations
 bp_indoor <- ggplot(indoor, aes(x = reorder(analyte, conc.), 
                                 y = conc., #fill = analyte
@@ -208,8 +208,16 @@ indoor_108 <- indoor_108 %>%
   ungroup() %>% 
   mutate(od_ratio = (indoor_108$conc./outdoor_108$conc.))
 
-median_002 <- filter_and_summarize(indoor_002, analytes) %>% 
-  mutate(site_id = "002", .before = analyte)
+donald <- indoor_002 %>% 
+  select(1,4,7,9,20)
+
+print(donald, n = 100)
+
+
+
+median_002 <- summarize_od_ratio(indoor_002, analytes) 
+# %>% 
+#   mutate(site_id = "002", .before = analyte)
 median_040 <- filter_and_summarize(indoor_040, analytes) %>% 
   mutate(site_id = "040", .before = analyte)
 median_063A <- filter_and_summarize(indoor_063A, analytes) %>% 
@@ -282,9 +290,7 @@ median_list %>%
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "I/O Ratio")
 
-donald <- indoor_002 %>% 
-  select(1,4,7,9,20)
-print(donald, n = 100)
+
 
 #second boxplot of I/O
 ggplot(indoor_002,
@@ -698,4 +704,5 @@ result <- filtered_data %>%
   select(datetime, site_id, id_inst, room, val) %>%
   group_by(site_id, id_inst, room) %>%
   summarise(sum_val = sum(val, na.rm = TRUE))
+
 #-----------
