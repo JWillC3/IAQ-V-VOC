@@ -3,9 +3,9 @@ source("source_data.R")
 
 #replace the site number and name first
 #change the dates for plots "Oct. 24 - Oct. 31, 2023."
-#change the site location "[Site Name] " 
-#location1, location2, ect. for objects and plots
-#location_1, location_2, ect. for name in plot titles or axis
+#change the site location "Routt Co. Jail " 
+#booking, kitchen, ect. for objects and plots
+#Booking, Kitchen, ect. for name in plot titles or axis
 #change "[floor] [room type]" for where the canisters were located
 
 
@@ -18,21 +18,12 @@ indoor_002 <- indoor_002 %>%
 #UPDATE LOCATIONS FOR THE SITE YOU ARE CURRENTLY WORKING ON, Location 1, 2, etc.!
 #location order should be alphabetical
 
-#location1
-location1 <- site_002 %>% 
-  filter(room_name == "location_1")
-#location2
-location2 <- site_002 %>% 
-  filter(room_name == "location_2")
-#location3
-location3 <- site_002 %>% 
-  filter(room_name == "location_3")
-#location4
-location4 <- site_002 %>% 
-  filter(room_name == "location_4")
-#location5
-location5 <- site_002 %>% 
-  filter(room_name == "location_5")
+#booking
+booking <- site_002 %>% 
+  filter(room_name == "Booking")
+#kitchen
+kitchen <- site_002 %>% 
+  filter(room_name == "Kitchen")
 
 #data table
 site_002_table <- data_table(sites, "002")
@@ -51,11 +42,11 @@ p_002
 ggplotly(p_002, tooltip = "text")
 
 #TVOC for site by room
-p_002_sum <- p_conc_room(site_002, "002 [Site Name]")
+p_002_sum <- p_conc_room(site_002, "002 Routt Co. Jail")
 p_002_sum
 
 #top 10 analyte concentrations for all locations
-site_002_top <- top_n_analytes(site_002, 45)
+site_002_top <- top_n_analytes(site_002, 17)
 
 site_002_top <- top_plot(site_002_top, "002", fill = "darkgreen")
 site_002_top
@@ -79,64 +70,34 @@ p_002i_fctw
 p_002outdoor <- room_plot(outdoor_002, "002", "midnightblue", "Outdoor, rooftop")
 p_002outdoor
 
-#location1
-p_location1 <- room_plot(location1, "002", "orchid", "location_1, [floor] [room type]")
-p_location1
+#booking
+p_booking <- room_plot(booking, "002", "orchid", "Booking, [floor] [room type]")
+p_booking
 
-#location2
-p_location2 <- room_plot(location2, "002", "chocolate4", "location_2, [floor] [room type]")
-p_location2
+#kitchen
+p_kitchen <- room_plot(kitchen, "002", "chocolate4", "Kitchen, [floor] [room type]")
+p_kitchen
 
-#location3
-p_location3 <- room_plot(location3, "002", "goldenrod2", "location_3, [floor] [room type]")
-p_location3
-
-#location4
-p_location4 <- room_plot(location4, "002", "#50c878", "location_4, [floor] [room type]")
-p_location4
-
-#location5
-p_location5 <- room_plot(location5, "002", "tomato2", "location_5, [floor] [room type]")
-p_location5
 
 #all rooms
-grid.arrange(p_location1, p_location2, p_location4, p_location3,
-             p_location5, p_002outdoor, 
+grid.arrange(p_booking, p_kitchen, p_002outdoor, 
              ncol = 3,
              bottom = "Rooms Sampled", left = "Sum of VOC Sampled (ppb(v))")
 
 
 #create object of the top 5 analytes by conc. for the indoor locations then plot
-#location1
+#booking
 #testing something new for scale y in this plot
-location1_top <- top_n_analytes(location1, 10)
+booking_top <- top_n_analytes(booking, 10)
 
-p_location1_top <- loc_top_plot(location1_top, "orchid", "location_1 top 10")
-p_location1_top
+p_booking_top <- loc_top_plot(booking_top, "orchid", "Booking top 10")
+p_booking_top
 
-#location2
-location2_top <- top_n_analytes(location2, 10)
+#kitchen
+kitchen_top <- top_n_analytes(kitchen, 10)
 
-p_location2_top <- loc_top_plot(location2_top, "chocolate4", "location_2 top 10")
-p_location2_top
-
-#location3
-location3_top <- top_n_analytes(location3, 10)
-
-p_location3_top <- loc_top_plot(location3_top, "goldenrod2", "location_3 top 10")
-p_location3_top
-
-#location4
-location4_top <- top_n_analytes(location4, 10)
-
-p_location4_top <- loc_top_plot(location4_top, "#50c878", "location_4 top 10")
-p_location4_top
-
-#location5
-location5_top <- top_n_analytes(location5, 10)
-
-p_location5_top <- loc_top_plot(location5_top, "tomato2", "location_5 top 10")
-p_location5_top
+p_kitchen_top <- loc_top_plot(kitchen_top, "chocolate4", "Kitchen top 10")
+p_kitchen_top
 
 #outdoor
 outdoor_top <- top_n_analytes(outdoor_002, 10)
@@ -145,8 +106,7 @@ p_outdoor_top <- loc_top_plot(outdoor_top, "midnightblue", "Outdoor top 10")
 p_outdoor_top
 
 #all locations
-grid.arrange(p_location1_top, p_location2_top, p_location3_top,
-             p_location4_top, p_location5_top, p_outdoor_top,
+grid.arrange(p_booking_top, p_kitchen_top, p_outdoor_top,
              ncol = 3, nrow = 2,
              top = "Top 10 Analytes at Each Location",
              left = "Concentration\n(VOC ppbv or methane ppmv)")
@@ -164,49 +124,28 @@ p_002_ratio
 #plotly ratio
 ggplotly(p_002_ratio, tooltip = "text")
 
-#ratio plot with facet wrap
+#ratio plot with facet wrap grpuped by category
 p_002_r_fctw <- r_fct_wrap(indoor_002, "002")
 p_002_r_fctw
 
 #create object of the top 10 analytes by outdoor ratio then plot
-#location1 outdoor ratio
-location1_top_or <- top_n_or(indoor_002, "location_1", 10)
+#booking outdoor ratio
+booking_top_or <- top_n_or(indoor_002, "Booking", 10)
 
-p_location1_top_or <- or_top_plot(location1_top_or, "orchid",
-                                  "location_1 top 10 I/O Ratios")
-p_location1_top_or
+p_booking_top_or <- or_top_plot(booking_top_or, "orchid",
+                                  "Booking top 10 I/O Ratios")
+p_booking_top_or
 
-#location2 outdoor ratio
-location2_top_or <- top_n_or(indoor_002, "location_1", 10)
+#kitchen outdoor ratio
+kitchen_top_or <- top_n_or(indoor_002, "Booking", 10)
 
-p_location2_top_or <- or_top_plot(location2_top_or, "chocolate4",
-                                  "location_2 top 10 I/O Ratios")
-p_location2_top_or
+p_kitchen_top_or <- or_top_plot(kitchen_top_or, "chocolate4",
+                                  "Kitchen top 10 I/O Ratios")
+p_kitchen_top_or
 
-#location3 outdoor ratio
-location3_top_or <- top_n_or(indoor_002, "location_3", 10)
-
-p_location3_top_or <- or_top_plot(location3_top_or, "goldenrod2",
-                                  "location_3 top 10 I/O Ratios")
-p_location3_top_or
-
-#location4 outdoor ratio
-location4_top_or <- top_n_or(indoor_002, "location_4", 10)
-
-p_location4_top_or <- or_top_plot(location4_top_or, "#50C878",
-                                  "location_4 top 10 I/O Ratios")
-p_location4_top_or
-
-#location5 outdoor ratio
-location5_top_or <- top_n_or(indoor_002, "location_5", 10)
-
-p_location5_top_or <- or_top_plot(location5_top_or, "tomato2",
-                                  "location_5 top 10 I/O Ratios")
-p_location5_top_or
 
 #all locations outdoor ratio
-grid.arrange(p_location1_top_or, p_location2_top_or, p_location3_top_or,
-             p_location4_top_or, p_location5_top_or,
+grid.arrange(p_booking_top_or, p_kitchen_top_or,
              ncol = 3, nrow = 2,
              top = "Top 10 I/O Ratios in Each Location",
              left = "Concentration\n(VOC ppbv or methane ppmv)")
@@ -288,12 +227,14 @@ grid.arrange(p_btex, p_chlorinated, p_ketone, p_other, ncol = 2, nrow = 2,
 #----
 #SRA medians
 #compute median I/O for each analyte in each indoor location.
-
+#I/O for each analyte
 median_002 <- filter_and_summarize(indoor_002, analytes)
+#I/O for each room
+
 
 #----
 # #correlations
-cor(location2$conc., location1$conc., method = "spearman")
+cor(kitchen$conc., booking$conc., method = "spearman")
 #repeat the above for all location you want correlation for
 #create a new df for correlation. Slice out "outdoor" col. num. [-X]
 voc_cor <- site_002 %>%
@@ -302,12 +243,12 @@ voc_cor <- site_002 %>%
 #get all TVOC signals for each room, ex. "sum(location5$conc., na.rm = TRUE)"
 p.analytes$conc. <- as.numeric(as.character(p.analytes$conc.))
 
-tvoc_location1 <- p.analytes %>%
-  filter(ID == "location_1")
-sum(tvoc_location1$conc.)
-tvoc_location2 <- p.analytes %>% 
-  filter(ID == "location_2")
-sum(tvoc_location2$conc., na.rm = TRUE)
+tvoc_booking <- p.analytes %>%
+  filter(ID == "Booking")
+sum(tvoc_booking$conc.)
+tvoc_kitchen <- p.analytes %>% 
+  filter(ID == "Kitchen")
+sum(tvoc_kitchen$conc., na.rm = TRUE)
 tvoc_lessonprep <- p.analytes %>% 
   filter(ID == "location_3")
 sum(tvoc_lessonprep$conc., na.rm = TRUE)  

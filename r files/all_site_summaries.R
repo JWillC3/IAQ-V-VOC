@@ -22,13 +22,13 @@ datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
           options = list(pageLenght = 10), rownames = FALSE,
           caption = "All Sites Table, Concentrations: ppb(v) or methane ppb(v)")
 
+#----
 #site voc concentration sums
 #site 040
 p_conc_room(site_040, site_id = "040")
 
 #SITE 063 A
 p_conc_room(site_063A, site_id = "063A")
-
 
 #SITE 063 B
 
@@ -60,7 +60,6 @@ p_conc_room(site_063A, site_id = "063A")
 #site 094
 
 #grid for all summary plots
-
 grid.arrange(site_094_sum, site_063a_sum, site_063b_sum, site_066_sum, 
              site_079_sum, site_085_sum, site_086_sum, site_099_sum,
              site_103_sum, site_107_sum, site_108_sum, site_094_sum,
@@ -68,6 +67,7 @@ grid.arrange(site_094_sum, site_063a_sum, site_063b_sum, site_066_sum,
              bottom = "Rooms Sampled", left = "Sum of VOC Sampled (ppb(v))")
 
 
+#----
 #box plot for all indoor locations
 bp_indoor <- ggplot(indoor, aes(x = reorder(analyte, conc.), 
                                 y = conc., #fill = analyte
@@ -118,6 +118,277 @@ bp_040
 
 #outdoor concentrations
 #-----------
+
+#----
+#SRA medians
+#compute median I/O for each analyte in each indoor location.
+#calculate ratios 002
+indoor_002 <- indoor_002 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_002$conc./outdoor_002$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 040
+indoor_040 <- indoor_040 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_040$conc./outdoor_040$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 063A
+indoor_063A <- indoor_063A %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_063A$conc./outdoor_063A$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 063B
+indoor_063B <- indoor_063B %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_063B$conc./outdoor_063B$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 066
+indoor_066 <- indoor_066 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_066$conc./outdoor_066$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 079
+indoor_079 <- indoor_079 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_079$conc./outdoor_079$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 085
+indoor_085 <- indoor_085 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_085$conc./outdoor_085$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 086
+indoor_086 <- indoor_086 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_086$conc./outdoor_086$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 089
+indoor_089 <- indoor_089 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_089$conc./outdoor_089$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 094
+indoor_094 <- indoor_094 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_094$conc./outdoor_094$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 099
+indoor_099 <- indoor_099 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_099$conc./outdoor_099$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 101
+indoor_101 <- indoor_101 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_101$conc./outdoor_101$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 103
+indoor_103 <- indoor_103 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_103$conc./outdoor_103$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 105
+indoor_105 <- indoor_105 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_105$conc./outdoor_105$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 106
+indoor_106 <- indoor_106 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_106$conc./outdoor_106$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 107
+indoor_107 <- indoor_107 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_107$conc./outdoor_107$conc.)) %>% 
+  select(1,4,7,9,20)
+#calculate ratios 108
+indoor_108 <- indoor_108 %>%
+  group_by(room_name, analyte) %>%
+  ungroup() %>% 
+  mutate(od_ratio = (indoor_108$conc./outdoor_108$conc.)) %>% 
+  select(1,4,7,9,20)
+
+ratio_list <- list(indoor_002, indoor_040, indoor_063A, indoor_063B, indoor_066,
+                    indoor_079, indoor_085, indoor_086, indoor_089, indoor_094,
+                    indoor_099, indoor_101, indoor_103, indoor_105, indoor_105,
+                    indoor_106, indoor_107, indoor_108)
+
+ratio_list <- bind_rows(ratio_list)
+
+#plot of all ratios for each site
+p_ratio_list <- ratio_list %>% 
+  ggplot(aes(x = reorder(analyte, od_ratio), y = od_ratio,
+             color = site_id,
+             text = paste("Site ID: ", site_id,
+                          "<br> Analyte: ", analyte,
+                          "<br> I/O :", od_ratio))) +
+  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  ggtitle("VOC I/O Ratios") +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "I/O Ratio") +
+  scale_color_manual(name = "Site ID",
+                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
+                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
+                                "#b9cda1", "#096013", "#afe642", "#3aa609",
+                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
+                                "#d9c937", "#9f04fc"))
+
+ggplotly(p_ratio_list, tooltip = "text")
+
+
+#all ratios from all canister locations box plot
+ggplot(ratio_list,
+       aes(x = fct_reorder(analyte, od_ratio, .fun = "median", .desc = TRUE),
+           y = od_ratio)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "I/O Ratio") +
+  ggtitle("I/O Ratios for All Canister Locations Arranged by Median")
+
+# donald <- indoor_002 %>% 
+#   select(1,4,7,9,20)
+# 
+# print(donald, n = 100)
+
+#----
+#Help from Ben 8/22/24
+# List all objects in the environment
+all_objects <- ls()
+
+# Filter the objects that match the pattern "indoor_" followed by a number
+indoor_objects <- grep("^indoor_\\d+$", all_objects, value = TRUE)
+
+# Combine the dataframes while keeping only the specified columns
+indoor_all <- do.call(rbind, lapply(indoor_objects, function(df_name) {
+  df <- get(df_name)
+  df[, c("site_id", "room_name", "analyte", "od_ratio")]
+}))
+
+# Summarize the od_ratio by analyte for each site_id and room_name combination
+summary_stats <- as.data.frame(indoor_all) %>%
+  mutate(analyte = as.factor(analyte)) %>% 
+  group_by(room_name) %>%
+  summarize(
+    mean_od_ratio = mean(od_ratio, na.rm = TRUE),
+    median_od_ratio = median(od_ratio, na.rm = TRUE),
+    p5_od_ratio = quantile(od_ratio, 0.05, na.rm = TRUE),
+    p95_od_ratio = quantile(od_ratio, 0.95, na.rm = TRUE),
+    p25_od_ratio = quantile(od_ratio, 0.25, na.rm = TRUE),
+    p75_od_ratio = quantile(od_ratio, 0.75, na.rm = TRUE)
+  )
+
+# View the summary statistics
+summary_stats
+
+#
+median_df <- as.data.frame(median_list) %>%
+  group_by(analyte) %>%
+  summarize(median_analyte = median(median_or_ratio)) %>%
+  ungroup()
+
+# Check the structure of your dataframe
+str(indoor_all)
+
+#----
+median_002 <- filter_and_summarize(indoor_002, analytes_df) %>%
+  mutate(site_id = "002", .before = analyte)
+median_040 <- filter_and_summarize(indoor_040, analytes_df) %>% 
+  mutate(site_id = "040", .before = analyte)
+median_063A <- filter_and_summarize(indoor_063A, analytes_df) %>% 
+  mutate(site_id = "063A", .before = analyte)
+median_063B <- filter_and_summarize(indoor_063B, analytes_df) %>% 
+  mutate(site_id = "063B", .before = analyte)
+median_066 <- filter_and_summarize(indoor_066, analytes_df) %>% 
+  mutate(site_id = "066", .before = analyte)
+median_079 <- filter_and_summarize(indoor_079, analytes_df) %>% 
+  mutate(site_id = "079", .before = analyte)
+median_085 <- filter_and_summarize(indoor_085, analytes_df) %>% 
+  mutate(site_id = "085", .before = analyte)
+median_086 <- filter_and_summarize(indoor_086, analytes_df) %>% 
+  mutate(site_id = "086", .before = analyte)
+median_089 <- filter_and_summarize(indoor_089, analytes_df) %>% 
+  mutate(site_id = "089", .before = analyte)
+median_094 <- filter_and_summarize(indoor_094, analytes_df) %>% 
+  mutate(site_id = "094", .before = analyte)
+median_099 <- filter_and_summarize(indoor_099, analytes_df) %>% 
+  mutate(site_id = "099", .before = analyte)
+median_101 <- filter_and_summarize(indoor_101, analytes_df) %>% 
+  mutate(site_id = "101", .before = analyte)
+median_103 <- filter_and_summarize(indoor_103, analytes_df) %>% 
+  mutate(site_id = "103", .before = analyte)
+median_105 <- filter_and_summarize(indoor_105, analytes_df) %>% 
+  mutate(site_id = "105", .before = analyte)
+median_106 <- filter_and_summarize(indoor_106, analytes_df) %>% 
+  mutate(site_id = "106", .before = analyte)
+median_107 <- filter_and_summarize(indoor_107, analytes_df) %>% 
+  mutate(site_id = "107", .before = analyte)
+median_108 <- filter_and_summarize(indoor_108, analytes_df) %>% 
+  mutate(site_id = "108", .before = analyte)
+
+median_list <- list(median_002, median_040, median_063A, median_063B, median_066,
+                median_079, median_085, median_086, median_089, median_094,
+                median_099, median_101, median_103, median_105, median_105,
+                median_106, median_107, median_108)
+
+median_list <- bind_rows(median_list)
+
+median_list %>% 
+  ggplot(aes(x = reorder(analyte, median_or_ratio), y = median_or_ratio,
+             color = site_id,
+             text = paste("Analyte: ", analyte,
+                          "<br> I/O :", median_or_ratio))) +
+  geom_point(shape = 18, size = 3, alpha = 0.5) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  ggtitle("VOC I/O Ratios") +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "I/O Ratio") +
+  scale_color_manual(name = "Site ID",
+                     values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
+                                "#e28de2", "#934270", "#e72fc2", "#5361c7",
+                                "#b9cda1", "#096013", "#afe642", "#3aa609",
+                                "#2af464", "#683d0d", "#efaa79", "#d6061a",
+                                "#d9c937", "#9f04fc"))
+
+#as boxplot
+#this is not working like it should, need to figure out how to make the second
+#box plot work for I/O medians for all sites...
+ggplot(indoor_002,
+       aes(x = fct_reorder(analyte, od_ratio, .fun = "median", .desc = TRUE),
+           y = od_ratio)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "I/O Ratio") +
+  ggtitle("Site 002 I/O Ratio for All Rooms Arranged by Median")
+
+
 
 
 #-----------
@@ -517,4 +788,5 @@ result <- filtered_data %>%
   select(datetime, site_id, id_inst, room, val) %>%
   group_by(site_id, id_inst, room) %>%
   summarise(sum_val = sum(val, na.rm = TRUE))
+
 #-----------

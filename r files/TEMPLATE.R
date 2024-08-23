@@ -308,9 +308,9 @@ sum(tvoc_location1$conc.)
 tvoc_location2 <- p.analytes %>% 
   filter(ID == "location_2")
 sum(tvoc_location2$conc., na.rm = TRUE)
-tvoc_lessonprep <- p.analytes %>% 
+tvoc_location3 <- p.analytes %>% 
   filter(ID == "location_3")
-sum(tvoc_lessonprep$conc., na.rm = TRUE)  
+sum(tvoc_location4$conc., na.rm = TRUE)  
 tvoc_location4 <- p.analytes %>% 
   filter(ID == "location_4")
 sum(tvoc_location4$conc., na.rm = TRUE)
