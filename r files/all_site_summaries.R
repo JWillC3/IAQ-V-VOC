@@ -31,38 +31,58 @@ p_conc_room(site_040, "040")
 p_conc_room(site_063A, "063A")
 
 #SITE 063 B
-
+p_conc_room(site_063B, "063B")
 
 #SITE 066
 p_conc_room(site_066, "066")
+
+
+site_066_top <- top_n_analytes(site_066, 47)
+p_site_066_top <- top_plot(site_066_top, "orange", "066")
+p_site_066_top
 
 # SITE 079
 p_conc_room(site_079, "079")
 
 # SITE 085
-
+p_conc_room(site_085, "085")
 
 # SITE 086
-
+p_conc_room(site_086, "086")
 
 # SITE 099
-
+p_conc_room(site_099, "099")
 
 # SITE 103
+p_conc_room(site_103, "103")
+
+#SITE 105
+p_conc_room(site_105, "105")
+
+#SITE 106
+p_conc_room(site_106, "106")
+
+p_106 <- p_site(site_106, "106")
+p_106
+
+site_106_top <- top_n_analytes(site_106, 56)
+p_site_106_top <- top_plot(site_106_top, "orange", "106")
+p_site_106_top
 
 
 # SITE 107
-
+p_conc_room(site_107, "107")
 
 #sites 108
-
+p_conc_room(site_108, "108")
 
 #site 094
-
+p_conc_room(site_094, "094")
 #grid for all summary plots
 grid.arrange(site_094_sum, site_063a_sum, site_063b_sum, site_066_sum, 
              site_079_sum, site_085_sum, site_086_sum, site_099_sum,
-             site_103_sum, site_107_sum, site_108_sum, site_094_sum,
+             site_103_sum, site_105, site_106, site_107_sum, site_108_sum,
+             site_094_sum,
              ncol = 3, nrow = 4,
              bottom = "Rooms Sampled", left = "Sum of VOC Sampled (ppb(v))")
 
@@ -121,12 +141,44 @@ bp_040
 p_outdoor <- p_locations(outdoor, "Outdoor")
 p_outdoor
 
+#top 10 outdoor for all sites
+sites_top_out <- top_n_analytes(outdoor, 47)
+sites_top_out$analyte <- factor(sites_top_out$analyte,
+  levels = c("ethane", "propane", "acetone", "n-butane", "ethene", "isopropanol",
+             "acetaldehyde", "i-butane", "ethyne", "acetonitrile"), ordered = TRUE)
+
+ggplot(sites_top_out, aes(x = analyte, y = conc.)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) +
+  labs(x = "Analyte", y = "Concentration (ppb)") +
+  ggtitle("Top 10 Outdoor Analytes Across All Sites") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x)))
+
+
 #indoor concentrations
 #-----------
 p_indoor <- p_locations(indoor, "Indoor")
-p_indoor
+p_indoor +
+  geom_hline(yintercept = 0.05, linetype = "dashed", color = "red")
 
 ggplotly(p_indoor, tooltip = "text")
+
+sites_top_in <- top_n_analytes(indoor, 220)
+sites_top_in$analyte <- factor(sites_top_in$analyte, levels = c("isopropanol", "ethane",
+  "propane", "n-butane", "i-butane", "acetone", "acetaldehyde", "butanol", 
+  "ethene", "methane"), ordered = TRUE)
+
+ggplot(sites_top_in, aes(x = analyte, y = conc.)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) +
+  labs(x = "Analyte", y = "Concentration (ppb)") +
+  ggtitle("Top 10 Analytes Across All Sites") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x)))
+  
 
 #----
 #SRA medians
@@ -241,6 +293,17 @@ ratio_list <- list(indoor_002, indoor_040, indoor_063A, indoor_063B, indoor_066,
 
 ratio_list <- bind_rows(ratio_list)
 
+# ratio_list$ratio_cat <- cut(ratio_list$od_ratio,
+#                                  breaks = c(-Inf, 1, 10, Inf),
+#                                  labels = c("Less than 1", "1 to 10",
+#                                             "Greater than 10"))
+
+ratio_list$ratio_category <- cut(ratio_list$od_ratio,
+                                 breaks = c(-Inf, 1, 10, Inf),
+                                 labels = c("Less than 1", "1 to 10", "Greater than 10"))
+
+ratio_list_filtered <- ratio_list[!is.na(ratio_list$ratio_category), ]
+
 #plot of all ratios for each site
 p_ratio_list <- ratio_list %>% 
   ggplot(aes(x = reorder(analyte, od_ratio), y = od_ratio,
@@ -266,7 +329,9 @@ ggplotly(p_ratio_list, tooltip = "text")
 
 
 #all ratios from all canister locations box plot
-ggplot(ratio_list,
+
+
+ggplot(ratio_list_filtered,
        aes(x = fct_reorder(analyte, od_ratio, .fun = "median", .desc = TRUE),
            y = od_ratio)) +
   geom_boxplot() +
@@ -275,7 +340,8 @@ ggplot(ratio_list,
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "I/O Ratio") +
-  ggtitle("I/O Ratios for All Canister Locations Arranged by Median")
+  ggtitle("I/O Ratios for All Canister Locations Arranged by Median") +
+  facet_grid(~ ratio_cat, scales = "free_y")
 
 # donald <- indoor_002 %>% 
 #   select(1,4,7,9,20)
