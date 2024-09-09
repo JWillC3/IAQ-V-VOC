@@ -277,7 +277,7 @@ p_002_sum <- p_conc_room(site_002, "002")
 
 ```{r all_voc_sum_plots, fig.height= 30, fig.width = 15, dpi = 200, warning=FALSE, message=FALSE}
 
-grid.arrange(p_094_sum, p_063a_sum, p_063b_sum, p_066_sum, p_079_sum, p_085_sum,
+grid.arrange(p_040_sum, p_063a_sum, p_063b_sum, p_066_sum, p_079_sum, p_085_sum,
              p_086_sum, p_099_sum, p_103_sum, p_107_sum, p_108_sum, p_094_sum,
              p_106_sum, p_105_sum, p_109_sum, p_101_sum, p_104_sum, p_089_sum,
              p_002_sum,
@@ -392,10 +392,10 @@ twa_040
 
 ```{r top_10 analytes, message=FALSE, warning=FALSE}
 #chnage number to fetch the top 10, may need to use a number < 10
-sites_top <- top_n_analytes(sites, 45)
+sites_top <- top_n_analytes(indoor, 220)
 
-ggplot(sites, aes(x = reorder(analyte, conc.), y = conc.)) +
-    geom_bar(stat = "identity", fill = fill) +
+ggplot(sites_top, aes(x = reorder(analyte, conc.), y = conc.)) +
+    geom_bar(stat = "identity", fill = "orange") +
     labs(x = "Analyte", y = "Concentration (ppb)") +
     ggtitle("Top 10 Analytes Across All Sites") +
     scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
