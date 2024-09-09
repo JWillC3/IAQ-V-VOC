@@ -25,19 +25,19 @@ datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
 #----
 #site voc concentration sums
 #site 040
-p_conc_room(site_040, site_id = "040")
+p_conc_room(site_040, "040")
 
 #SITE 063 A
-p_conc_room(site_063A, site_id = "063A")
+p_conc_room(site_063A, "063A")
 
 #SITE 063 B
 
 
 #SITE 066
-
+p_conc_room(site_066, "066")
 
 # SITE 079
-
+p_conc_room(site_079, "079")
 
 # SITE 085
 
@@ -118,6 +118,15 @@ bp_040
 
 #outdoor concentrations
 #-----------
+p_outdoor <- p_locations(outdoor, "Outdoor")
+p_outdoor
+
+#indoor concentrations
+#-----------
+p_indoor <- p_locations(indoor, "Indoor")
+p_indoor
+
+ggplotly(p_indoor, tooltip = "text")
 
 #----
 #SRA medians
