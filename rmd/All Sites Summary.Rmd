@@ -33,16 +33,16 @@ From October 2022 to May 2024 we deployed Summa Canisters at 18 of the 50 CDPHE 
 
 | CDPHE sites sampled organized by date |
 |:------|
-| 063 A & B. High Desert Assisted Living, Pagosa Springs |
+| 063 A & B. High Desert Assisted Living, Clifton |
 | 079. Mango House, Denver |
-| 066. Homeward Bound Shelter, Pagosa Springs |
+| 066. Homeward Bound Shelter, Grand Junction |
 | 085. La Puente, Alamosa |
 | 086. BGCSLV, Alamosa |
 | 099. Radiant Healthcare, Rocky Ford |
 | 040. Teaching Tree (post), Fort Collins |
 | 103. Karis Community, Denver |
 | 107. The Center, Denver |
-| 094. Ability Advocates, Pagosa Springs |
+| 094. Ability Advocates, Grand Junction |
 | 108. The Phoenix, Denver |
 | 106. Lawrence St. Shelter, Denver |
 | 109. Amaryllis Therapy Network, Denver |
@@ -394,7 +394,11 @@ twa_040
 #chnage number to fetch the top 10, may need to use a number < 10
 sites_top <- top_n_analytes(indoor, 220)
 
-ggplot(sites_top, aes(x = reorder(analyte, conc.), y = conc.)) +
+sites_top <- sites_top %>%
+  arrange(desc(conc.)) %>% 
+  select(7, 9)
+
+ggplot(sites_top, aes(x = analyte, y = conc.)) +
     geom_bar(stat = "identity", fill = "orange") +
     labs(x = "Analyte", y = "Concentration (ppb)") +
     ggtitle("Top 10 Analytes Across All Sites") +
