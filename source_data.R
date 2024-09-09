@@ -408,8 +408,9 @@ p_site <- function(df, site){
   
   ggplot(df, aes(x = reorder(analyte, conc.),
                               y = conc., color = room_name,
-                 text = paste("Analyte: ", analyte,
-                              "<br> Conc. :", conc.,
+                 text = paste("Site: ", site_id,
+                              "<br> Analyte: ", analyte,
+                              "<br> Conc.: ", conc.,
                               "<br> Class: ", category))) +
   geom_point(shape = 18, size = 5, alpha = 0.5) +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
@@ -527,15 +528,16 @@ p_locations <- function(df, type){
   
   ggplot(df, aes(x = reorder(analyte, conc.),
                          y = conc., color = site_id,
-                         text = paste("Analyte: ", analyte,
-                                      "<br> Conc. :", conc.,
+                         text = paste("Site: ", site_id,
+                                      "<br> Analyte: ", analyte,
+                                      "<br> Conc.: ", conc.,
                                       "<br> Class: ", category))) +
     geom_point(shape = 18, size = 3, alpha = 0.5) +
     scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                   labels = trans_format("log10", math_format(10^.x))) +
     theme_bw() +
     ggtitle(paste0("VOC Concentrations in ", type, " Locations in CO")) +
-    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+    theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
     labs(x = "Ananlyte", y = "Concentration ppb(v)") +
     scale_color_manual(name = "Site ID",
                        values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
