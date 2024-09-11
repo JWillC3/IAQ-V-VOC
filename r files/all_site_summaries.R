@@ -199,7 +199,14 @@ bp_040
 
 
 #temp living locations
+temp_living_top <- top_n_analytes(temp_living, 10)
 
+temp_living_top$analyte <- factor(temp_living_top$analyte,
+      levels = c("ethane", "isopropanol", "i-butane", "n-butane", "propane"),
+      ordered = TRUE)
+
+p_temp_living_top <- top_plot2(temp_living_top, "mediumorchid3", "Shelters")
+p_temp_living_top
 
 #classroom locations
 
@@ -208,13 +215,49 @@ bp_040
 
 
 #healthcare room locations
+medical_top <- top_n_analytes(medical, 10)
+
+medical_top$analyte <- factor(medical_top$analyte,
+      levels = c("isopropanol", "ethane", "i-butane", "propane", "acetone"),
+      ordered = TRUE)
+
+p_medical_top <- top_plot2(medical_top, "tomato2", "Healthcare")
+p_medical_top
 
 
 #recreation locations
+recreation_top <- top_n_analytes(recreation, 13)
+
+recreation_top$analyte <- factor(recreation_top$analyte,
+       levels = c("ethane", "n-butane", "propane", "isopropanol", "i-butane"),
+       ordered = TRUE)
+
+p_recreation_top <- top_plot2(recreation_top, "aquamarine4", "Recreation")
+p_recreation_top
 
 
 #kitchen/dinning locations
+kitchens_top <- top_n_analytes(kitchens, 10)
 
+kitchens_top$analyte <- factor(kitchens_top$analyte,
+      levels = c("n-butane", "propane", "ethane", "isopropanol","i-butane"),
+      ordered = TRUE)
+
+top_plot2 <- function(df, fill, site){
+  
+  ggplot(df, aes(x = analyte, y = conc.)) +
+    geom_bar(stat = "identity", fill = fill) +
+    labs(x = "Analyte", y = "Concentration (ppb)") +
+    ggtitle(paste0("Site Type: ", site, " Top 5 Analytes")) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+  
+}
+
+p_kitchens_top <- top_plot2(kitchens_top, "forestgreen", "Kitchen/Dining")
+p_kitchens_top
 
 #staff locations
 
