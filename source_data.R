@@ -29,7 +29,7 @@ sites <-
   read_sheet("https://docs.google.com/spreadsheets/d/1s34WArIxQtaPa8HHk_6iRN9osTeJPnUU5HqpEplh5dU/edit?gid=0#gid=0",
              "info", col_types = "c")
 
-cols_to_convert <- c("value", "conc.", "ug_m3", "ppm(v)", "M", "OSHA_8hr")
+cols_to_convert <- c("value", "conc.", "ug_m3", "ppm", "M", "OSHA_8hr")
 
 sites <- sites %>% mutate_at(vars(cols_to_convert), ~ signif(as.numeric(.), 4))
 print(sites)
@@ -425,9 +425,31 @@ p_site <- function(df, site){
   
 }
 
+#second plot for analytes
+p_site2 <- function(df, site){
+  
+  ggplot(df, aes(x = reorder(analyte, ppm),
+                 y = ppm, color = room_name,
+                 text = paste("Site: ", site_id,
+                              "<br> Analyte: ", analyte,
+                              "<br> Conc.: ", conc.,
+                              "<br> Class: ", category))) +
+    geom_point(shape = 18, size = 5, alpha = 0.5) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+    labs(x = "Analytes", y = "Concentration (ppmv)") +
+    ggtitle(paste0("Site: ", site, " Summa Canister Deployment")) +
+    scale_color_manual(name = "Room ID",
+                       values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                  "tomato2", "midnightblue", "orange")) 
+  
+}
 
-#all analytes plots by room id with threshold filter
-p_site2 <- function(df, site, conc_threshold){
+
+#third plot for all analytes by room id with threshold filter
+p_site3 <- function(df, site, conc_threshold){
   
   # Filter the dataframe based on the concentration threshold
   df_filtered <- df[df$conc. > conc_threshold, ]
@@ -450,6 +472,8 @@ p_site2 <- function(df, site, conc_threshold){
                                   "tomato2", "midnightblue", "orange")) 
   
 }
+
+
 
 #top 10 analytes plot for site
 top_plot <- function(df, fill, site){
@@ -480,6 +504,19 @@ loc_top_plot <- function(df, fill, location){
   
 }
 
+#second top analytes plot
+top_plot2 <- function(df, fill, site){
+  
+  ggplot(df, aes(x = analyte, y = conc.)) +
+    geom_bar(stat = "identity", fill = fill) +
+    labs(x = "Analyte", y = "Concentration (ppb)") +
+    ggtitle(paste0("Room Type: ", site, " Top 5 Analytes")) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+  
+}
 
 #ratios box plot
 r_box_plot <- function(df){
@@ -533,7 +570,7 @@ or_top_plot <- function(df, fill, location){
 }
 
 
-#to plot total voc conc by room
+#to plot total voc conc by room ppb(v)
 p_conc_room <- function(df, site){
 
 ggplot(df, aes(x = reorder(room_name, conc.),
@@ -545,6 +582,20 @@ ggplot(df, aes(x = reorder(room_name, conc.),
   labs(x = "Room", y = "Sum of VOC Sampled (ppb(v))") +
   theme_bw() +
   theme(axis.text.y = element_blank())
+}
+
+#second plot for for rooms by ppm(v)
+p_conc_room2 <- function(df, site){
+  
+  ggplot(df, aes(x = reorder(room_name, ppm),
+                 y = ppm)) +
+    geom_bar(stat = "identity", fill = "midnightblue") +
+    stat_summary(aes(label = after_stat(y)), fun = "sum", geom = "text",
+                 col = "white", vjust = 1.5) +
+    ggtitle(paste0("Site: ", site,  " VOC Concentrations Sum")) +
+    labs(x = "Room", y = "Sum of VOC Sampled (ppm)") +
+    theme_bw() +
+    theme(axis.text.y = element_blank())
 }
 
 
@@ -573,6 +624,30 @@ p_locations <- function(df, type){
   
 }
 
+#plot for ug/m3
+p_locations2 <- function(df, type){
+  
+  ggplot(df, aes(x = reorder(analyte, ug_m3),
+                 y = ug_m3, color = site_id,
+                 text = paste("Site: ", site_id,
+                              "<br> Analyte: ", analyte,
+                              "<br> Conc.: ", conc.,
+                              "<br> Class: ", category))) +
+    geom_point(shape = 18, size = 3, alpha = 0.5) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    ggtitle(paste0("VOC Concentrations in ", type, " Locations in CO")) +
+    theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+    labs(x = "Ananlyte", y = "Concentration µg/m3") +
+    scale_color_manual(name = "Site ID",
+                       values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
+                                  "#e28de2", "#934270", "#e72fc2", "#5361c7",
+                                  "#b9cda1", "#096013", "#afe642", "#3aa609",
+                                  "#2af464", "#683d0d", "#efaa79", "#d6061a",
+                                  "#d9c937", "#9f04fc"))
+  
+}
 
 #analyte category plots
 p_sites_cat <- function(df, category){
