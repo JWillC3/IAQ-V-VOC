@@ -33,16 +33,16 @@ From October 2022 to May 2024 we deployed Summa Canisters at 18 of the 50 CDPHE 
 
 | CDPHE sites sampled organized by date |
 |:------|
-| 063 A & B. High Desert Assisted Living, Pagosa Springs |
+| 063 A & B. High Desert Assisted Living, Clifton |
 | 079. Mango House, Denver |
-| 066. Homeward Bound Shelter, Pagosa Springs |
+| 066. Homeward Bound Shelter, Grand Junction |
 | 085. La Puente, Alamosa |
 | 086. BGCSLV, Alamosa |
 | 099. Radiant Healthcare, Rocky Ford |
 | 040. Teaching Tree (post), Fort Collins |
 | 103. Karis Community, Denver |
 | 107. The Center, Denver |
-| 094. Ability Advocates, Pagosa Springs |
+| 094. Ability Advocates, Grand Junction |
 | 108. The Phoenix, Denver |
 | 106. Lawrence St. Shelter, Denver |
 | 109. Amaryllis Therapy Network, Denver |
@@ -277,7 +277,7 @@ p_002_sum <- p_conc_room(site_002, "002")
 
 ```{r all_voc_sum_plots, fig.height= 30, fig.width = 15, dpi = 200, warning=FALSE, message=FALSE}
 
-grid.arrange(p_094_sum, p_063a_sum, p_063b_sum, p_066_sum, p_079_sum, p_085_sum,
+grid.arrange(p_040_sum, p_063a_sum, p_063b_sum, p_066_sum, p_079_sum, p_085_sum,
              p_086_sum, p_099_sum, p_103_sum, p_107_sum, p_108_sum, p_094_sum,
              p_106_sum, p_105_sum, p_109_sum, p_101_sum, p_104_sum, p_089_sum,
              p_002_sum,
@@ -392,10 +392,14 @@ twa_040
 
 ```{r top_10 analytes, message=FALSE, warning=FALSE}
 #chnage number to fetch the top 10, may need to use a number < 10
-sites_top <- top_n_analytes(sites, 45)
+sites_top <- top_n_analytes(indoor, 220)
 
-ggplot(sites, aes(x = reorder(analyte, conc.), y = conc.)) +
-    geom_bar(stat = "identity", fill = fill) +
+sites_top <- sites_top %>%
+  arrange(desc(conc.)) %>% 
+  select(7, 9)
+
+ggplot(sites_top, aes(x = analyte, y = conc.)) +
+    geom_bar(stat = "identity", fill = "orange") +
     labs(x = "Analyte", y = "Concentration (ppb)") +
     ggtitle("Top 10 Analytes Across All Sites") +
     scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),

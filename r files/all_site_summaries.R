@@ -24,45 +24,136 @@ datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
 
 #----
 #site voc concentration sums
+p_site2 <- function(df, site){
+  
+  ggplot(df, aes(x = reorder(analyte, "ppm(v)"),
+                 y = "ppm(v)", color = room_name,
+                 text = paste("Site: ", site_id,
+                              "<br> Analyte: ", analyte,
+                              "<br> Conc.: ", conc.,
+                              "<br> Class: ", category))) +
+    geom_point(shape = 18, size = 5, alpha = 0.5) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+    labs(x = "Analytes", y = "Concentration (ppmv)") +
+    ggtitle(paste0("Site: ", site, " Summa Canister Deployment")) +
+    scale_color_manual(name = "Room ID",
+                       values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                  "tomato2", "midnightblue", "orange")) 
+  
+}
+
+p_conc_room2 <- function(df, site){
+  
+  ggplot(df, aes(x = reorder(room_name, ppm),
+                 y = ppm)) +
+    geom_bar(stat = "identity", fill = "midnightblue") +
+    stat_summary(aes(label = after_stat(y)), fun = "sum", geom = "text",
+                 col = "white", vjust = 1.5) +
+    ggtitle(paste0("Site: ", site,  " VOC Concentrations Sum")) +
+    labs(x = "Room", y = "Sum of VOC Sampled (ppm)") +
+    theme_bw() +
+    theme(axis.text.y = element_blank())
+}
+
 #site 040
-p_conc_room(site_040, site_id = "040")
+site_040_2 <- site_040 %>% 
+  rename("ppm" = "ppm(v)")
+
+p_conc_room2(site_040_2, "040")
+
 
 #SITE 063 A
-p_conc_room(site_063A, site_id = "063A")
+p_conc_room(site_063A, "063A")
 
 #SITE 063 B
-
+p_conc_room(site_063B, "063B")
 
 #SITE 066
+site_066_2 <- site_066 %>% 
+  rename("ppm" = "ppm(v)")
 
+p_conc_room2(site_066_2, "066")
+
+p_conc_room(site_066, "066")
+
+
+site_066_top <- top_n_analytes(site_066, 47)
+p_site_066_top <- top_plot(site_066_top, "orange", "066")
+p_site_066_top
+
+p_066_3 <- p_site3(indoor_066, "066")
+p_066_3
 
 # SITE 079
-
+p_conc_room(site_079, "079")
 
 # SITE 085
-
+p_conc_room(site_085, "085")
 
 # SITE 086
+site_086_2 <- site_086 %>% 
+  rename("ppm" = "ppm(v)")
 
+p_conc_room2(site_086_2, "086")
+
+p_conc_room(site_086, "086")
+
+p_086_3 <- p_site3(indoor_086, "086")
+p_086_3
 
 # SITE 099
-
+p_conc_room(site_099, "099")
 
 # SITE 103
+p_conc_room(site_103, "103")
 
+#SITE 105
+p_conc_room(site_105, "105")
 
+#SITE 106
+site_106_2 <- site_106 %>% 
+  rename("ppm" = "ppm(v)")
+
+p_conc_room2(site_106_2, "106")
+
+p_conc_room(site_106, "106")
+
+p_106 <- p_site(site_106, "106")
+p_106
+
+site_106_top <- top_n_analytes(site_106, 56)
+p_site_106_top <- top_plot(site_106_top, "orange", "106")
+p_site_106_top
+
+p_106_3 <- p_site3(indoor_106, "106")
+
+p_106_3
 # SITE 107
-
+p_conc_room(site_107, "107")
 
 #sites 108
-
+p_conc_room(site_108, "108")
 
 #site 094
+site_094_2 <- site_094 %>% 
+  rename("ppm" = "ppm(v)")
+
+p_conc_room2(site_094_2, "094")
+
+p_conc_room(site_094, "094")
+
+p_094_3 <- p_site3(indoor_094, "094")
+p_094_3
+
 
 #grid for all summary plots
 grid.arrange(site_094_sum, site_063a_sum, site_063b_sum, site_066_sum, 
              site_079_sum, site_085_sum, site_086_sum, site_099_sum,
-             site_103_sum, site_107_sum, site_108_sum, site_094_sum,
+             site_103_sum, site_105, site_106, site_107_sum, site_108_sum,
+             site_094_sum,
              ncol = 3, nrow = 4,
              bottom = "Rooms Sampled", left = "Sum of VOC Sampled (ppb(v))")
 
@@ -81,6 +172,18 @@ bp_indoor <- ggplot(indoor, aes(x = reorder(analyte, conc.),
   labs(x = "Ananlyte", y = "Concentration")
 bp_indoor 
 
+#box plot for all sites
+bp_all <- ggplot(sites, aes(x = reorder(analyte, conc.), 
+                                y = conc.)) +
+  geom_boxplot(show.legend = FALSE) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  ggtitle("VOC Conectrations: All Locations in CO\n (n = 18)") +
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+  labs(x = "Ananlyte", y = "Concentration")
+bp_all 
+
 #site_040 boxplot
 bp_040 <- site_040 %>% 
   ggplot(aes(x = reorder(analyte, conc.), y = conc.)) +
@@ -96,7 +199,14 @@ bp_040
 
 
 #temp living locations
+temp_living_top <- top_n_analytes(temp_living, 10)
 
+temp_living_top$analyte <- factor(temp_living_top$analyte,
+      levels = c("ethane", "isopropanol", "i-butane", "n-butane", "propane"),
+      ordered = TRUE)
+
+p_temp_living_top <- top_plot2(temp_living_top, "mediumorchid3", "Shelters")
+p_temp_living_top
 
 #classroom locations
 
@@ -105,19 +215,142 @@ bp_040
 
 
 #healthcare room locations
+medical_top <- top_n_analytes(medical, 10)
+
+medical_top$analyte <- factor(medical_top$analyte,
+      levels = c("isopropanol", "ethane", "i-butane", "propane", "acetone"),
+      ordered = TRUE)
+
+p_medical_top <- top_plot2(medical_top, "tomato2", "Healthcare")
+p_medical_top
 
 
 #recreation locations
+recreation_top <- top_n_analytes(recreation, 13)
+
+recreation_top$analyte <- factor(recreation_top$analyte,
+       levels = c("ethane", "n-butane", "propane", "isopropanol", "i-butane"),
+       ordered = TRUE)
+
+p_recreation_top <- top_plot2(recreation_top, "aquamarine4", "Recreation")
+p_recreation_top
 
 
 #kitchen/dinning locations
+kitchens_top <- top_n_analytes(kitchens, 10)
 
+kitchens_top$analyte <- factor(kitchens_top$analyte,
+      levels = c("n-butane", "propane", "ethane", "isopropanol","i-butane"),
+      ordered = TRUE)
+
+top_plot2 <- function(df, fill, site){
+  
+  ggplot(df, aes(x = analyte, y = conc.)) +
+    geom_bar(stat = "identity", fill = fill) +
+    labs(x = "Analyte", y = "Concentration (ppb)") +
+    ggtitle(paste0("Site Type: ", site, " Top 5 Analytes")) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
+  
+}
+
+p_kitchens_top <- top_plot2(kitchens_top, "forestgreen", "Kitchen/Dining")
+p_kitchens_top
 
 #staff locations
 
 
 #outdoor concentrations
 #-----------
+p_outdoor <- p_locations(outdoor, "Outdoor")
+p_outdoor
+
+#top 10 outdoor for all sites
+sites_top_out <- top_n_analytes(outdoor, 47)
+sites_top_out$analyte <- factor(sites_top_out$analyte,
+  levels = c("ethane", "propane", "acetone", "n-butane", "ethene", "isopropanol",
+             "acetaldehyde", "i-butane", "ethyne", "acetonitrile"), ordered = TRUE)
+
+ggplot(sites_top_out, aes(x = analyte, y = conc.)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) +
+  labs(x = "Analyte", y = "Concentration (ppb)") +
+  ggtitle("Top 10 Outdoor Analytes Across All Sites") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x)))
+
+
+#indoor concentrations
+#-----------
+p_indoor <- p_locations(indoor, "Indoor")
+p_indoor +
+  geom_hline(yintercept = 218, linetype = "dashed", color = "red")
+
+#same as above in ug/m3
+p_locations2 <- function(df, type){
+  
+  ggplot(df, aes(x = reorder(analyte, ug_m3),
+                 y = ug_m3, color = site_id,
+                 text = paste("Site: ", site_id,
+                              "<br> Analyte: ", analyte,
+                              "<br> Conc.: ", conc.,
+                              "<br> Class: ", category))) +
+    geom_point(shape = 18, size = 3, alpha = 0.5) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    ggtitle(paste0("VOC Concentrations in ", type, " Locations in CO")) +
+    theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+    labs(x = "Ananlyte", y = "Concentration µg/m3") +
+    scale_color_manual(name = "Site ID",
+                       values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
+                                  "#e28de2", "#934270", "#e72fc2", "#5361c7",
+                                  "#b9cda1", "#096013", "#afe642", "#3aa609",
+                                  "#2af464", "#683d0d", "#efaa79", "#d6061a",
+                                  "#d9c937", "#9f04fc"))
+  
+}
+
+#all indoor with ppm
+p_site3 <- function(df, site){
+  
+  ggplot(df, aes(x = reorder(analyte, ppm),
+                 y = ppm, color = room_name)) +
+    geom_point(shape = 18, size = 5, alpha = 0.5) +
+    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    theme_bw() +
+    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
+    labs(x = "Analytes", y = "Concentration (VOC ppmv)") +
+    ggtitle(paste0("Site: ", site, " Indoor Locations")) +
+    scale_color_manual(name = "Room ID",
+                       values = c("orchid", "chocolate4", "goldenrod2","#50C878",
+                                  "tomato2", "midnightblue", "orange")) 
+  
+}
+
+p_indoor2 <- p_locations2(indoor, "indoor") +
+  geom_hline(yintercept = 500, linetype = "dashed", color = "red")
+
+ggplotly(p_indoor, tooltip = "text")
+
+sites_top_in <- top_n_analytes(indoor, 220)
+sites_top_in$analyte <- factor(sites_top_in$analyte, levels = c("isopropanol", "ethane",
+  "propane", "n-butane", "i-butane", "acetone", "acetaldehyde", "butanol", 
+  "ethene", "methane"), ordered = TRUE)
+
+ggplot(sites_top_in, aes(x = analyte, y = conc.)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1)) +
+  labs(x = "Analyte", y = "Concentration (ppb)") +
+  ggtitle("Top 10 Analytes Across All Sites") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x)))
+  
 
 #----
 #SRA medians
@@ -126,104 +359,108 @@ bp_040
 indoor_002 <- indoor_002 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_002$conc./outdoor_002$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_002$conc./outdoor_002$conc.)) 
+  #select(1,4,7,9,20)
 #calculate ratios 040
 indoor_040 <- indoor_040 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_040$conc./outdoor_040$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_040$conc./outdoor_040$conc.)) 
+  #select(1,4,7,9,20)
 #calculate ratios 063A
 indoor_063A <- indoor_063A %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_063A$conc./outdoor_063A$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_063A$conc./outdoor_063A$conc.)) 
+  #select(1,4,7,9,20)
 #calculate ratios 063B
 indoor_063B <- indoor_063B %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_063B$conc./outdoor_063B$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_063B$conc./outdoor_063B$conc.))
+  #select(1,4,7,9,20)
 #calculate ratios 066
 indoor_066 <- indoor_066 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_066$conc./outdoor_066$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_066$conc./outdoor_066$conc.)) 
+  # rename("ppm" = "ppm(v)") %>% 
+  # select(1,4,7,9,16,20)
 #calculate ratios 079
 indoor_079 <- indoor_079 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_079$conc./outdoor_079$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_079$conc./outdoor_079$conc.))
+  #select(1,4,7,9,20)
 #calculate ratios 085
 indoor_085 <- indoor_085 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_085$conc./outdoor_085$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_085$conc./outdoor_085$conc.)) 
+  #select(1,4,7,9,20)
 #calculate ratios 086
 indoor_086 <- indoor_086 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_086$conc./outdoor_086$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_086$conc./outdoor_086$conc.))
+  # rename("ppm" = "ppm(v)") %>%
+  # select(1,4,7,9,16,20)
 #calculate ratios 089
 indoor_089 <- indoor_089 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_089$conc./outdoor_089$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_089$conc./outdoor_089$conc.))
+  #select(1,4,7,9,20)
 #calculate ratios 094
 indoor_094 <- indoor_094 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_094$conc./outdoor_094$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_094$conc./outdoor_094$conc.))
+  # rename("ppm" = "ppm(v)") %>%
+  # select(1,4,7,9,16,20)
 #calculate ratios 099
 indoor_099 <- indoor_099 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_099$conc./outdoor_099$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_099$conc./outdoor_099$conc.))
+  #select(1,4,7,9,20)
 #calculate ratios 101
 indoor_101 <- indoor_101 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_101$conc./outdoor_101$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_101$conc./outdoor_101$conc.))
+  #select(1,4,7,9,20)
 #calculate ratios 103
 indoor_103 <- indoor_103 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_103$conc./outdoor_103$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_103$conc./outdoor_103$conc.)) 
+  #select(1,4,7,9,20)
 #calculate ratios 105
 indoor_105 <- indoor_105 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_105$conc./outdoor_105$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_105$conc./outdoor_105$conc.))
+  #select(1,4,7,9,20)
 #calculate ratios 106
 indoor_106 <- indoor_106 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_106$conc./outdoor_106$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_106$conc./outdoor_106$conc.)) 
+  # rename("ppm" = "ppm(v)") %>%
+  # select(1,4,7,9,16,20)
 #calculate ratios 107
 indoor_107 <- indoor_107 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_107$conc./outdoor_107$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_107$conc./outdoor_107$conc.)) 
+  #select(1,4,7,9,20)
 #calculate ratios 108
 indoor_108 <- indoor_108 %>%
   group_by(room_name, analyte) %>%
   ungroup() %>% 
-  mutate(od_ratio = (indoor_108$conc./outdoor_108$conc.)) %>% 
-  select(1,4,7,9,20)
+  mutate(od_ratio = (indoor_108$conc./outdoor_108$conc.))
+  #select(1,4,7,9,20)
 
 ratio_list <- list(indoor_002, indoor_040, indoor_063A, indoor_063B, indoor_066,
                     indoor_079, indoor_085, indoor_086, indoor_089, indoor_094,
@@ -231,6 +468,17 @@ ratio_list <- list(indoor_002, indoor_040, indoor_063A, indoor_063B, indoor_066,
                     indoor_106, indoor_107, indoor_108)
 
 ratio_list <- bind_rows(ratio_list)
+
+# ratio_list$ratio_cat <- cut(ratio_list$od_ratio,
+#                                  breaks = c(-Inf, 1, 10, Inf),
+#                                  labels = c("Less than 1", "1 to 10",
+#                                             "Greater than 10"))
+
+ratio_list$ratio_category <- cut(ratio_list$od_ratio,
+                                 breaks = c(-Inf, 1, 10, Inf),
+                                 labels = c("Less than 1", "1 to 10", "Greater than 10"))
+
+ratio_list_filtered <- ratio_list[!is.na(ratio_list$ratio_category), ]
 
 #plot of all ratios for each site
 p_ratio_list <- ratio_list %>% 
@@ -257,7 +505,9 @@ ggplotly(p_ratio_list, tooltip = "text")
 
 
 #all ratios from all canister locations box plot
-ggplot(ratio_list,
+
+
+ggplot(ratio_list_filtered,
        aes(x = fct_reorder(analyte, od_ratio, .fun = "median", .desc = TRUE),
            y = od_ratio)) +
   geom_boxplot() +
@@ -266,7 +516,44 @@ ggplot(ratio_list,
   theme_bw() +
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "I/O Ratio") +
-  ggtitle("I/O Ratios for All Canister Locations Arranged by Median")
+  ggtitle("I/O Ratios for All Canister Locations Arranged by Median") +
+  facet_grid(~ ratio_cat, scales = "free_y")
+
+#plot ratios less than 1
+plot_less_than_1 <- ggplot(filter(ratio_list_filtered, ratio_category == "Less than 1"),
+                           aes(x = fct_reorder(analyte, od_ratio, .fun = "median", .desc = TRUE),
+                               y = od_ratio)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  labs(x = "Analyte", y = "I/O Ratio", title = "Less than 1") +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1))
+
+#plot ratios between 1 and 10
+plot_1_to_10 <- ggplot(filter(ratio_list_filtered, ratio_category == "1 to 10"),
+                       aes(x = fct_reorder(analyte, od_ratio, .fun = "median", .desc = TRUE),
+                           y = od_ratio)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  labs(x = "Analyte", y = "I/O Ratio", title = "1 to 10") +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1))
+
+#plot ratios greater than 10
+plot_greater_than_10 <- ggplot(filter(ratio_list_filtered, ratio_category == "Greater than 10"),
+                               aes(x = fct_reorder(analyte, od_ratio, .fun = "median", .desc = TRUE),
+                                   y = od_ratio)) +
+  geom_boxplot() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw() +
+  labs(x = "Analyte", y = "I/O Ratio", title = "Greater than 10") +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1))
+
+# Arrange the three plots in a grid
+grid.arrange(plot_less_than_1, plot_1_to_10, plot_greater_than_10, nrow = 3)
 
 # donald <- indoor_002 %>% 
 #   select(1,4,7,9,20)
