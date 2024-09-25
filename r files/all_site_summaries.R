@@ -24,45 +24,9 @@ datatable(sites_table, colnames = c("Site ID", "Name", "Location", "Analyte",
 
 #----
 #site voc concentration sums
-p_site2 <- function(df, site){
-  
-  ggplot(df, aes(x = reorder(analyte, "ppm(v)"),
-                 y = "ppm(v)", color = room_name,
-                 text = paste("Site: ", site_id,
-                              "<br> Analyte: ", analyte,
-                              "<br> Conc.: ", conc.,
-                              "<br> Class: ", category))) +
-    geom_point(shape = 18, size = 5, alpha = 0.5) +
-    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                  labels = trans_format("log10", math_format(10^.x))) +
-    theme_bw() +
-    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-    labs(x = "Analytes", y = "Concentration (ppmv)") +
-    ggtitle(paste0("Site: ", site, " Summa Canister Deployment")) +
-    scale_color_manual(name = "Room ID",
-                       values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                  "tomato2", "midnightblue", "orange")) 
-  
-}
-
-p_conc_room2 <- function(df, site){
-  
-  ggplot(df, aes(x = reorder(room_name, ppm),
-                 y = ppm)) +
-    geom_bar(stat = "identity", fill = "midnightblue") +
-    stat_summary(aes(label = after_stat(y)), fun = "sum", geom = "text",
-                 col = "white", vjust = 1.5) +
-    ggtitle(paste0("Site: ", site,  " VOC Concentrations Sum")) +
-    labs(x = "Room", y = "Sum of VOC Sampled (ppm)") +
-    theme_bw() +
-    theme(axis.text.y = element_blank())
-}
 
 #site 040
-site_040_2 <- site_040 %>% 
-  rename("ppm" = "ppm(v)")
-
-p_conc_room2(site_040_2, "040")
+p_conc_room2(site_040, "040")
 
 
 #SITE 063 A
@@ -72,19 +36,18 @@ p_conc_room(site_063A, "063A")
 p_conc_room(site_063B, "063B")
 
 #SITE 066
-site_066_2 <- site_066 %>% 
-  rename("ppm" = "ppm(v)")
-
-p_conc_room2(site_066_2, "066")
-
+#plot in ppm(v)
+p_conc_room2(site_066, "066")
+#plot in ppb(v)
 p_conc_room(site_066, "066")
 
-
+#top 10 analytes for site 066 BUT it is not arranged properly
 site_066_top <- top_n_analytes(site_066, 47)
 p_site_066_top <- top_plot(site_066_top, "orange", "066")
 p_site_066_top
 
-p_066_3 <- p_site3(indoor_066, "066")
+#supposed to plot with a threshold line but not sure where that is?
+p_066_3 <- p_site3(indoor_066, "066", ".005")
 p_066_3
 
 # SITE 079
@@ -94,13 +57,11 @@ p_conc_room(site_079, "079")
 p_conc_room(site_085, "085")
 
 # SITE 086
-site_086_2 <- site_086 %>% 
-  rename("ppm" = "ppm(v)")
-
-p_conc_room2(site_086_2, "086")
+p_conc_room2(site_086, "086")
 
 p_conc_room(site_086, "086")
 
+#supposed to plot with a threshold line but not sure where that is?
 p_086_3 <- p_site3(indoor_086, "086")
 p_086_3
 
@@ -114,10 +75,7 @@ p_conc_room(site_103, "103")
 p_conc_room(site_105, "105")
 
 #SITE 106
-site_106_2 <- site_106 %>% 
-  rename("ppm" = "ppm(v)")
-
-p_conc_room2(site_106_2, "106")
+p_conc_room2(site_106, "106")
 
 p_conc_room(site_106, "106")
 
@@ -131,6 +89,7 @@ p_site_106_top
 p_106_3 <- p_site3(indoor_106, "106")
 
 p_106_3
+
 # SITE 107
 p_conc_room(site_107, "107")
 
@@ -138,9 +97,6 @@ p_conc_room(site_107, "107")
 p_conc_room(site_108, "108")
 
 #site 094
-site_094_2 <- site_094 %>% 
-  rename("ppm" = "ppm(v)")
-
 p_conc_room2(site_094_2, "094")
 
 p_conc_room(site_094, "094")
@@ -195,6 +151,10 @@ bp_040 <- site_040 %>%
   labs(x = "Ananlyte", y = "Concentration")
 bp_040
 
+#----
+
+#top plots for room location types
+
 #apartments
 
 
@@ -243,18 +203,7 @@ kitchens_top$analyte <- factor(kitchens_top$analyte,
       levels = c("n-butane", "propane", "ethane", "isopropanol","i-butane"),
       ordered = TRUE)
 
-top_plot2 <- function(df, fill, site){
-  
-  ggplot(df, aes(x = analyte, y = conc.)) +
-    geom_bar(stat = "identity", fill = fill) +
-    labs(x = "Analyte", y = "Concentration (ppb)") +
-    ggtitle(paste0("Site Type: ", site, " Top 5 Analytes")) +
-    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                  labels = trans_format("log10", math_format(10^.x))) +
-    theme_bw() +
-    theme(axis.text.x = element_text(size = 13, angle = 45, hjust = 1))
-  
-}
+
 
 p_kitchens_top <- top_plot2(kitchens_top, "forestgreen", "Kitchen/Dining")
 p_kitchens_top
@@ -285,58 +234,19 @@ ggplot(sites_top_out, aes(x = analyte, y = conc.)) +
 
 #indoor concentrations
 #-----------
+
+#plot with threshold line
 p_indoor <- p_locations(indoor, "Indoor")
 p_indoor +
   geom_hline(yintercept = 218, linetype = "dashed", color = "red")
 
 #same as above in ug/m3
-p_locations2 <- function(df, type){
-  
-  ggplot(df, aes(x = reorder(analyte, ug_m3),
-                 y = ug_m3, color = site_id,
-                 text = paste("Site: ", site_id,
-                              "<br> Analyte: ", analyte,
-                              "<br> Conc.: ", conc.,
-                              "<br> Class: ", category))) +
-    geom_point(shape = 18, size = 3, alpha = 0.5) +
-    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                  labels = trans_format("log10", math_format(10^.x))) +
-    theme_bw() +
-    ggtitle(paste0("VOC Concentrations in ", type, " Locations in CO")) +
-    theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
-    labs(x = "Ananlyte", y = "Concentration µg/m3") +
-    scale_color_manual(name = "Site ID",
-                       values = c("#48bf8e", "#245a62", "#75b3d8", "#621da6",
-                                  "#e28de2", "#934270", "#e72fc2", "#5361c7",
-                                  "#b9cda1", "#096013", "#afe642", "#3aa609",
-                                  "#2af464", "#683d0d", "#efaa79", "#d6061a",
-                                  "#d9c937", "#9f04fc"))
-  
-}
-
-#all indoor with ppm
-p_site3 <- function(df, site){
-  
-  ggplot(df, aes(x = reorder(analyte, ppm),
-                 y = ppm, color = room_name)) +
-    geom_point(shape = 18, size = 5, alpha = 0.5) +
-    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                  labels = trans_format("log10", math_format(10^.x))) +
-    theme_bw() +
-    theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
-    labs(x = "Analytes", y = "Concentration (VOC ppmv)") +
-    ggtitle(paste0("Site: ", site, " Indoor Locations")) +
-    scale_color_manual(name = "Room ID",
-                       values = c("orchid", "chocolate4", "goldenrod2","#50C878",
-                                  "tomato2", "midnightblue", "orange")) 
-  
-}
-
 p_indoor2 <- p_locations2(indoor, "indoor") +
   geom_hline(yintercept = 500, linetype = "dashed", color = "red")
 
 ggplotly(p_indoor, tooltip = "text")
 
+#top 10 indoor analytes for all sites
 sites_top_in <- top_n_analytes(indoor, 220)
 sites_top_in$analyte <- factor(sites_top_in$analyte, levels = c("isopropanol", "ethane",
   "propane", "n-butane", "i-butane", "acetone", "acetaldehyde", "butanol", 
@@ -505,8 +415,7 @@ ggplotly(p_ratio_list, tooltip = "text")
 
 
 #all ratios from all canister locations box plot
-
-
+#facet grid side by side
 ggplot(ratio_list_filtered,
        aes(x = fct_reorder(analyte, od_ratio, .fun = "median", .desc = TRUE),
            y = od_ratio)) +
@@ -517,7 +426,7 @@ ggplot(ratio_list_filtered,
   theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1)) +
   labs(x = "Ananlyte", y = "I/O Ratio") +
   ggtitle("I/O Ratios for All Canister Locations Arranged by Median") +
-  facet_grid(~ ratio_cat, scales = "free_y")
+  facet_grid(~ ratio_category, scales = "free_y")
 
 #plot ratios less than 1
 plot_less_than_1 <- ggplot(filter(ratio_list_filtered, ratio_category == "Less than 1"),
@@ -552,7 +461,7 @@ plot_greater_than_10 <- ggplot(filter(ratio_list_filtered, ratio_category == "Gr
   labs(x = "Analyte", y = "I/O Ratio", title = "Greater than 10") +
   theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1))
 
-# Arrange the three plots in a grid
+# Arrange the three plots in a grid stacked on top of each other
 grid.arrange(plot_less_than_1, plot_1_to_10, plot_greater_than_10, nrow = 3)
 
 # donald <- indoor_002 %>% 
@@ -642,6 +551,7 @@ median_list <- list(median_002, median_040, median_063A, median_063B, median_066
 
 median_list <- bind_rows(median_list)
 
+#plot of ratio medians
 median_list %>% 
   ggplot(aes(x = reorder(analyte, median_or_ratio), y = median_or_ratio,
              color = site_id,
